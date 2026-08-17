@@ -3124,15 +3124,15 @@ function AdminScreen({
     if (events.length > 0 && (!selectedAdminDate || !events.some(e => e.date === selectedAdminDate))) {
       setSelectedAdminDate(events[0].date)
     }
-  }, [events, selectedAdminDate])
+  }, [events.length, selectedAdminDate])
 
-  // Cargar el setlist del evento seleccionado
+  // Cargar el setlist del evento seleccionado SOLO cuando cambia la fecha seleccionada
   useEffect(() => {
     const target = events.find(e => e.date === selectedAdminDate)
     if (target) {
       setAdminSetlist(target.setlist || [])
     }
-  }, [selectedAdminDate, events])
+  }, [selectedAdminDate])
 
   // Estado para gestión de músicos
   const [musicianModal, setMusicianModal] = useState<{ mode: 'create' | 'edit'; musician?: Musician } | null>(null)
@@ -3322,37 +3322,47 @@ function AdminScreen({
 
   function moveUp(idx: number) {
     if (idx === 0) return
-    const next = [...adminSetlist]
-    ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
-    setAdminSetlist(next)
-    if (selectedAdminDate) {
-      onEditService(selectedAdminDate, { setlist: next })
-    }
-  }
-  function moveDown(idx: number) {
-    if (idx === adminSetlist.length - 1) return
-    const next = [...adminSetlist]
-    ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
-    setAdminSetlist(next)
-    if (selectedAdminDate) {
-      onEditService(selectedAdminDate, { setlist: next })
-    }
-  }
-  function removeSong(id: string) {
-    const next = adminSetlist.filter(s => s !== id)
-    setAdminSetlist(next)
-    if (selectedAdminDate) {
-      onEditService(selectedAdminDate, { setlist: next })
-    }
-  }
-  function addSong(id: string) {
-    if (!adminSetlist.includes(id)) {
-      const next = [...adminSetlist, id]
-      setAdminSetlist(next)
+    setAdminSetlist(prev => {
+      const next = [...prev]
+      ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
       if (selectedAdminDate) {
         onEditService(selectedAdminDate, { setlist: next })
       }
-    }
+      return next
+    })
+  }
+
+  function moveDown(idx: number) {
+    setAdminSetlist(prev => {
+      if (idx >= prev.length - 1) return prev
+      const next = [...prev]
+      ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
+      if (selectedAdminDate) {
+        onEditService(selectedAdminDate, { setlist: next })
+      }
+      return next
+    })
+  }
+
+  function removeSong(id: string) {
+    setAdminSetlist(prev => {
+      const next = prev.filter(s => s !== id)
+      if (selectedAdminDate) {
+        onEditService(selectedAdminDate, { setlist: next })
+      }
+      return next
+    })
+  }
+
+  function addSong(id: string) {
+    setAdminSetlist(prev => {
+      if (prev.includes(id)) return prev
+      const next = [...prev, id]
+      if (selectedAdminDate) {
+        onEditService(selectedAdminDate, { setlist: next })
+      }
+      return next
+    })
   }
 
   return (
@@ -4198,8 +4208,12 @@ export default function App() {
   }
 
   async function handleEditService(date: string, updates: Partial<ServiceEvent>) {
-    await updateServiceEvent(date, updates)
     setEvents(prev => prev.map(e => e.date === date ? { ...e, ...updates } : e))
+    try {
+      await updateServiceEvent(date, updates)
+    } catch (err) {
+      console.error('Error actualizando servicio:', err)
+    }
   }
 
   async function handleDeleteService(date: string) {
