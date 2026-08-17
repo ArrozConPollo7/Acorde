@@ -444,7 +444,6 @@ function InstrumentChip({ instrument, isPrimary = true }: { instrument: string; 
     >
       <span className={isLeader ? 'text-accent' : 'text-fg-subtle'}>{getInstrumentIcon(instrument, 12)}</span>
       <span className="capitalize text-fg">{instrument}</span>
-      {isPrimary && <span className="text-[9px] text-accent font-bold ml-0.5">★</span>}
     </span>
   )
 }
@@ -494,7 +493,7 @@ function ChurchDomainBadge({ domain }: { domain?: string }) {
   }
   return (
     <span className={`text-[10px] px-2 py-0.5 rounded-full border ${styles[domain] || 'text-fg-muted bg-surface-2 border-border'}`}>
-      ⛪ {domain}
+      Iglesia: {domain}
     </span>
   )
 }
@@ -509,7 +508,7 @@ function TeamDomainBadge({ domain }: { domain?: string }) {
   }
   return (
     <span className={`text-[10px] px-2 py-0.5 rounded-full border ${styles[domain] || 'text-fg-muted bg-surface-2 border-border'}`}>
-      🎸 {domain}
+      Equipo: {domain}
     </span>
   )
 }
@@ -518,7 +517,7 @@ function ClassicBadge() {
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-accent text-accent-fg shadow-xs">
       <IconCrown size={11} />
-      Clásico IBAMI
+      <span>Clásico IBAMI</span>
     </span>
   )
 }
@@ -654,7 +653,8 @@ function AddSongModal({
           {/* Ficha Ministerial / Notion Data */}
           <div className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
             <p className="text-xs font-bold text-fg uppercase tracking-wider flex items-center gap-1.5">
-              <span>📋</span> Datos Ministeriales (Notion)
+              <IconFileText size={14} className="text-accent" />
+              <span>Datos Ministeriales</span>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div className="flex flex-col gap-1">
@@ -903,7 +903,8 @@ function EditSongModal({
           {/* Ficha Ministerial / Notion Data */}
           <div className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
             <p className="text-xs font-bold text-fg uppercase tracking-wider flex items-center gap-1.5">
-              <span>📋</span> Datos Ministeriales (Notion)
+              <IconFileText size={14} className="text-accent" />
+              <span>Datos Ministeriales</span>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div className="flex flex-col gap-1">
@@ -1502,12 +1503,12 @@ function ProfileScreen({
                     }}
                     className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
                   >
-                    <optgroup label="👑 Liderazgo & Voces">
+                    <optgroup label="Liderazgo & Voces">
                       {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Liderazgo & Voces').map(inst => (
                         <option key={inst.id} value={inst.id}>{inst.label}</option>
                       ))}
                     </optgroup>
-                    <optgroup label="🎸 Instrumentos de Banda">
+                    <optgroup label="Instrumentos de Banda">
                       {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Instrumentos de Banda').map(inst => (
                         <option key={inst.id} value={inst.id}>{inst.label}</option>
                       ))}
@@ -1536,7 +1537,7 @@ function ProfileScreen({
                           }`}
                         >
                           <span className="truncate">{opt.short}</span>
-                          <span>{isSelected ? '✓' : '+'}</span>
+                          <span>{isSelected ? <IconCheck size={12} /> : <IconPlus size={12} />}</span>
                         </button>
                       )
                     })}
@@ -1932,7 +1933,7 @@ function DayDetailScreen({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <p className="font-semibold text-fg text-sm truncate">{song.title}</p>
-                          {song.is_classic && <span className="text-[10px] text-accent">👑</span>}
+                          {song.is_classic && <span title="Clásico IBAMI" className="text-accent inline-flex items-center"><IconCrown size={12} /></span>}
                         </div>
                         <p className="text-xs text-fg-muted truncate">{song.artist}</p>
                       </div>
@@ -2097,7 +2098,7 @@ function LibraryScreen({
               className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
             >
               <option value="all">Todos (Clásicos y Nuevas)</option>
-              <option value="classic">👑 Solo Clásicos IBAMI</option>
+              <option value="classic">Solo Clásicos IBAMI</option>
               <option value="non-classic">Repertorio General</option>
             </select>
           </div>
@@ -2561,7 +2562,7 @@ function AISuggestionModal({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-fg text-sm leading-tight truncate">{song.title}</p>
-                          {song.is_classic && <span className="text-xs text-accent">👑</span>}
+                          {song.is_classic && <span title="Clásico IBAMI" className="text-accent inline-flex items-center"><IconCrown size={12} /></span>}
                           {sMoment && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface text-accent border border-border flex-shrink-0">
                               {sMoment}
@@ -2719,7 +2720,7 @@ function SetlistSongPicker({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <p className="text-sm font-medium text-fg truncate">{song.title}</p>
-                  {song.is_classic && <span className="text-xs text-accent">👑</span>}
+                  {song.is_classic && <span title="Clásico IBAMI" className="text-accent inline-flex items-center"><IconCrown size={12} /></span>}
                 </div>
                 <p className="text-xs text-fg-muted truncate">{song.artist} · <span className="capitalize">{song.tempo}</span></p>
               </div>
@@ -2997,12 +2998,12 @@ function AdminScreen({
                   }}
                   className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
                 >
-                  <optgroup label="👑 Liderazgo & Voces">
+                  <optgroup label="Liderazgo & Voces">
                     {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Liderazgo & Voces').map(inst => (
                       <option key={inst.id} value={inst.id}>{inst.label}</option>
                     ))}
                   </optgroup>
-                  <optgroup label="🎸 Instrumentos de Banda">
+                  <optgroup label="Instrumentos de Banda">
                     {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Instrumentos de Banda').map(inst => (
                       <option key={inst.id} value={inst.id}>{inst.label}</option>
                     ))}
@@ -3031,7 +3032,7 @@ function AdminScreen({
                         }`}
                       >
                         <span className="truncate">{opt.short}</span>
-                        <span>{isSelected ? '✓' : '+'}</span>
+                        <span>{isSelected ? <IconCheck size={12} /> : <IconPlus size={12} />}</span>
                       </button>
                     )
                   })}
@@ -3452,7 +3453,7 @@ function AdminScreen({
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5">
                                 <p className="text-sm font-medium text-fg truncate">{song.title}</p>
-                                {song.is_classic && <span className="text-xs text-accent">👑</span>}
+                                {song.is_classic && <span title="Clásico IBAMI" className="text-accent inline-flex items-center"><IconCrown size={12} /></span>}
                               </div>
                               <p className="text-xs text-fg-muted">{song.key} · {song.tempo} · {song.church_domain || 'Conocida'}</p>
                             </div>
