@@ -315,6 +315,15 @@ function IconFileText({ size = 15 }: { size?: number }) {
   )
 }
 
+function IconBook({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  )
+}
+
 function IconEdit({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2552,6 +2561,7 @@ function SongViewScreen({
 }) {
   const [transpose, setTranspose] = useState(0)
   const [instTab, setInstTab] = useState<typeof INSTRUMENTS_TABS[number]>('guitarra')
+  const [isFocusMode, setIsFocusMode] = useState(false)
 
   const displayKey = transposeChord(song.key, transpose)
   const transposedLyrics = song.lyrics.map(line => ({
@@ -2572,6 +2582,66 @@ function SongViewScreen({
     })
   }
 
+  // Vista de solo letra y acordes (Modo Lectura / Enfoque)
+  if (isFocusMode) {
+    return (
+      <div className="fixed inset-0 z-50 bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8">
+        <div className="max-w-xl mx-auto w-full overflow-x-hidden">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+            <button
+              onClick={() => setIsFocusMode(false)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface border border-border text-fg text-xs font-semibold hover:bg-surface-2 cursor-pointer shadow-xs active:scale-95 transition-all"
+            >
+              <IconChevronLeft size={16} />
+              <span>Volver</span>
+            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-accent px-3 py-1 rounded-lg bg-surface-2 border border-border">
+                Tono {displayKey}
+              </span>
+              <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            </div>
+          </div>
+
+          <article className="w-full max-w-full overflow-x-hidden break-words">
+            <header className="mb-6 border-b border-border pb-4">
+              <h1 className="font-display text-3xl md:text-4xl text-fg tracking-wide mb-1 leading-tight uppercase">
+                {song.title}
+              </h1>
+              <p className="text-fg-muted text-sm font-medium">
+                {song.artist} {song.tempo ? `· ${song.tempo}` : ''}
+              </p>
+            </header>
+
+            <main className="flex flex-col gap-6 font-mono text-base md:text-lg text-fg leading-relaxed max-w-full overflow-x-hidden break-words">
+              {transposedLyrics.map((line, li) => (
+                <div key={li} className="max-w-full overflow-x-hidden break-words">
+                  {line.label && (
+                    <p className="font-body text-xs font-bold text-accent uppercase tracking-widest mb-2">
+                      {line.label}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 max-w-full overflow-x-hidden break-words leading-loose">
+                    {line.segments.map((seg, si) => (
+                      <span key={si} className="inline-flex flex-col max-w-full overflow-x-hidden break-words">
+                        {seg.chord && (
+                          <strong className="text-accent font-bold text-sm md:text-base leading-none mb-0.5">
+                            {seg.chord}
+                          </strong>
+                        )}
+                        <span className="text-fg whitespace-pre-wrap break-words">{seg.text || ' '}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </main>
+          </article>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-bg text-fg pb-12">
       <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6">
@@ -2580,8 +2650,17 @@ function SongViewScreen({
             <IconChevronLeft size={16} />
             <span>Volver al Repertorio</span>
           </button>
-          <div className="md:hidden">
-            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsFocusMode(true)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent text-accent-fg font-semibold text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
+            >
+              <IconBook size={14} />
+              <span>Solo Letra y Acordes</span>
+            </button>
+            <div className="md:hidden">
+              <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            </div>
           </div>
         </div>
 
@@ -2683,13 +2762,20 @@ function SongViewScreen({
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+          <button
+            onClick={() => setIsFocusMode(true)}
+            className="py-3.5 px-4 rounded-2xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
+          >
+            <IconBook size={16} />
+            Solo Letra y Acordes
+          </button>
           <button
             onClick={onEdit}
             className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer shadow-xs"
           >
             <IconEdit size={16} />
-            Editar Canción & Datos
+            Editar Canción
           </button>
           <button
             onClick={handleExportPDF}
@@ -2703,7 +2789,7 @@ function SongViewScreen({
               href={song.media_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-3.5 px-4 rounded-2xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
+              className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
             >
               <IconPlay size={14} />
               Ver video
@@ -2714,7 +2800,7 @@ function SongViewScreen({
               className="py-3.5 px-4 rounded-2xl text-fg-muted bg-surface-2 border border-border hover:text-fg font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
             >
               <IconPlus size={13} />
-              Agregar enlace video
+              Agregar video
             </button>
           )}
         </div>
