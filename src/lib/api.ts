@@ -3,7 +3,7 @@ import { NOTION_SONGS } from './notionSongs'
 
 export type Instrument = 'guitarra' | 'piano' | 'bajo' | 'voz' | 'batería'
 export type Status = 'confirmado' | 'pendiente' | 'rechazado'
-export type Role = 'admin' | 'musician'
+export type Role = 'admin' | 'musician' | 'both'
 
 export interface Musician {
   id: string
@@ -13,6 +13,31 @@ export interface Musician {
   email: string
   phone?: string
   role?: Role
+}
+
+export function hasRole(m: Musician | undefined | null, targetRole: 'admin' | 'musician'): boolean {
+  if (!m) return false
+  if (m.role === 'both') return true
+  return m.role === targetRole
+}
+
+export function normalizePhone(p: string): string {
+  return p.replace(/\D/g, '')
+}
+
+export function findMusicianByIdentifier(identifier: string, list: Musician[]): Musician | undefined {
+  if (!identifier || !identifier.trim() || !list || list.length === 0) return undefined
+  const clean = identifier.trim().toLowerCase()
+  const digits = identifier.replace(/\D/g, '')
+
+  return list.find(m => {
+    if (m.email && m.email.toLowerCase().trim() === clean) return true
+    if (digits.length >= 7 && m.phone) {
+      const mDigits = m.phone.replace(/\D/g, '')
+      if (mDigits === digits || mDigits.endsWith(digits) || digits.endsWith(mDigits)) return true
+    }
+    return false
+  })
 }
 
 export interface SongSegment {

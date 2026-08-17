@@ -16,6 +16,8 @@ import {
   formatLyricsToChordPro,
   updateAttendanceStatus,
   suggestSongsWithGroq,
+  hasRole,
+  findMusicianByIdentifier,
   type Song,
   type ServiceEvent,
   type Musician,
@@ -390,6 +392,21 @@ function InstrumentChip({ instrument }: { instrument: Instrument }) {
   )
 }
 
+function RoleBadges({ role }: { role?: Role }) {
+  if (role === 'both') {
+    return (
+      <div className="inline-flex items-center gap-1">
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-2 text-fg border border-border">Músico</span>
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-2 text-accent border border-border">Admin</span>
+      </div>
+    )
+  }
+  if (role === 'admin') {
+    return <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-2 text-accent border border-border">Admin</span>
+  }
+  return <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-2 text-fg-muted border border-border">Músico</span>
+}
+
 function Avatar({ initials, size = 'md' }: { initials: string; size?: 'sm' | 'md' | 'lg' | 'xl' }) {
   const sizes = {
     sm: 'w-7 h-7 text-xs',
@@ -742,18 +759,18 @@ function EditSongModal({
 function DesktopHeader({
   screen,
   setScreen,
-  role,
+  currentUser,
   theme,
   onToggleTheme,
-  currentUser,
 }: {
   screen: Screen
   setScreen: (s: Screen) => void
-  role: Role
+  currentUser: Musician
   theme: Theme
   onToggleTheme: () => void
-  currentUser: { name: string; initials: string; instrument?: Instrument }
 }) {
+  const isAdm = hasRole(currentUser, 'admin')
+
   const isActive = (s: Screen) =>
     (['calendar', 'day-detail'].includes(screen) && s === 'calendar') ||
     (['library', 'song'].includes(screen) && s === 'library') ||
@@ -763,7 +780,7 @@ function DesktopHeader({
   const navItems = [
     { id: 'calendar' as Screen, label: 'Inicio', icon: <IconCalendar size={18} /> },
     { id: 'library' as Screen, label: 'Repertorio', icon: <IconMusic size={18} /> },
-    ...(role === 'admin' ? [{ id: 'admin' as Screen, label: 'Admin', icon: <IconSettings size={18} /> }] : []),
+    ...(isAdm ? [{ id: 'admin' as Screen, label: 'Admin', icon: <IconSettings size={18} /> }] : []),
   ]
 
   return (
@@ -812,7 +829,7 @@ function DesktopHeader({
             <Avatar initials={currentUser.initials} size="sm" />
             <div className="text-left hidden lg:block">
               <p className="text-xs font-semibold text-fg leading-tight">{currentUser.name}</p>
-              <p className="text-[10px] text-fg-muted capitalize">{role === 'admin' ? 'Administrador' : currentUser.instrument || 'Músico'}</p>
+              <div className="mt-0.5"><RoleBadges role={currentUser.role} /></div>
             </div>
           </button>
         </div>
@@ -821,7 +838,9 @@ function DesktopHeader({
   )
 }
 
-function BottomNav({ screen, setScreen, role }: { screen: Screen; setScreen: (s: Screen) => void; role: Role }) {
+function BottomNav({ screen, setScreen, currentUser }: { screen: Screen; setScreen: (s: Screen) => void; currentUser: Musician }) {
+  const isAdm = hasRole(currentUser, 'admin')
+
   const isActive = (s: Screen) =>
     (['calendar', 'day-detail'].includes(screen) && s === 'calendar') ||
     (['library', 'song'].includes(screen) && s === 'library') ||
@@ -831,7 +850,7 @@ function BottomNav({ screen, setScreen, role }: { screen: Screen; setScreen: (s:
   const tabs = [
     { id: 'calendar' as Screen, label: 'Inicio', icon: <IconCalendar /> },
     { id: 'library' as Screen, label: 'Repertorio', icon: <IconMusic /> },
-    ...(role === 'admin' ? [{ id: 'admin' as Screen, label: 'Admin', icon: <IconSettings /> }] : []),
+    ...(isAdm ? [{ id: 'admin' as Screen, label: 'Admin', icon: <IconSettings /> }] : []),
     { id: 'profile' as Screen, label: 'Perfil', icon: <IconUser /> },
   ]
 
@@ -858,21 +877,55 @@ function BottomNav({ screen, setScreen, role }: { screen: Screen; setScreen: (s:
   )
 }
 
-// ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
+// ─── LOGIN SCREEN (SIN CONTRASEÑA, POR CORREO O CELULAR) ──────────────────────
 
 function LoginScreen({
   onLogin,
-  role,
-  setRole,
+  musicians,
   theme,
   onToggleTheme,
 }: {
-  onLogin: () => void
-  role: Role
-  setRole: (r: Role) => void
+  onLogin: (musician: Musician) => void
+  musicians: Musician[]
   theme: Theme
   onToggleTheme: () => void
 }) {
+  const [identifier, setIdentifier] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setErrorMsg('')
+
+    const trimmed = identifier.trim()
+    if (!trimmed) {
+      setErrorMsg('Por favor ingresa tu correo o número de celular.')
+      return
+    }
+
+    const matched = findMusicianByIdentifier(trimmed, musicians)
+
+    if (matched) {
+      onLogin(matched)
+    } else {
+      if (musicians.length === 0) {
+        // Si no hay ningún músico en la base de datos, crear perfil de inicio
+        const firstAdmin: Musician = {
+          id: `m-${Date.now()}`,
+          name: trimmed.includes('@') ? trimmed.split('@')[0] : 'Líder de Alabanza',
+          instrument: 'guitarra',
+          initials: 'LA',
+          email: trimmed.includes('@') ? trimmed : 'pastor@ibami.org',
+          phone: !trimmed.includes('@') ? trimmed : '+57 300 000 0000',
+          role: 'both',
+        }
+        onLogin(firstAdmin)
+      } else {
+        setErrorMsg('No encontramos ningún integrante registrado con ese correo o celular. Solicita a un líder o administrador que te registre en el equipo.')
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-bg text-fg flex flex-col justify-center items-center px-4 py-12">
       <div className="w-full max-w-md bg-surface border border-border rounded-3xl p-8 shadow-xl relative">
@@ -890,63 +943,64 @@ function LoginScreen({
           </div>
         </div>
 
-        <div className="flex gap-1 p-1 rounded-xl bg-surface-2 border border-border mb-6">
-          {(['musician', 'admin'] as Role[]).map((r) => (
-            <button
-              key={r}
-              onClick={() => setRole(r)}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-                role === r
-                  ? 'bg-accent text-accent-fg shadow-sm'
-                  : 'text-fg-muted hover:text-fg'
-              }`}
-            >
-              {r === 'musician' ? 'Soy Músico' : 'Soy Admin'}
-            </button>
-          ))}
-        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-semibold text-fg-muted uppercase tracking-widest">
+              Correo o número de celular
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Ej: carlos@ibami.org o 3101234567"
+              value={identifier}
+              onChange={e => { setIdentifier(e.target.value); setErrorMsg(''); }}
+              className="w-full px-4 py-3.5 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent transition"
+            />
+            <p className="text-[11px] text-fg-subtle">
+              Ingresa el correo o celular registrado por el líder de alabanza.
+            </p>
+          </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold text-fg-muted uppercase tracking-widest">Correo electrónico</label>
-            <input
-              type="email"
-              defaultValue={role === 'admin' ? 'pastor@ibami.org' : 'carlos.mejia@ibami.org'}
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent transition"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold text-fg-muted uppercase tracking-widest">Contraseña</label>
-            <input
-              type="password"
-              defaultValue="password"
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent transition"
-            />
-          </div>
+          {errorMsg && (
+            <div className="p-3.5 rounded-xl bg-surface-2 border border-accent/40 text-accent text-xs leading-relaxed">
+              {errorMsg}
+            </div>
+          )}
 
           <button
-            onClick={onLogin}
+            type="submit"
             className="w-full py-3.5 mt-2 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold tracking-wide active:scale-[0.99] transition-all text-sm shadow-sm cursor-pointer"
           >
-            Entrar
+            Ingresar al Ministerio
           </button>
-        </div>
+        </form>
 
-        <p className="text-center text-xs text-fg-muted mt-6">
-          {"¿Olvidaste tu contraseña? "}
-          <span className="text-accent underline underline-offset-2 cursor-pointer font-medium">Recupérala aquí</span>
-        </p>
+        {/* Sugerencias de acceso para pruebas */}
+        {musicians.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-border flex flex-col gap-2 text-center">
+            <p className="text-[11px] text-fg-muted font-medium">Acceso rápido con integrantes registrados:</p>
+            <div className="flex flex-wrap gap-1.5 justify-center">
+              {musicians.slice(0, 3).map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => onLogin(m)}
+                  className="text-xs px-2.5 py-1 rounded-lg bg-surface-2 hover:bg-surface-3 text-fg border border-border transition cursor-pointer"
+                >
+                  {m.name} {hasRole(m, 'admin') ? '(Admin)' : ''}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-// ─── PROFILE SCREEN ───────────────────────────────────────────────────────────
+// ─── PROFILE SCREEN (CON MULTI-ROL Y EDICIÓN) ──────────────────────────────────
 
 function ProfileScreen({
   musician,
-  role,
-  setRole,
   onUpdateMusician,
   onLogout,
   events,
@@ -956,8 +1010,6 @@ function ProfileScreen({
   onToggleTheme,
 }: {
   musician: Musician
-  role: Role
-  setRole: (r: Role) => void
   onUpdateMusician: (updates: Partial<Musician>) => void
   onLogout: () => void
   events: ServiceEvent[]
@@ -971,14 +1023,18 @@ function ProfileScreen({
   const [instrument, setInstrument] = useState<Instrument>(musician.instrument)
   const [email, setEmail] = useState(musician.email)
   const [phone, setPhone] = useState(musician.phone || '')
+  const [isMusicianRole, setIsMusicianRole] = useState(hasRole(musician, 'musician'))
+  const [isAdminRole, setIsAdminRole] = useState(hasRole(musician, 'admin'))
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
+    const computedRole: Role = isMusicianRole && isAdminRole ? 'both' : isAdminRole ? 'admin' : 'musician'
     onUpdateMusician({
       name: name.trim(),
       instrument,
       email: email.trim(),
       phone: phone.trim(),
+      role: computedRole,
     })
     setIsEditing(false)
   }
@@ -1012,22 +1068,18 @@ function ProfileScreen({
             <h2 className="font-display text-2xl text-fg tracking-wide">{musician.name}</h2>
             <div className="flex items-center gap-2 mt-2">
               <InstrumentChip instrument={musician.instrument} />
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-2 text-fg border border-border capitalize">
-                {role === 'admin' ? 'Administrador' : 'Músico'}
-              </span>
+              <RoleBadges role={musician.role} />
             </div>
 
             <div className="w-full flex flex-col gap-2.5 mt-6 pt-6 border-t border-border text-left text-xs">
               <div className="flex items-center gap-2.5 text-fg-muted">
                 <IconMail size={14} />
-                <span className="truncate text-fg">{musician.email}</span>
+                <span className="truncate text-fg">{musician.email || 'Sin correo'}</span>
               </div>
-              {musician.phone && (
-                <div className="flex items-center gap-2.5 text-fg-muted">
-                  <IconPhone size={14} />
-                  <span className="text-fg">{musician.phone}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2.5 text-fg-muted">
+                <IconPhone size={14} />
+                <span className="text-fg">{musician.phone || 'Sin celular registrado'}</span>
+              </div>
             </div>
 
             <button
@@ -1037,17 +1089,6 @@ function ProfileScreen({
               <IconEdit size={14} />
               Editar Información
             </button>
-
-            {/* Alternar Rol para Pruebas */}
-            <div className="w-full mt-4 p-3 rounded-2xl bg-surface-2 border border-border flex items-center justify-between">
-              <span className="text-xs text-fg-muted font-medium">Modo de cuenta</span>
-              <button
-                onClick={() => setRole(role === 'admin' ? 'musician' : 'admin')}
-                className="text-xs font-bold text-accent underline cursor-pointer"
-              >
-                Cambiar a {role === 'admin' ? 'Músico' : 'Admin'}
-              </button>
-            </div>
           </div>
 
           {/* Columna Derecha: Próximos Servicios Asignados */}
@@ -1127,7 +1168,7 @@ function ProfileScreen({
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-fg-muted uppercase">Teléfono / WhatsApp</label>
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Teléfono / Celular (WhatsApp)</label>
                   <input
                     type="text"
                     value={phone}
@@ -1135,6 +1176,37 @@ function ProfileScreen({
                     placeholder="+57 300 000 0000"
                     className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                   />
+                </div>
+
+                {/* Roles Checkboxes */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Roles / Permisos</label>
+                  <div className="flex gap-2">
+                    <label className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-2 border border-border flex-1 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isMusicianRole}
+                        onChange={e => {
+                          if (!e.target.checked && !isAdminRole) return
+                          setIsMusicianRole(e.target.checked)
+                        }}
+                        className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
+                      />
+                      <span className="text-xs font-semibold text-fg">Músico</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-2 border border-border flex-1 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isAdminRole}
+                        onChange={e => {
+                          if (!e.target.checked && !isMusicianRole) return
+                          setIsAdminRole(e.target.checked)
+                        }}
+                        className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
+                      />
+                      <span className="text-xs font-semibold text-fg">Admin</span>
+                    </label>
+                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-2">
@@ -1177,7 +1249,7 @@ function CalendarScreen({
   events: ServiceEvent[]
   musicians: Musician[]
   onDaySelect: (date: string) => void
-  currentUser: { name: string; initials: string }
+  currentUser: Musician
   theme: Theme
   onToggleTheme: () => void
 }) {
@@ -1344,11 +1416,10 @@ function DayDetailScreen({
   roster,
   songs,
   musicians,
-  role,
+  currentUser,
   onBack,
   onSongSelect,
   onAttendance,
-  currentUserId,
   theme,
   onToggleTheme,
 }: {
@@ -1356,17 +1427,16 @@ function DayDetailScreen({
   roster: { mid: string; status: Status }[]
   songs: Song[]
   musicians: Musician[]
-  role: Role
+  currentUser: Musician
   onBack: () => void
   onSongSelect: (id: string) => void
   onAttendance: (mid: string, status: Status) => void
-  currentUserId?: string
   theme: Theme
   onToggleTheme: () => void
 }) {
   const date = new Date(event.date + 'T12:00:00')
   const instruments: Instrument[] = ['voz', 'guitarra', 'piano', 'bajo', 'batería']
-  const myEntry = roster.find(r => r.mid === currentUserId)
+  const myEntry = roster.find(r => r.mid === currentUser.id)
 
   return (
     <div className="min-h-screen bg-bg text-fg pb-12">
@@ -1399,13 +1469,13 @@ function DayDetailScreen({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Columna Izquierda: Asistencia y Setlist */}
           <div className="lg:col-span-7 flex flex-col gap-6">
-            {role === 'musician' && currentUserId && myEntry && (
+            {myEntry && (
               <div className="rounded-3xl p-5 bg-surface border border-border shadow-xs">
                 <p className="text-sm font-semibold text-fg mb-1">Tu asistencia al servicio</p>
                 <p className="text-xs text-fg-muted mb-4">{"¿Puedes servir y tocar en este servicio?"}</p>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => onAttendance(currentUserId, 'confirmado')}
+                    onClick={() => onAttendance(currentUser.id, 'confirmado')}
                     className={`flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                       myEntry.status === 'confirmado'
                         ? 'bg-accent text-accent-fg shadow-xs'
@@ -1416,7 +1486,7 @@ function DayDetailScreen({
                     Confirmar
                   </button>
                   <button
-                    onClick={() => onAttendance(currentUserId, 'rechazado')}
+                    onClick={() => onAttendance(currentUser.id, 'rechazado')}
                     className={`flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                       myEntry.status === 'rechazado'
                         ? 'bg-surface-3 text-fg-muted border border-border font-bold'
@@ -2204,7 +2274,7 @@ function SetlistSongPicker({
   )
 }
 
-// ─── ADMIN SCREEN (CON GESTIÓN COMPLETA Y SETLIST PAGINADO) ────────────────────
+// ─── ADMIN SCREEN (CON GESTIÓN MULTI-ROL Y PROGRAMACIÓN) ─────────────────────────
 
 type AdminTab = 'usuarios' | 'programación' | 'setlist'
 
@@ -2251,7 +2321,8 @@ function AdminScreen({
   const [musicianInst, setMusicianInst] = useState<Instrument>('guitarra')
   const [musicianEmail, setMusicianEmail] = useState('')
   const [musicianPhone, setMusicianPhone] = useState('')
-  const [musicianRole, setMusicianRole] = useState<Role>('musician')
+  const [musicianIsMusician, setMusicianIsMusician] = useState(true)
+  const [musicianIsAdmin, setMusicianIsAdmin] = useState(false)
 
   // Estado para gestión de servicios
   const [serviceModal, setServiceModal] = useState<{ mode: 'create' | 'edit'; event?: ServiceEvent } | null>(null)
@@ -2267,7 +2338,8 @@ function AdminScreen({
     setMusicianInst('guitarra')
     setMusicianEmail('')
     setMusicianPhone('')
-    setMusicianRole('musician')
+    setMusicianIsMusician(true)
+    setMusicianIsAdmin(false)
     setMusicianModal({ mode: 'create' })
   }
 
@@ -2276,7 +2348,8 @@ function AdminScreen({
     setMusicianInst(m.instrument)
     setMusicianEmail(m.email)
     setMusicianPhone(m.phone || '')
-    setMusicianRole(m.role || 'musician')
+    setMusicianIsMusician(hasRole(m, 'musician'))
+    setMusicianIsAdmin(hasRole(m, 'admin'))
     setMusicianModal({ mode: 'edit', musician: m })
   }
 
@@ -2284,13 +2357,19 @@ function AdminScreen({
     e.preventDefault()
     if (!musicianName.trim()) return
 
+    const computedRole: Role = musicianIsMusician && musicianIsAdmin
+      ? 'both'
+      : musicianIsAdmin
+      ? 'admin'
+      : 'musician'
+
     if (musicianModal?.mode === 'create') {
       onAddMusician({
         name: musicianName.trim(),
         instrument: musicianInst,
         email: musicianEmail.trim() || `${musicianName.toLowerCase().replace(/\s+/g, '.')}@ibami.org`,
         phone: musicianPhone.trim(),
-        role: musicianRole,
+        role: computedRole,
       })
     } else if (musicianModal?.mode === 'edit' && musicianModal.musician) {
       onEditMusician(musicianModal.musician.id, {
@@ -2298,7 +2377,7 @@ function AdminScreen({
         instrument: musicianInst,
         email: musicianEmail.trim(),
         phone: musicianPhone.trim(),
-        role: musicianRole,
+        role: computedRole,
       })
     }
     setMusicianModal(null)
@@ -2308,7 +2387,7 @@ function AdminScreen({
     setServiceDate(new Date().toISOString().split('T')[0])
     setServiceType('domingo')
     setServiceLabel('Servicio Dominical')
-    setServiceRosterMids(musicians.slice(0, 4).map(m => m.id))
+    setServiceRosterMids((musicians || []).slice(0, 4).map(m => m.id))
     setServiceModal({ mode: 'create' })
   }
 
@@ -2378,13 +2457,13 @@ function AdminScreen({
         />
       )}
 
-      {/* Modal Crear / Editar Músico */}
+      {/* Modal Crear / Editar Músico con Multi-Rol */}
       {musicianModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setMusicianModal(null)} />
           <div className="relative w-full max-w-md rounded-3xl bg-surface border border-border p-6 shadow-2xl">
             <h3 className="font-display text-xl text-fg tracking-wide mb-4">
-              {musicianModal.mode === 'create' ? 'REGISTRAR MÚSICO' : 'EDITAR MÚSICO'}
+              {musicianModal.mode === 'create' ? 'REGISTRAR INTEGRANTE' : 'EDITAR INTEGRANTE'}
             </h3>
             <form onSubmit={handleSaveMusician} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
@@ -2398,33 +2477,58 @@ function AdminScreen({
                   className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-fg-muted uppercase">Instrumento</label>
-                  <select
-                    value={musicianInst}
-                    onChange={e => setMusicianInst(e.target.value as Instrument)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
-                  >
-                    {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(i => (
-                      <option key={i} value={i}>{i}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-fg-muted uppercase">Rol</label>
-                  <select
-                    value={musicianRole}
-                    onChange={e => setMusicianRole(e.target.value as Role)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
-                  >
-                    <option value="musician">Músico</option>
-                    <option value="admin">Admin</option>
-                  </select>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-fg-muted uppercase">Instrumento Principal</label>
+                <select
+                  value={musicianInst}
+                  onChange={e => setMusicianInst(e.target.value as Instrument)}
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
+                >
+                  {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(i => (
+                    <option key={i} value={i}>{i}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Checkboxes de Roles Multiples */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-fg-muted uppercase">Roles / Permisos</label>
+                <div className="flex gap-2">
+                  <label className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-2 border border-border flex-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={musicianIsMusician}
+                      onChange={e => {
+                        if (!e.target.checked && !musicianIsAdmin) return
+                        setMusicianIsMusician(e.target.checked)
+                      }}
+                      className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
+                    />
+                    <div>
+                      <p className="text-xs font-semibold text-fg">Músico</p>
+                      <p className="text-[10px] text-fg-muted">Toca o canta</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-2 border border-border flex-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={musicianIsAdmin}
+                      onChange={e => {
+                        if (!e.target.checked && !musicianIsMusician) return
+                        setMusicianIsAdmin(e.target.checked)
+                      }}
+                      className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
+                    />
+                    <div>
+                      <p className="text-xs font-semibold text-fg">Admin</p>
+                      <p className="text-[10px] text-fg-muted">Gestiona equipo</p>
+                    </div>
+                  </label>
                 </div>
               </div>
+
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-fg-muted uppercase">Correo Electrónico</label>
+                <label className="text-xs font-semibold text-fg-muted uppercase">Correo Electrónico (para login)</label>
                 <input
                   type="email"
                   placeholder="ejemplo@ibami.org"
@@ -2434,10 +2538,10 @@ function AdminScreen({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-fg-muted uppercase">Teléfono / Celular</label>
+                <label className="text-xs font-semibold text-fg-muted uppercase">Celular / WhatsApp (para login)</label>
                 <input
                   type="text"
-                  placeholder="+57 300 000 0000"
+                  placeholder="Ej: 3101234567"
                   value={musicianPhone}
                   onChange={e => setMusicianPhone(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
@@ -2511,30 +2615,34 @@ function AdminScreen({
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-fg-muted uppercase">Músicos Asignados</label>
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-surface-2 border border-border rounded-xl">
-                  {musicians.map(m => {
-                    const isSelected = serviceRosterMids.includes(m.id)
-                    return (
-                      <button
-                        type="button"
-                        key={m.id}
-                        onClick={() => {
-                          setServiceRosterMids(prev =>
-                            isSelected ? prev.filter(id => id !== m.id) : [...prev, m.id]
-                          )
-                        }}
-                        className={`p-2 rounded-lg text-left text-base md:text-xs font-medium border flex items-center justify-between transition cursor-pointer ${
-                          isSelected
-                            ? 'bg-surface text-fg border-accent font-semibold shadow-xs'
-                            : 'bg-surface-3 text-fg-muted border-transparent hover:text-fg'
-                        }`}
-                      >
-                        <span className="truncate">{m.name}</span>
-                        <span className="text-[10px] text-fg-subtle capitalize">({m.instrument})</span>
-                      </button>
-                    )
-                  })}
-                </div>
+                {musicians.length === 0 ? (
+                  <p className="text-xs text-fg-muted p-3 bg-surface-2 rounded-xl">No hay músicos registrados para asignar.</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-surface-2 border border-border rounded-xl">
+                    {musicians.map(m => {
+                      const isSelected = serviceRosterMids.includes(m.id)
+                      return (
+                        <button
+                          type="button"
+                          key={m.id}
+                          onClick={() => {
+                            setServiceRosterMids(prev =>
+                              isSelected ? prev.filter(id => id !== m.id) : [...prev, m.id]
+                            )
+                          }}
+                          className={`p-2 rounded-lg text-left text-base md:text-xs font-medium border flex items-center justify-between transition cursor-pointer ${
+                            isSelected
+                              ? 'bg-surface text-fg border-accent font-semibold shadow-xs'
+                              : 'bg-surface-3 text-fg-muted border-transparent hover:text-fg'
+                          }`}
+                        >
+                          <span className="truncate">{m.name}</span>
+                          <span className="text-[10px] text-fg-subtle capitalize">({m.instrument})</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -2637,12 +2745,10 @@ function AdminScreen({
                       <Avatar initials={m.initials} size="md" />
                       <div className="min-w-0">
                         <p className="font-semibold text-fg text-sm truncate">{m.name}</p>
-                        <p className="text-xs text-fg-muted truncate">{m.email}</p>
+                        <p className="text-xs text-fg-muted truncate">{m.email || m.phone || 'Sin contacto'}</p>
                         <div className="mt-2 flex items-center gap-1.5">
                           <InstrumentChip instrument={m.instrument} />
-                          {m.role === 'admin' && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-2 text-accent border border-border">Admin</span>
-                          )}
+                          <RoleBadges role={m.role} />
                         </div>
                       </div>
                     </div>
@@ -2846,7 +2952,6 @@ function getInitialTheme(): Theme {
 export default function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [screen, setScreen] = useState<Screen>('login')
-  const [role, setRole] = useState<Role>('musician')
   const [selectedDate, setSelectedDate] = useState('2026-08-16')
   const [selectedSongId, setSelectedSongId] = useState('notion-1')
   const [prevScreen, setPrevScreen] = useState<Screen>('calendar')
@@ -2859,6 +2964,7 @@ export default function App() {
   const [songs, setSongs] = useState<Song[]>([])
   const [events, setEvents] = useState<ServiceEvent[]>([])
   const [musicians, setMusicians] = useState<Musician[]>([])
+  const [activeUser, setActiveUser] = useState<Musician | null>(null)
 
   // Carga inicial de datos desde Supabase / LocalCache
   useEffect(() => {
@@ -2871,7 +2977,19 @@ export default function App() {
         ])
         if (Array.isArray(loadedSongs)) setSongs(loadedSongs)
         if (Array.isArray(loadedEvents)) setEvents(loadedEvents)
-        if (Array.isArray(loadedMusicians)) setMusicians(loadedMusicians)
+        if (Array.isArray(loadedMusicians)) {
+          setMusicians(loadedMusicians)
+
+          // Restaurar sesión activa si existe en localStorage
+          const savedUserId = localStorage.getItem('acorde_logged_user_id')
+          if (savedUserId) {
+            const found = loadedMusicians.find(m => m.id === savedUserId)
+            if (found) {
+              setActiveUser(found)
+              setScreen('calendar')
+            }
+          }
+        }
       } catch (err) {
         console.warn('Carga de datos con fallback:', err)
       }
@@ -2909,24 +3027,30 @@ export default function App() {
     setTheme(t => (t === 'dark' ? 'light' : 'dark'))
   }
 
-  // Usuario predeterminado seguro en caso de que no haya músicos registrados
+  // Usuario de respaldo
   const defaultUser: Musician = useMemo(() => ({
     id: 'user-default',
-    name: role === 'admin' ? 'Administrador' : 'Músico IBAMI',
+    name: 'Integrante IBAMI',
     instrument: 'guitarra',
-    initials: role === 'admin' ? 'AD' : 'IB',
-    email: role === 'admin' ? 'pastor@ibami.org' : 'musico@ibami.org',
+    initials: 'IB',
+    email: 'pastor@ibami.org',
     phone: '+57 300 000 0000',
-    role,
-  }), [role])
+    role: 'both',
+  }), [])
 
-  const currentMusician: Musician = useMemo(() => {
-    if (!musicians || musicians.length === 0) return defaultUser
-    if (role === 'admin') {
-      return musicians.find(m => m.role === 'admin') || musicians[0] || defaultUser
-    }
-    return musicians.find(m => m.id === 'm1') || musicians[0] || defaultUser
-  }, [musicians, role, defaultUser])
+  const currentMusician: Musician = activeUser || (musicians.length > 0 ? musicians[0] : defaultUser)
+
+  function handleLogin(user: Musician) {
+    setActiveUser(user)
+    localStorage.setItem('acorde_logged_user_id', user.id)
+    nav('calendar')
+  }
+
+  function handleLogout() {
+    setActiveUser(null)
+    localStorage.removeItem('acorde_logged_user_id')
+    nav('login')
+  }
 
   function nav(to: Screen, from?: Screen) {
     if (from) setPrevScreen(from)
@@ -2953,11 +3077,17 @@ export default function App() {
   async function handleEditMusician(id: string, updates: Partial<Musician>) {
     const updated = await updateMusician(id, updates)
     setMusicians(prev => prev.map(m => m.id === id ? updated : m))
+    if (activeUser?.id === id) {
+      setActiveUser(updated)
+    }
   }
 
   async function handleDeleteMusician(id: string) {
     await deleteMusician(id)
     setMusicians(prev => prev.filter(m => m.id !== id))
+    if (activeUser?.id === id) {
+      handleLogout()
+    }
   }
 
   async function handleAddService(ev: ServiceEvent) {
@@ -2990,9 +3120,8 @@ export default function App() {
   if (screen === 'login') {
     return (
       <LoginScreen
-        onLogin={() => nav('calendar')}
-        role={role}
-        setRole={setRole}
+        onLogin={handleLogin}
+        musicians={musicians}
         theme={theme}
         onToggleTheme={toggleTheme}
       />
@@ -3022,10 +3151,9 @@ export default function App() {
       <DesktopHeader
         screen={screen}
         setScreen={s => nav(s)}
-        role={role}
+        currentUser={currentMusician}
         theme={theme}
         onToggleTheme={toggleTheme}
-        currentUser={currentMusician}
       />
 
       <main className="pb-20 md:pb-8">
@@ -3045,11 +3173,10 @@ export default function App() {
             roster={mergedRoster}
             songs={songs}
             musicians={musicians}
-            role={role}
+            currentUser={currentMusician}
             onBack={() => nav('calendar')}
             onSongSelect={id => { setSelectedSongId(id); nav('song', 'day-detail') }}
             onAttendance={handleAttendance}
-            currentUserId={role === 'musician' ? currentMusician.id : undefined}
             theme={theme}
             onToggleTheme={toggleTheme}
           />
@@ -3072,7 +3199,7 @@ export default function App() {
             onToggleTheme={toggleTheme}
           />
         )}
-        {screen === 'admin' && role === 'admin' && (
+        {screen === 'admin' && hasRole(currentMusician, 'admin') && (
           <AdminScreen
             events={events}
             musicians={musicians}
@@ -3094,10 +3221,8 @@ export default function App() {
         {screen === 'profile' && (
           <ProfileScreen
             musician={currentMusician}
-            role={role}
-            setRole={setRole}
             onUpdateMusician={updates => handleEditMusician(currentMusician.id, updates)}
-            onLogout={() => nav('login')}
+            onLogout={handleLogout}
             events={events}
             songs={songs}
             onSelectEvent={date => { setSelectedDate(date); nav('day-detail', 'profile') }}
@@ -3108,7 +3233,7 @@ export default function App() {
       </main>
 
       {/* Navegación Inferior para Móviles */}
-      <BottomNav screen={screen} setScreen={s => nav(s)} role={role} />
+      <BottomNav screen={screen} setScreen={s => nav(s)} currentUser={currentMusician} />
     </div>
   )
 }
