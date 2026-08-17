@@ -70,9 +70,14 @@ create table if not exists public.service_roster (
   event_id uuid not null references public.service_events(id) on delete cascade,
   user_id uuid not null references public.profiles(id) on delete cascade,
   status text not null check (status in ('confirmado', 'pendiente', 'rechazado')) default 'pendiente',
+  instrument text,
+  secondary_instruments text[] default '{}',
   created_at timestamptz not null default now(),
   unique(event_id, user_id)
 );
+
+alter table public.service_roster add column if not exists instrument text;
+alter table public.service_roster add column if not exists secondary_instruments text[] default '{}';
 
 -- 6. TABLA: service_setlists (Canciones programadas por Servicio)
 create table if not exists public.service_setlists (

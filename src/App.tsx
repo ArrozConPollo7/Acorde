@@ -1811,7 +1811,7 @@ function DayDetailScreen({
   onToggleTheme,
 }: {
   event: ServiceEvent
-  roster: { mid: string; status: Status }[]
+  roster: { mid: string; status: Status; instrument?: string; secondary_instruments?: string[] }[]
   songs: Song[]
   musicians: Musician[]
   currentUser: Musician
@@ -1824,7 +1824,6 @@ function DayDetailScreen({
   const date = new Date(event.date + 'T12:00:00')
   const myEntry = roster.find(r => r.mid === currentUser.id)
 
-  // Agrupación litúrgica del equipo
   const ministryGroups = useMemo(() => {
     const leadership: typeof roster = []
     const vocals: typeof roster = []
@@ -1833,7 +1832,7 @@ function DayDetailScreen({
     roster.forEach(entry => {
       const m = musicians.find(x => x.id === entry.mid)
       if (!m) return
-      const inst = (m.instrument || '').toLowerCase()
+      const inst = (entry.instrument || m.instrument || '').toLowerCase()
       if (inst.includes('direc') || inst.includes('líder') || inst.includes('lider')) {
         leadership.push(entry)
       } else if (inst.includes('voz') || inst.includes('coro')) {
@@ -1858,66 +1857,64 @@ function DayDetailScreen({
             <IconChevronLeft size={16} />
             <span>Volver al Calendario</span>
           </button>
-          <div className="md:hidden">
-            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          </div>
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
 
-        <div className="bg-surface border border-border rounded-3xl p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
-          <div>
-            <p className="text-fg-muted text-xs tracking-widest uppercase font-medium">
-              {date.toLocaleDateString('es', { weekday: 'long' })}
-            </p>
-            <h1 className="font-display text-3xl md:text-4xl text-fg mt-0.5 tracking-wide">
-              {date.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()}
-            </h1>
-            <p className="text-fg-muted text-sm mt-1">{event.label}</p>
-          </div>
-          <span className="self-start md:self-auto text-xs font-semibold px-3.5 py-1.5 rounded-full bg-surface-2 text-fg border border-border">
-            {event.type === 'domingo' ? 'Servicio Dominical' : 'Servicio Entre semana'}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Columna Izquierda: Asistencia y Setlist */}
-          <div className="lg:col-span-7 flex flex-col gap-6">
-            {myEntry && (
-              <div className="rounded-3xl p-5 bg-surface border border-border shadow-xs">
-                <p className="text-sm font-semibold text-fg mb-1">Tu asistencia al servicio</p>
-                <p className="text-xs text-fg-muted mb-4">{"¿Puedes servir y tocar en este servicio?"}</p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => onAttendance(currentUser.id, 'confirmado')}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      myEntry.status === 'confirmado'
-                        ? 'bg-accent text-accent-fg shadow-xs'
-                        : 'bg-surface-2 text-fg border border-border hover:border-border-hover'
-                    }`}
-                  >
-                    <IconCheck size={14} />
-                    Confirmar
-                  </button>
-                  <button
-                    onClick={() => onAttendance(currentUser.id, 'rechazado')}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      myEntry.status === 'rechazado'
-                        ? 'bg-surface-3 text-fg-muted border border-border font-bold'
-                        : 'bg-surface-2 text-fg-subtle border border-border hover:border-border-hover'
-                    }`}
-                  >
-                    <IconX size={14} />
-                    No puedo
-                  </button>
+        {myEntry && (
+          <div className="rounded-3xl p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface border border-border shadow-xs">
+            <div className="flex items-center gap-3">
+              <Avatar initials={currentUser.initials} size="md" />
+              <div>
+                <p className="font-semibold text-fg text-sm">Tu participación en este servicio</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-fg-muted">Estado actual:</span>
+                  <StatusBadge status={myEntry.status} />
                 </div>
               </div>
-            )}
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={() => onAttendance(currentUser.id, 'confirmado')}
+                className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+                  myEntry.status === 'confirmado'
+                    ? 'bg-accent text-accent-fg'
+                    : 'bg-surface-2 hover:bg-surface-3 text-fg border border-border'
+                }`}
+              >
+                <IconCheck size={14} />
+                <span>Confirmar asistencia</span>
+              </button>
+              <button
+                onClick={() => onAttendance(currentUser.id, 'rechazado')}
+                className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  myEntry.status === 'rechazado'
+                    ? 'bg-surface-3 text-fg-muted border border-border'
+                    : 'bg-surface-2 hover:bg-surface-3 text-fg-muted border border-border'
+                }`}
+              >
+                <IconX size={14} />
+                <span>No podré asistir</span>
+              </button>
+            </div>
+          </div>
+        )}
 
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-7 flex flex-col gap-6">
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold text-accent uppercase tracking-widest block mb-1">
+                {event.type === 'domingo' ? 'Servicio Principal' : 'Reunión Congregacional'}
+              </span>
+              <h1 className="font-display text-3xl md:text-4xl text-fg tracking-wide">{event.label}</h1>
+              <p className="text-fg-muted text-sm mt-1 capitalize">{date.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
                 <h2 className="font-display text-xl text-fg tracking-wide">SETLIST DEL SERVICIO</h2>
-                <span className="text-xs text-fg-muted">{event.setlist.length} canciones</span>
+                <span className="text-xs text-fg-muted font-medium">{event.setlist.length} canciones</span>
               </div>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 {event.setlist.map((sid, idx) => {
                   const song = songs.find(s => s.id === sid)
                   if (!song) return null
@@ -1948,7 +1945,6 @@ function DayDetailScreen({
             </div>
           </div>
 
-          {/* Columna Derecha: Músicos Asignados Agrupados por Ministerio */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO ASIGNADO</h2>
             <div className="flex flex-col gap-3">
@@ -1959,11 +1955,15 @@ function DayDetailScreen({
                     <span className="text-xs font-bold text-fg uppercase tracking-wider">{group.title}</span>
                   </div>
                   <div className="flex flex-col gap-3">
-                    {group.entries.map(({ mid, status }) => {
-                      const m = musicians.find(x => x.id === mid)
+                    {group.entries.map(entry => {
+                      const m = musicians.find(x => x.id === entry.mid)
                       if (!m) return null
+                      const primaryInst = entry.instrument || m.instrument
+                      const secondaries = entry.secondary_instruments && entry.secondary_instruments.length > 0
+                        ? entry.secondary_instruments
+                        : (m.secondary_instruments || [])
                       return (
-                        <div key={mid} className="flex items-start justify-between gap-2">
+                        <div key={entry.mid} className="flex items-start justify-between gap-2">
                           <div className="flex items-start gap-2.5 min-w-0">
                             <Avatar initials={m.initials} size="sm" />
                             <div className="min-w-0">
@@ -2826,7 +2826,14 @@ function AdminScreen({
   const [serviceDate, setServiceDate] = useState('')
   const [serviceType, setServiceType] = useState<'domingo' | 'midweek'>('domingo')
   const [serviceLabel, setServiceLabel] = useState('')
-  const [serviceRosterMids, setServiceRosterMids] = useState<string[]>([])
+  
+  interface ServiceRosterDraftItem {
+    mid: string
+    instrument: string
+    secondary_instruments: string[]
+    status: Status
+  }
+  const [serviceRoster, setServiceRoster] = useState<ServiceRosterDraftItem[]>([])
 
   const event = events.find(e => e.date === selectedAdminDate)
 
@@ -2895,7 +2902,13 @@ function AdminScreen({
     setServiceDate(new Date().toISOString().split('T')[0])
     setServiceType('domingo')
     setServiceLabel('Servicio Dominical')
-    setServiceRosterMids((musicians || []).slice(0, 4).map(m => m.id))
+    const initialRoster: ServiceRosterDraftItem[] = (musicians || []).slice(0, 4).map(m => ({
+      mid: m.id,
+      instrument: m.instrument || 'guitarra',
+      secondary_instruments: m.secondary_instruments || [],
+      status: 'pendiente',
+    }))
+    setServiceRoster(initialRoster)
     setServiceModal({ mode: 'create' })
   }
 
@@ -2903,17 +2916,73 @@ function AdminScreen({
     setServiceDate(ev.date)
     setServiceType(ev.type)
     setServiceLabel(ev.label)
-    setServiceRosterMids(ev.roster.map(r => r.mid))
+    const mappedRoster: ServiceRosterDraftItem[] = (ev.roster || []).map(r => {
+      const m = musicians.find(x => x.id === r.mid)
+      return {
+        mid: r.mid,
+        instrument: r.instrument || m?.instrument || 'guitarra',
+        secondary_instruments: r.secondary_instruments && r.secondary_instruments.length > 0
+          ? r.secondary_instruments
+          : (m?.secondary_instruments || []),
+        status: r.status,
+      }
+    })
+    setServiceRoster(mappedRoster)
     setServiceModal({ mode: 'edit', event: ev })
+  }
+
+  function addMusicianToService(mid: string) {
+    const m = musicians.find(x => x.id === mid)
+    if (!m || serviceRoster.some(r => r.mid === mid)) return
+    setServiceRoster(prev => [
+      ...prev,
+      {
+        mid: m.id,
+        instrument: m.instrument || 'guitarra',
+        secondary_instruments: m.secondary_instruments || [],
+        status: 'pendiente',
+      }
+    ])
+  }
+
+  function removeMusicianFromService(mid: string) {
+    setServiceRoster(prev => prev.filter(r => r.mid !== mid))
+  }
+
+  function updateServiceMusicianInstrument(mid: string, instrument: string) {
+    setServiceRoster(prev => prev.map(r => {
+      if (r.mid !== mid) return r
+      return {
+        ...r,
+        instrument,
+        secondary_instruments: r.secondary_instruments.filter(s => s !== instrument),
+      }
+    }))
+  }
+
+  function toggleServiceMusicianSecondary(mid: string, secInst: string) {
+    setServiceRoster(prev => prev.map(r => {
+      if (r.mid !== mid) return r
+      const exists = r.secondary_instruments.includes(secInst)
+      const next = exists
+        ? r.secondary_instruments.filter(s => s !== secInst)
+        : [...r.secondary_instruments, secInst]
+      return {
+        ...r,
+        secondary_instruments: next,
+      }
+    }))
   }
 
   function handleSaveService(e: React.FormEvent) {
     e.preventDefault()
     if (!serviceDate || !serviceLabel.trim()) return
 
-    const roster: RosterEntry[] = serviceRosterMids.map(mid => ({
-      mid,
-      status: 'pendiente',
+    const roster: RosterEntry[] = serviceRoster.map(r => ({
+      mid: r.mid,
+      status: r.status || 'pendiente',
+      instrument: r.instrument,
+      secondary_instruments: r.secondary_instruments,
     }))
 
     if (serviceModal?.mode === 'create') {
@@ -3121,12 +3190,25 @@ function AdminScreen({
       {serviceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setServiceModal(null)} />
-          <div className="relative w-full max-w-lg rounded-3xl bg-surface border border-border p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="font-display text-xl text-fg tracking-wide mb-4">
-              {serviceModal.mode === 'create' ? 'PROGRAMAR SERVICIO' : 'EDITAR SERVICIO'}
-            </h3>
+          <div className="relative w-full max-w-2xl rounded-3xl bg-surface border border-border p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-display text-xl text-fg tracking-wide">
+                  {serviceModal.mode === 'create' ? 'PROGRAMAR SERVICIO' : 'EDITAR SERVICIO'}
+                </h3>
+                <p className="text-xs text-fg-muted mt-0.5">Asigna fecha, tipo y personaliza los roles de los músicos para este día.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setServiceModal(null)}
+                className="w-8 h-8 rounded-xl bg-surface-2 text-fg-muted hover:text-fg border border-border flex items-center justify-center transition cursor-pointer"
+              >
+                <IconX size={14} />
+              </button>
+            </div>
+
             <form onSubmit={handleSaveService} className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-fg-muted uppercase">Fecha *</label>
                   <input
@@ -3162,39 +3244,125 @@ function AdminScreen({
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-fg-muted uppercase">Músicos Asignados</label>
-                {musicians.length === 0 ? (
-                  <p className="text-xs text-fg-muted p-3 bg-surface-2 rounded-xl">No hay músicos registrados para asignar.</p>
+              {/* Sección de Músicos Convocados y Asignación de Instrumentos */}
+              <div className="flex flex-col gap-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-fg uppercase tracking-wider">
+                    Músicos Convocados ({serviceRoster.length})
+                  </label>
+                  <span className="text-[11px] text-fg-subtle">Personaliza el rol o instrumento de cada integrante</span>
+                </div>
+
+                {serviceRoster.length === 0 ? (
+                  <div className="p-4 rounded-2xl bg-surface-2 border border-border text-center text-xs text-fg-muted">
+                    No hay músicos convocados para este servicio todavía. Selecciona integrantes abajo.
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-surface-2 border border-border rounded-xl">
-                    {musicians.map(m => {
-                      const isSelected = serviceRosterMids.includes(m.id)
+                  <div className="flex flex-col gap-2.5 max-h-72 overflow-y-auto pr-1">
+                    {serviceRoster.map(r => {
+                      const m = musicians.find(x => x.id === r.mid)
+                      if (!m) return null
                       return (
-                        <button
-                          type="button"
-                          key={m.id}
-                          onClick={() => {
-                            setServiceRosterMids(prev =>
-                              isSelected ? prev.filter(id => id !== m.id) : [...prev, m.id]
-                            )
-                          }}
-                          className={`p-2 rounded-lg text-left text-base md:text-xs font-medium border flex items-center justify-between transition cursor-pointer ${
-                            isSelected
-                              ? 'bg-surface text-fg border-accent font-semibold shadow-xs'
-                              : 'bg-surface-3 text-fg-muted border-transparent hover:text-fg'
-                          }`}
-                        >
-                          <span className="truncate">{m.name}</span>
-                          <span className="text-[10px] text-fg-subtle capitalize">({m.instrument})</span>
-                        </button>
+                        <div key={r.mid} className="p-3 rounded-2xl bg-surface-2 border border-border flex flex-col gap-2.5 shadow-xs">
+                          {/* Fila 1: Integrante y botón de quitar */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <Avatar initials={m.initials} size="sm" />
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-fg truncate">{m.name}</p>
+                                <p className="text-[10px] text-fg-subtle truncate">Perfil: {m.instrument}</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeMusicianFromService(r.mid)}
+                              className="p-1.5 rounded-xl text-fg-muted hover:text-accent bg-surface border border-border transition-colors cursor-pointer"
+                              title="Quitar del servicio"
+                            >
+                              <IconTrash size={13} />
+                            </button>
+                          </div>
+
+                          {/* Fila 2: Selector de Instrumento Principal para este servicio */}
+                          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                            <label className="text-[11px] font-semibold text-fg-muted uppercase sm:col-span-4">
+                              Rol en este servicio:
+                            </label>
+                            <div className="sm:col-span-8">
+                              <select
+                                value={r.instrument}
+                                onChange={e => updateServiceMusicianInstrument(r.mid, e.target.value)}
+                                className="w-full px-3 py-1.5 rounded-xl text-xs font-semibold text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer capitalize"
+                              >
+                                <optgroup label="Liderazgo & Voces">
+                                  {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Liderazgo & Voces').map(inst => (
+                                    <option key={inst.id} value={inst.id}>{inst.label}</option>
+                                  ))}
+                                </optgroup>
+                                <optgroup label="Instrumentos de Banda">
+                                  {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Instrumentos de Banda').map(inst => (
+                                    <option key={inst.id} value={inst.id}>{inst.label}</option>
+                                  ))}
+                                </optgroup>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Fila 3: Instrumentos Secundarios para este servicio */}
+                          <div className="flex flex-col gap-1 pt-1 border-t border-border/50">
+                            <span className="text-[10px] font-semibold text-fg-muted uppercase">Instrumentos Secundarios en este servicio:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {AVAILABLE_INSTRUMENTS.filter(i => i.id !== r.instrument).map(opt => {
+                                const isSelected = r.secondary_instruments.includes(opt.id)
+                                return (
+                                  <button
+                                    type="button"
+                                    key={opt.id}
+                                    onClick={() => toggleServiceMusicianSecondary(r.mid, opt.id)}
+                                    className={`px-2 py-0.5 rounded-lg text-[10px] font-medium border flex items-center gap-1 transition cursor-pointer ${
+                                      isSelected
+                                        ? 'bg-accent text-accent-fg border-accent font-semibold shadow-xs'
+                                        : 'bg-surface text-fg-muted border-border hover:text-fg'
+                                    }`}
+                                  >
+                                    <span>{opt.short}</span>
+                                    <span>{isSelected ? <IconCheck size={9} /> : <IconPlus size={9} />}</span>
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        </div>
                       )
                     })}
                   </div>
                 )}
+
+                {/* Sección para agregar más músicos registrados */}
+                {musicians.filter(m => !serviceRoster.some(r => r.mid === m.id)).length > 0 && (
+                  <div className="flex flex-col gap-1.5 pt-1">
+                    <label className="text-[11px] font-semibold text-fg-muted uppercase">Convocar más integrantes:</label>
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 rounded-xl bg-surface-2 border border-border">
+                      {musicians
+                        .filter(m => !serviceRoster.some(r => r.mid === m.id))
+                        .map(m => (
+                          <button
+                            type="button"
+                            key={m.id}
+                            onClick={() => addMusicianToService(m.id)}
+                            className="px-2.5 py-1.5 rounded-xl text-xs font-medium bg-surface text-fg-muted hover:text-fg border border-border flex items-center gap-1.5 transition cursor-pointer hover:border-accent/40"
+                          >
+                            <IconPlus size={11} className="text-accent" />
+                            <span className="font-semibold">{m.name}</span>
+                            <span className="text-[10px] text-fg-subtle capitalize">({m.instrument})</span>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setServiceModal(null)}
@@ -3206,7 +3374,7 @@ function AdminScreen({
                   type="submit"
                   className="flex-1 py-3 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover text-sm font-semibold shadow-xs cursor-pointer"
                 >
-                  Guardar
+                  Guardar Servicio
                 </button>
               </div>
             </form>
@@ -3385,19 +3553,27 @@ function AdminScreen({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border">
-                      <div className="flex -space-x-2">
-                        {ev.roster.slice(0, 4).map(r => {
+                    <div className="flex flex-col gap-2 mt-4 pt-3 border-t border-border">
+                      <div className="flex flex-wrap gap-1">
+                        {ev.roster.slice(0, 5).map(r => {
                           const m = musicians.find(x => x.id === r.mid)
-                          return m ? (
-                            <div key={r.mid} className="w-7 h-7 rounded-full bg-surface-3 text-fg text-[9px] font-bold flex items-center justify-center border-2 border-surface">
-                              {m.initials}
-                            </div>
-                          ) : null
+                          if (!m) return null
+                          const assignedInst = r.instrument || m.instrument
+                          return (
+                            <span key={r.mid} className="inline-flex items-center gap-1 text-[10px] bg-surface-2 text-fg px-2 py-0.5 rounded-lg border border-border">
+                              <span className="font-semibold">{m.name.split(' ')[0]}</span>
+                              <span className="text-fg-subtle capitalize">({assignedInst})</span>
+                            </span>
+                          )
                         })}
+                        {ev.roster.length > 5 && (
+                          <span className="text-[10px] text-fg-muted font-semibold self-center">+{ev.roster.length - 5} más</span>
+                        )}
                       </div>
-                      <span className="text-xs text-fg font-medium">{confirmed} confirmados</span>
-                      {pending > 0 && <span className="text-xs text-fg-muted font-medium">· {pending} pendientes</span>}
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-fg font-semibold">{confirmed} confirmados</span>
+                        {pending > 0 && <span className="text-fg-muted font-medium">· {pending} pendientes</span>}
+                      </div>
                     </div>
                   </div>
                 )

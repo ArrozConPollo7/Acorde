@@ -84,6 +84,8 @@ export interface Song {
 export interface RosterEntry {
   mid: string
   status: Status
+  instrument?: string
+  secondary_instruments?: string[]
 }
 
 export interface ServiceEvent {
@@ -401,7 +403,7 @@ export async function fetchEvents(): Promise<ServiceEvent[]> {
           type,
           label,
           service_setlists ( song_id, position ),
-          service_roster ( user_id, status )
+          service_roster ( user_id, status, instrument, secondary_instruments )
         `)
         .order('date', { ascending: true })
 
@@ -416,6 +418,8 @@ export async function fetchEvents(): Promise<ServiceEvent[]> {
           roster: (ev.service_roster || []).map((r: any) => ({
             mid: r.user_id,
             status: r.status,
+            instrument: r.instrument || undefined,
+            secondary_instruments: Array.isArray(r.secondary_instruments) ? r.secondary_instruments : [],
           })),
         }))
         setStored(STORAGE_KEYS.EVENTS, mapped)
@@ -460,6 +464,8 @@ export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEv
               event_id: eventRow.id,
               user_id: r.mid,
               status: r.status,
+              instrument: r.instrument || null,
+              secondary_instruments: r.secondary_instruments || [],
             }))
           )
         }
@@ -517,6 +523,8 @@ export async function updateServiceEvent(date: string, updates: Partial<ServiceE
                 event_id: existing.id,
                 user_id: r.mid,
                 status: r.status,
+                instrument: r.instrument || null,
+                secondary_instruments: r.secondary_instruments || [],
               }))
             )
           }
