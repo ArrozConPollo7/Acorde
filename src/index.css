@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+  /* Modo claro: Fondo blanco hueso/crema, texto negro suave, acento rojo/naranja quemado desaturado */
+  --bg: #F7F5F0;
+  --bg-subtle: #EFECE3;
+  --surface: #FFFFFF;
+  --surface-2: #F1EDE4;
+  --surface-3: #E5E0D5;
+  --surface-elevated: #FFFFFF;
+  --border: #E2DDD2;
+  --border-subtle: #EFEBE2;
+  --border-hover: #CFC8B8;
+  --fg: #1C1B18;
+  --fg-muted: #747168;
+  --fg-subtle: #9E9A8E;
+  --accent: #B8472C;
+  --accent-hover: #A13C23;
+  --accent-fg: #FFFFFF;
+  --accent-subtle: #F6ECE8;
+  --accent-subtle-fg: #9C3820;
+  --accent-border: #E8BDB2;
+}
+
+.dark, [data-theme='dark'] {
+  /* Modo oscuro: Fondo negro cálido casi puro, texto blanco hueso, acento rojo/naranja quemado desaturado */
+  --bg: #121110;
+  --bg-subtle: #191817;
+  --surface: #1B1A18;
+  --surface-2: #242320;
+  --surface-3: #302E2B;
+  --surface-elevated: #22211F;
+  --border: #2E2C28;
+  --border-subtle: #24221F;
+  --border-hover: #423E39;
+  --fg: #F2EFE9;
+  --fg-muted: #8E8B82;
+  --fg-subtle: #615E58;
+  --accent: #C35337;
+  --accent-hover: #D46245;
+  --accent-fg: #FFFFFF;
+  --accent-subtle: #2C1C18;
+  --accent-subtle-fg: #E0765B;
+  --accent-border: #522E25;
+}
+
+@theme {
+  --font-display: 'Anton', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-hover: var(--border-hover);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-subtle-fg: var(--accent-subtle-fg);
+  --color-accent-border: var(--accent-border);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
