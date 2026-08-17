@@ -3,47 +3,67 @@
 @import 'tailwindcss';
 
 :root {
-  /* Modo claro: Fondo blanco hueso/crema, texto negro suave, acento rojo/naranja quemado desaturado */
-  --bg: #F7F5F0;
-  --bg-subtle: #EFECE3;
+  /* Modo claro: Fondos Claros (#FFFFFF / #F9FAFB), Texto Principal (#121212), Bordes y Texto Secundario (#E5E7EB / #6B7280) */
+  --bg: #F9FAFB;
+  --bg-subtle: #F3F4F6;
   --surface: #FFFFFF;
-  --surface-2: #F1EDE4;
-  --surface-3: #E5E0D5;
+  --surface-2: #F3F4F6;
+  --surface-3: #E5E7EB;
   --surface-elevated: #FFFFFF;
-  --border: #E2DDD2;
-  --border-subtle: #EFEBE2;
-  --border-hover: #CFC8B8;
-  --fg: #1C1B18;
-  --fg-muted: #747168;
-  --fg-subtle: #9E9A8E;
-  --accent: #B8472C;
-  --accent-hover: #A13C23;
+  --border: #E5E7EB;
+  --border-subtle: #F3F4F6;
+  --border-hover: #D1D5DB;
+  --fg: #121212;
+  --fg-muted: #6B7280;
+  --fg-subtle: #9CA3AF;
+
+  /* Primario / Acento Digital: #00A8E8 (Azul cian / turquesa vibrante), Hover: #0090C7 */
+  --accent: #00A8E8;
+  --accent-hover: #0090C7;
   --accent-fg: #FFFFFF;
-  --accent-subtle: #F6ECE8;
-  --accent-subtle-fg: #9C3820;
-  --accent-border: #E8BDB2;
+  --accent-subtle: #E0F5FC;
+  --accent-subtle-fg: #0077A8;
+  --accent-border: #BAE8FA;
+
+  /* Acento Cálido (Eventos y destacados): #E76F51 (Coral / Salmón cálido) */
+  --warm-accent: #E76F51;
+  --warm-accent-hover: #D85839;
+  --warm-accent-fg: #FFFFFF;
+  --warm-accent-subtle: #FDF0ED;
+  --warm-accent-subtle-fg: #C24E32;
+  --warm-accent-border: #F8C8BD;
 }
 
 .dark, [data-theme='dark'] {
-  /* Modo oscuro: Fondo negro cálido casi puro, texto blanco hueso, acento rojo/naranja quemado desaturado */
-  --bg: #121110;
-  --bg-subtle: #191817;
-  --surface: #1B1A18;
-  --surface-2: #242320;
-  --surface-3: #302E2B;
-  --surface-elevated: #22211F;
-  --border: #2E2C28;
-  --border-subtle: #24221F;
-  --border-hover: #423E39;
-  --fg: #F2EFE9;
-  --fg-muted: #8E8B82;
-  --fg-subtle: #615E58;
-  --accent: #C35337;
-  --accent-hover: #D46245;
+  /* Modo oscuro: Fondo Oscuro (#121212), Superficie/Cards (#1E1E1E), Texto Secundario/Bordes (#6B7280 / #2E2E2E) */
+  --bg: #121212;
+  --bg-subtle: #181818;
+  --surface: #1E1E1E;
+  --surface-2: #262626;
+  --surface-3: #303030;
+  --surface-elevated: #242424;
+  --border: #2E2E2E;
+  --border-subtle: #242424;
+  --border-hover: #404040;
+  --fg: #F9FAFB;
+  --fg-muted: #9CA3AF;
+  --fg-subtle: #6B7280;
+
+  /* Primario / Acento Digital: #00A8E8, Hover: #0090C7 */
+  --accent: #00A8E8;
+  --accent-hover: #0090C7;
   --accent-fg: #FFFFFF;
-  --accent-subtle: #2C1C18;
-  --accent-subtle-fg: #E0765B;
-  --accent-border: #522E25;
+  --accent-subtle: #082937;
+  --accent-subtle-fg: #38BDF8;
+  --accent-border: #0E4861;
+
+  /* Acento Cálido (Eventos y destacados): #E76F51 */
+  --warm-accent: #E76F51;
+  --warm-accent-hover: #F08469;
+  --warm-accent-fg: #FFFFFF;
+  --warm-accent-subtle: #331A14;
+  --warm-accent-subtle-fg: #F4A261;
+  --warm-accent-border: #5A271C;
 }
 
 @theme {
@@ -68,6 +88,12 @@
   --color-accent-subtle: var(--accent-subtle);
   --color-accent-subtle-fg: var(--accent-subtle-fg);
   --color-accent-border: var(--accent-border);
+  --color-warm: var(--warm-accent);
+  --color-warm-hover: var(--warm-accent-hover);
+  --color-warm-fg: var(--warm-accent-fg);
+  --color-warm-subtle: var(--warm-accent-subtle);
+  --color-warm-subtle-fg: var(--warm-accent-subtle-fg);
+  --color-warm-border: var(--warm-accent-border);
 }
 
 body {

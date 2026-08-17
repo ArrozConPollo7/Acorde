@@ -540,7 +540,7 @@ function TeamDomainBadge({ domain }: { domain?: string }) {
 
 function ClassicBadge() {
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-accent text-accent-fg shadow-xs">
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-warm text-warm-fg shadow-xs">
       <IconCrown size={11} />
       <span>Clásico IBAMI</span>
     </span>
@@ -742,10 +742,10 @@ function AddSongModal({
                 type="checkbox"
                 checked={isClassic}
                 onChange={e => setIsClassic(e.target.checked)}
-                className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
+                className="w-4 h-4 rounded text-warm accent-warm cursor-pointer"
               />
               <div className="flex items-center gap-1.5">
-                <IconCrown size={14} className="text-accent" />
+                <IconCrown size={14} className="text-warm" />
                 <span className="text-xs font-bold text-fg">Marcar como Clásico IBAMI</span>
                 <span className="text-[10px] text-fg-muted">(Canción insignia del ministerio)</span>
               </div>
@@ -992,10 +992,10 @@ function EditSongModal({
                 type="checkbox"
                 checked={isClassic}
                 onChange={e => setIsClassic(e.target.checked)}
-                className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
+                className="w-4 h-4 rounded text-warm accent-warm cursor-pointer"
               />
               <div className="flex items-center gap-1.5">
-                <IconCrown size={14} className="text-accent" />
+                <IconCrown size={14} className="text-warm" />
                 <span className="text-xs font-bold text-fg">Marcar como Clásico IBAMI</span>
                 <span className="text-[10px] text-fg-muted">(Canción insignia del ministerio)</span>
               </div>
@@ -1718,7 +1718,7 @@ function CalendarScreen({
                     </span>
                     {event && (
                       <div className="flex flex-col items-center gap-0.5 mt-1">
-                        <div className={`w-1.5 h-1.5 rounded-full ${event.type === 'domingo' ? 'bg-accent' : 'bg-fg-muted'}`} />
+                        <div className={`w-1.5 h-1.5 rounded-full ${event.type === 'domingo' ? 'bg-warm' : 'bg-accent'}`} />
                         <span className="text-[9px] text-fg-muted font-medium hidden md:inline">{confirmed}/{total}</span>
                       </div>
                     )}
@@ -1729,11 +1729,11 @@ function CalendarScreen({
 
             <div className="flex items-center gap-6 mt-6 pt-4 border-t border-border">
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-accent" />
+                <div className="w-2.5 h-2.5 rounded-full bg-warm" />
                 <span className="text-xs text-fg-muted">Servicio Dominical</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-fg-muted" />
+                <div className="w-2.5 h-2.5 rounded-full bg-accent" />
                 <span className="text-xs text-fg-muted">Servicio Entre semana</span>
               </div>
             </div>
@@ -1754,7 +1754,7 @@ function CalendarScreen({
                   >
                     <div
                       className="w-12 h-12 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 border border-border"
-                      style={{ background: ev.type === 'domingo' ? 'var(--accent)' : 'var(--surface-3)', color: ev.type === 'domingo' ? 'var(--accent-fg)' : 'var(--fg)' }}
+                      style={{ background: ev.type === 'domingo' ? 'var(--warm-accent)' : 'var(--accent)', color: '#FFFFFF' }}
                     >
                       <span className="text-sm font-bold leading-none">{date.toLocaleDateString('es', { day: '2-digit' })}</span>
                       <span className="text-[10px] uppercase tracking-wide leading-none mt-0.5 opacity-90">{date.toLocaleDateString('es', { month: 'short' })}</span>
@@ -2214,7 +2214,7 @@ function DayDetailScreen({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <p className="font-semibold text-fg text-sm truncate">{song.title}</p>
-                          {song.is_classic && <span title="Clásico IBAMI" className="text-accent inline-flex items-center"><IconCrown size={12} /></span>}
+                          {song.is_classic && <span title="Clásico IBAMI" className="text-warm inline-flex items-center"><IconCrown size={12} /></span>}
                         </div>
                         <p className="text-xs text-fg-muted truncate">{song.artist}</p>
                       </div>
@@ -2876,7 +2876,7 @@ function AISuggestionModal({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-fg text-sm leading-tight truncate">{song.title}</p>
-                          {song.is_classic && <span title="Clásico IBAMI" className="text-accent inline-flex items-center"><IconCrown size={12} /></span>}
+                          {song.is_classic && <span title="Clásico IBAMI" className="text-warm inline-flex items-center"><IconCrown size={12} /></span>}
                           {sMoment && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface text-accent border border-border flex-shrink-0">
                               {sMoment}
@@ -3034,7 +3034,7 @@ function SetlistSongPicker({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <p className="text-sm font-medium text-fg truncate">{song.title}</p>
-                  {song.is_classic && <span title="Clásico IBAMI" className="text-accent inline-flex items-center"><IconCrown size={12} /></span>}
+                  {song.is_classic && <span title="Clásico IBAMI" className="text-warm inline-flex items-center"><IconCrown size={12} /></span>}
                 </div>
                 <p className="text-xs text-fg-muted truncate">{song.artist} · <span className="capitalize">{song.tempo}</span></p>
               </div>
@@ -3990,7 +3990,7 @@ function AdminScreen({
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5">
                                 <p className="text-sm font-medium text-fg truncate">{song.title}</p>
-                                {song.is_classic && <span title="Clásico IBAMI" className="text-accent inline-flex items-center"><IconCrown size={12} /></span>}
+                                {song.is_classic && <span title="Clásico IBAMI" className="text-warm inline-flex items-center"><IconCrown size={12} /></span>}
                               </div>
                               <p className="text-xs text-fg-muted">{song.key} · {song.tempo} · {song.church_domain || 'Conocida'}</p>
                             </div>
