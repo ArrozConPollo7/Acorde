@@ -1,14 +1,29 @@
 import { supabase, isSupabaseConfigured } from './supabase'
 import { NOTION_SONGS } from './notionSongs'
 
-export type Instrument = 'guitarra' | 'piano' | 'bajo' | 'voz' | 'batería'
+export type Instrument =
+  | 'dirección'
+  | 'voz líder'
+  | 'voz de apoyo'
+  | 'piano'
+  | 'guitarra acústica'
+  | 'guitarra eléctrica'
+  | 'bajo'
+  | 'batería'
+  | 'percusión'
+  | 'saxofón'
+  | 'guitarra'
+  | 'voz'
+  | string
+
 export type Status = 'confirmado' | 'pendiente' | 'rechazado'
 export type Role = 'admin' | 'musician' | 'both'
 
 export interface Musician {
   id: string
   name: string
-  instrument: Instrument
+  instrument: string
+  secondary_instruments?: string[]
   initials: string
   email: string
   phone?: string
@@ -509,7 +524,8 @@ export async function fetchMusicians(): Promise<Musician[]> {
         const mapped = data.map(item => ({
           id: item.id,
           name: item.name,
-          instrument: item.instrument,
+          instrument: item.instrument || 'guitarra',
+          secondary_instruments: Array.isArray(item.secondary_instruments) ? item.secondary_instruments : [],
           initials: item.initials || item.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
           email: item.email || '',
           phone: item.phone || '',
@@ -528,12 +544,20 @@ export async function fetchMusicians(): Promise<Musician[]> {
   return INITIAL_MUSICIANS
 }
 
-export async function createMusician(musician: { name: string; instrument: Instrument; email: string; phone?: string; role?: Role }): Promise<Musician> {
+export async function createMusician(musician: {
+  name: string
+  instrument: string
+  secondary_instruments?: string[]
+  email: string
+  phone?: string
+  role?: Role
+}): Promise<Musician> {
   const initials = musician.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
   let created: Musician = {
     id: `m-${Date.now()}`,
     name: musician.name,
     instrument: musician.instrument,
+    secondary_instruments: musician.secondary_instruments || [],
     initials,
     email: musician.email,
     phone: musician.phone,
@@ -547,6 +571,7 @@ export async function createMusician(musician: { name: string; instrument: Instr
         .insert({
           name: musician.name,
           instrument: musician.instrument,
+          secondary_instruments: musician.secondary_instruments || [],
           initials,
           email: musician.email,
           phone: musician.phone || '',
@@ -560,11 +585,14 @@ export async function createMusician(musician: { name: string; instrument: Instr
           id: data.id,
           name: data.name,
           instrument: data.instrument,
+          secondary_instruments: Array.isArray(data.secondary_instruments) ? data.secondary_instruments : [],
           initials: data.initials || initials,
           email: data.email,
           phone: data.phone,
           role: data.role,
         }
+      } else if (error) {
+        console.error('Error creando músico en Supabase:', error)
       }
     } catch (err) {
       console.error('Error creando músico en Supabase:', err)
@@ -581,6 +609,7 @@ export async function updateMusician(id: string, updates: Partial<Musician>): Pr
     id,
     name: updates.name || '',
     instrument: updates.instrument || 'guitarra',
+    secondary_instruments: updates.secondary_instruments || [],
     initials: updates.name ? updates.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : 'IB',
     email: updates.email || '',
     phone: updates.phone,
@@ -595,6 +624,7 @@ export async function updateMusician(id: string, updates: Partial<Musician>): Pr
         payload.initials = updates.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
       }
       if (updates.instrument !== undefined) payload.instrument = updates.instrument
+      if (updates.secondary_instruments !== undefined) payload.secondary_instruments = updates.secondary_instruments
       if (updates.email !== undefined) payload.email = updates.email
       if (updates.phone !== undefined) payload.phone = updates.phone
       if (updates.role !== undefined) payload.role = updates.role
@@ -611,11 +641,14 @@ export async function updateMusician(id: string, updates: Partial<Musician>): Pr
           id: data.id,
           name: data.name,
           instrument: data.instrument,
+          secondary_instruments: Array.isArray(data.secondary_instruments) ? data.secondary_instruments : [],
           initials: data.initials,
           email: data.email,
           phone: data.phone,
           role: data.role,
         }
+      } else if (error) {
+        console.error('Error actualizando músico en Supabase:', error)
       }
     } catch (err) {
       console.error('Error actualizando músico en Supabase:', err)

@@ -37,6 +37,29 @@ type Screen = 'login' | 'calendar' | 'day-detail' | 'library' | 'song' | 'admin'
 type AIState = 'idle' | 'loading' | 'results' | 'error'
 type Theme = 'light' | 'dark'
 
+// ─── INSTRUMENTS & MINISTERIAL ROLES CATALOG ───────────────────────────────────
+
+export interface InstrumentOption {
+  id: string
+  label: string
+  category: 'Liderazgo & Voces' | 'Instrumentos de Banda'
+  short: string
+}
+
+export const AVAILABLE_INSTRUMENTS: InstrumentOption[] = [
+  { id: 'dirección', label: 'Dirección / Líder de Alabanza', category: 'Liderazgo & Voces', short: 'Director' },
+  { id: 'voz líder', label: 'Voz Líder (Principal)', category: 'Liderazgo & Voces', short: 'Voz Líder' },
+  { id: 'voz de apoyo', label: 'Voz de Apoyo (Coros)', category: 'Liderazgo & Voces', short: 'Coros' },
+  { id: 'piano', label: 'Piano / Teclado', category: 'Instrumentos de Banda', short: 'Piano' },
+  { id: 'guitarra acústica', label: 'Guitarra Acústica', category: 'Instrumentos de Banda', short: 'Guit. Acústica' },
+  { id: 'guitarra eléctrica', label: 'Guitarra Eléctrica', category: 'Instrumentos de Banda', short: 'Guit. Eléctrica' },
+  { id: 'bajo', label: 'Bajo Eléctrico', category: 'Instrumentos de Banda', short: 'Bajo' },
+  { id: 'batería', label: 'Batería', category: 'Instrumentos de Banda', short: 'Batería' },
+  { id: 'percusión', label: 'Percusión / Pads / Secuencias', category: 'Instrumentos de Banda', short: 'Percusión' },
+  { id: 'saxofón', label: 'Saxofón / Vientos', category: 'Instrumentos de Banda', short: 'Saxofón' },
+  { id: 'otros', label: 'Otros Instrumentos', category: 'Instrumentos de Banda', short: 'Otros' },
+]
+
 // ─── CHORD TRANSPOSITION ─────────────────────────────────────────────────────
 
 const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -160,6 +183,14 @@ function IconUser({ size = 20 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
+    </svg>
+  )
+}
+
+function IconCrown({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
     </svg>
   )
 }
@@ -339,12 +370,15 @@ function IconMail({ size = 14 }: { size?: number }) {
   )
 }
 
-const INST_ICON: Record<Instrument, ReactNode> = {
-  guitarra: <IconGuitar size={13} />,
-  piano: <IconPiano size={13} />,
-  bajo: <IconGuitar size={13} />,
-  voz: <IconMic size={13} />,
-  batería: <IconDrum size={13} />,
+function getInstrumentIcon(inst: string = '', size = 13): ReactNode {
+  const norm = inst.toLowerCase()
+  if (norm.includes('direc') || norm.includes('líder') || norm.includes('lider')) return <IconCrown size={size} />
+  if (norm.includes('voz') || norm.includes('coro') || norm.includes('canto')) return <IconMic size={size} />
+  if (norm.includes('piano') || norm.includes('teclado') || norm.includes('synth')) return <IconPiano size={size} />
+  if (norm.includes('guit') || norm.includes('acústica') || norm.includes('eléctrica')) return <IconGuitar size={size} />
+  if (norm.includes('bajo')) return <IconGuitar size={size} />
+  if (norm.includes('bater') || norm.includes('percu') || norm.includes('pad')) return <IconDrum size={size} />
+  return <IconMusic size={size} />
 }
 
 // ─── THEME TOGGLE ─────────────────────────────────────────────────────────────
@@ -383,11 +417,25 @@ function StatusBadge({ status }: { status: Status }) {
   )
 }
 
-function InstrumentChip({ instrument }: { instrument: Instrument }) {
+function InstrumentChip({ instrument, isPrimary = true }: { instrument: string; isPrimary?: boolean }) {
+  const isLeader = instrument.toLowerCase().includes('direc') || instrument.toLowerCase().includes('líder')
+  const isVocalLead = instrument.toLowerCase().includes('voz líder')
+
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-surface-2 text-fg-muted border border-border">
-      <span className="text-fg-subtle">{INST_ICON[instrument]}</span>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border transition-colors ${
+        isPrimary
+          ? isLeader
+            ? 'px-2.5 py-0.5 text-xs font-bold bg-surface-2 text-accent border-accent/40 shadow-xs'
+            : isVocalLead
+            ? 'px-2.5 py-0.5 text-xs font-semibold bg-surface-2 text-fg border-border'
+            : 'px-2.5 py-0.5 text-xs font-medium bg-surface-2 text-fg border-border'
+          : 'px-2 py-0.5 text-[10px] font-medium bg-surface-3 text-fg-muted border-border/60'
+      }`}
+    >
+      <span className={isLeader ? 'text-accent' : 'text-fg-subtle'}>{getInstrumentIcon(instrument, 12)}</span>
       <span className="capitalize text-fg">{instrument}</span>
+      {isPrimary && <span className="text-[9px] text-accent font-bold ml-0.5">★</span>}
     </span>
   )
 }
@@ -923,7 +971,6 @@ function LoginScreen({
     const matched = findMusicianByIdentifier(trimmed, musicians)
 
     if (matched) {
-      // Guardar en la memoria local de este dispositivo
       try {
         const next = [matched, ...savedAccounts.filter(a => a.id !== matched.id)].slice(0, 5)
         localStorage.setItem('acorde_saved_device_accounts', JSON.stringify(next))
@@ -931,11 +978,11 @@ function LoginScreen({
       onLogin(matched)
     } else {
       if (musicians.length === 0) {
-        // Si la base de datos está recién iniciada
         const firstAdmin: Musician = {
           id: `m-${Date.now()}`,
           name: trimmed.includes('@') ? trimmed.split('@')[0] : 'Líder de Alabanza',
-          instrument: 'guitarra',
+          instrument: 'dirección',
+          secondary_instruments: ['voz líder'],
           initials: 'LA',
           email: trimmed.includes('@') ? trimmed : 'pastor@ibami.org',
           phone: !trimmed.includes('@') ? trimmed : '+57 300 000 0000',
@@ -1039,7 +1086,7 @@ function LoginScreen({
   )
 }
 
-// ─── PROFILE SCREEN (CON MULTI-ROL Y EDICIÓN) ──────────────────────────────────
+// ─── PROFILE SCREEN (CON MULTI-INSTRUMENTO Y MULTI-ROL) ───────────────────────
 
 function ProfileScreen({
   musician,
@@ -1062,11 +1109,19 @@ function ProfileScreen({
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(musician.name)
-  const [instrument, setInstrument] = useState<Instrument>(musician.instrument)
+  const [instrument, setInstrument] = useState<string>(musician.instrument || 'guitarra')
+  const [secondaries, setSecondaries] = useState<string[]>(musician.secondary_instruments || [])
   const [email, setEmail] = useState(musician.email)
   const [phone, setPhone] = useState(musician.phone || '')
   const [isMusicianRole, setIsMusicianRole] = useState(hasRole(musician, 'musician'))
   const [isAdminRole, setIsAdminRole] = useState(hasRole(musician, 'admin'))
+
+  function toggleSecondary(instId: string) {
+    if (instId === instrument) return
+    setSecondaries(prev =>
+      prev.includes(instId) ? prev.filter(i => i !== instId) : [...prev, instId]
+    )
+  }
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -1074,6 +1129,7 @@ function ProfileScreen({
     onUpdateMusician({
       name: name.trim(),
       instrument,
+      secondary_instruments: secondaries.filter(i => i !== instrument),
       email: email.trim(),
       phone: phone.trim(),
       role: computedRole,
@@ -1109,11 +1165,29 @@ function ProfileScreen({
 
             <h2 className="font-display text-2xl text-fg tracking-wide">{musician.name}</h2>
             <div className="flex items-center gap-2 mt-2">
-              <InstrumentChip instrument={musician.instrument} />
               <RoleBadges role={musician.role} />
             </div>
 
-            <div className="w-full flex flex-col gap-2.5 mt-6 pt-6 border-t border-border text-left text-xs">
+            {/* Instrumento Principal y Secundarios */}
+            <div className="w-full flex flex-col items-center gap-2 mt-4 pt-4 border-t border-border">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-fg-muted font-medium">Principal:</span>
+                <InstrumentChip instrument={musician.instrument} isPrimary={true} />
+              </div>
+
+              {musician.secondary_instruments && musician.secondary_instruments.length > 0 && (
+                <div className="flex flex-col items-center gap-1 mt-1">
+                  <span className="text-[10px] text-fg-subtle uppercase tracking-wider font-semibold">Instrumentos Secundarios:</span>
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {musician.secondary_instruments.map(sec => (
+                      <InstrumentChip key={sec} instrument={sec} isPrimary={false} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full flex flex-col gap-2.5 mt-5 pt-4 border-t border-border text-left text-xs">
               <div className="flex items-center gap-2.5 text-fg-muted">
                 <IconMail size={14} />
                 <span className="truncate text-fg">{musician.email || 'Sin correo'}</span>
@@ -1125,11 +1199,20 @@ function ProfileScreen({
             </div>
 
             <button
-              onClick={() => setIsEditing(true)}
+              onClick={() => {
+                setName(musician.name)
+                setInstrument(musician.instrument || 'guitarra')
+                setSecondaries(musician.secondary_instruments || [])
+                setEmail(musician.email)
+                setPhone(musician.phone || '')
+                setIsMusicianRole(hasRole(musician, 'musician'))
+                setIsAdminRole(hasRole(musician, 'admin'))
+                setIsEditing(true)
+              }}
               className="w-full mt-6 py-3 rounded-xl text-fg bg-surface-2 hover:bg-surface-3 border border-border font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
             >
               <IconEdit size={14} />
-              Editar Información
+              Editar Información & Habilidades
             </button>
           </div>
 
@@ -1170,15 +1253,15 @@ function ProfileScreen({
           </div>
         </div>
 
-        {/* Modal para Editar Perfil */}
+        {/* Modal para Editar Perfil y Multi-Instrumentos */}
         {isEditing && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setIsEditing(false)} />
-            <div className="relative w-full max-w-md rounded-3xl bg-surface border border-border p-6 shadow-2xl">
-              <h3 className="font-display text-xl text-fg tracking-wide mb-4">EDITAR PERFIL</h3>
+            <div className="relative w-full max-w-lg rounded-3xl bg-surface border border-border p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <h3 className="font-display text-xl text-fg tracking-wide mb-4">EDITAR PERFIL & INSTRUMENTOS</h3>
               <form onSubmit={handleSave} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-fg-muted uppercase">Nombre</label>
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Nombre Completo</label>
                   <input
                     type="text"
                     required
@@ -1187,18 +1270,60 @@ function ProfileScreen({
                     className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                   />
                 </div>
+
+                {/* Instrumento Principal */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-fg-muted uppercase">Instrumento Principal</label>
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Instrumento / Rol Principal *</label>
                   <select
                     value={instrument}
-                    onChange={e => setInstrument(e.target.value as Instrument)}
+                    onChange={e => {
+                      const newPri = e.target.value
+                      setInstrument(newPri)
+                      setSecondaries(prev => prev.filter(i => i !== newPri))
+                    }}
                     className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
                   >
-                    {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(inst => (
-                      <option key={inst} value={inst}>{inst}</option>
-                    ))}
+                    <optgroup label="👑 Liderazgo & Voces">
+                      {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Liderazgo & Voces').map(inst => (
+                        <option key={inst.id} value={inst.id}>{inst.label}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🎸 Instrumentos de Banda">
+                      {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Instrumentos de Banda').map(inst => (
+                        <option key={inst.id} value={inst.id}>{inst.label}</option>
+                      ))}
+                    </optgroup>
                   </select>
                 </div>
+
+                {/* Instrumentos Secundarios */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-fg-muted uppercase">Instrumentos Secundarios / Otras habilidades</label>
+                    <span className="text-[10px] text-fg-subtle">Toca varios</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 p-3 rounded-2xl bg-surface-2 border border-border max-h-44 overflow-y-auto">
+                    {AVAILABLE_INSTRUMENTS.filter(i => i.id !== instrument).map(opt => {
+                      const isSelected = secondaries.includes(opt.id)
+                      return (
+                        <button
+                          type="button"
+                          key={opt.id}
+                          onClick={() => toggleSecondary(opt.id)}
+                          className={`px-2.5 py-2 rounded-xl text-xs font-medium border flex items-center justify-between gap-1 transition cursor-pointer ${
+                            isSelected
+                              ? 'bg-accent text-accent-fg border-accent font-semibold shadow-xs'
+                              : 'bg-surface text-fg-muted border-border hover:text-fg'
+                          }`}
+                        >
+                          <span className="truncate">{opt.short}</span>
+                          <span>{isSelected ? '✓' : '+'}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-fg-muted uppercase">Correo Electrónico</label>
                   <input
@@ -1477,8 +1602,33 @@ function DayDetailScreen({
   onToggleTheme: () => void
 }) {
   const date = new Date(event.date + 'T12:00:00')
-  const instruments: Instrument[] = ['voz', 'guitarra', 'piano', 'bajo', 'batería']
   const myEntry = roster.find(r => r.mid === currentUser.id)
+
+  // Agrupación litúrgica del equipo
+  const ministryGroups = useMemo(() => {
+    const leadership: typeof roster = []
+    const vocals: typeof roster = []
+    const band: typeof roster = []
+
+    roster.forEach(entry => {
+      const m = musicians.find(x => x.id === entry.mid)
+      if (!m) return
+      const inst = (m.instrument || '').toLowerCase()
+      if (inst.includes('direc') || inst.includes('líder') || inst.includes('lider')) {
+        leadership.push(entry)
+      } else if (inst.includes('voz') || inst.includes('coro')) {
+        vocals.push(entry)
+      } else {
+        band.push(entry)
+      }
+    })
+
+    return [
+      { title: 'Dirección de Alabanza', icon: <IconCrown size={15} />, entries: leadership },
+      { title: 'Equipo Vocal', icon: <IconMic size={15} />, entries: vocals },
+      { title: 'Banda & Músicos', icon: <IconGuitar size={15} />, entries: band },
+    ].filter(g => g.entries.length > 0)
+  }, [roster, musicians])
 
   return (
     <div className="min-h-screen bg-bg text-fg pb-12">
@@ -1575,37 +1725,41 @@ function DayDetailScreen({
             </div>
           </div>
 
-          {/* Columna Derecha: Músicos Asignados */}
+          {/* Columna Derecha: Músicos Asignados Agrupados por Ministerio */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO ASIGNADO</h2>
             <div className="flex flex-col gap-3">
-              {instruments.map(inst => {
-                const entries = roster.filter(r => musicians.find(x => x.id === r.mid)?.instrument === inst)
-                if (entries.length === 0) return null
-                return (
-                  <div key={inst} className="rounded-3xl p-5 bg-surface border border-border shadow-xs">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-fg-subtle">{INST_ICON[inst]}</span>
-                      <span className="text-xs font-semibold text-fg-muted uppercase tracking-wider">{inst}</span>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      {entries.map(({ mid, status }) => {
-                        const m = musicians.find(x => x.id === mid)
-                        if (!m) return null
-                        return (
-                          <div key={mid} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                              <Avatar initials={m.initials} size="sm" />
-                              <span className="text-sm font-medium text-fg">{m.name}</span>
-                            </div>
-                            <StatusBadge status={status} />
-                          </div>
-                        )
-                      })}
-                    </div>
+              {ministryGroups.map(group => (
+                <div key={group.title} className="rounded-3xl p-5 bg-surface border border-border shadow-xs">
+                  <div className="flex items-center gap-2 mb-3.5 pb-2 border-b border-border">
+                    <span className="text-accent">{group.icon}</span>
+                    <span className="text-xs font-bold text-fg uppercase tracking-wider">{group.title}</span>
                   </div>
-                )
-              })}
+                  <div className="flex flex-col gap-3">
+                    {group.entries.map(({ mid, status }) => {
+                      const m = musicians.find(x => x.id === mid)
+                      if (!m) return null
+                      return (
+                        <div key={mid} className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <Avatar initials={m.initials} size="sm" />
+                            <div className="min-w-0">
+                              <span className="text-sm font-semibold text-fg block truncate">{m.name}</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                <InstrumentChip instrument={m.instrument} isPrimary={true} />
+                                {m.secondary_instruments && m.secondary_instruments.slice(0, 2).map(sec => (
+                                  <InstrumentChip key={sec} instrument={sec} isPrimary={false} />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <StatusBadge status={status} />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1661,7 +1815,6 @@ function LibraryScreen({
   return (
     <div className="min-h-screen bg-bg text-fg pb-12">
       <div className="max-w-6xl mx-auto px-4 lg:px-8 pt-6">
-        {/* Cabecera del Repertorio */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="font-display text-3xl text-fg tracking-wide">REPERTORIO OFICIAL</h1>
@@ -1695,9 +1848,7 @@ function LibraryScreen({
           </div>
         </div>
 
-        {/* Filtros Desplegables Elegantes */}
         <div className="bg-surface border border-border rounded-2xl p-4 mb-6 shadow-xs flex flex-wrap items-center gap-3">
-          {/* Desplegable Tempo */}
           <div className="flex-1 min-w-[140px]">
             <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Tempo</label>
             <select
@@ -1712,7 +1863,6 @@ function LibraryScreen({
             </select>
           </div>
 
-          {/* Desplegable Tonalidad */}
           <div className="flex-1 min-w-[130px]">
             <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Tono Original</label>
             <select
@@ -1727,7 +1877,6 @@ function LibraryScreen({
             </select>
           </div>
 
-          {/* Desplegable Categoría / Temática */}
           <div className="flex-1 min-w-[180px]">
             <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Categoría</label>
             <select
@@ -1742,7 +1891,6 @@ function LibraryScreen({
             </select>
           </div>
 
-          {/* Botón Limpiar Filtros */}
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
@@ -1754,7 +1902,6 @@ function LibraryScreen({
           )}
         </div>
 
-        {/* Cuadrícula de Canciones */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(song => (
             <button
@@ -1762,7 +1909,6 @@ function LibraryScreen({
               onClick={() => onSongSelect(song.id)}
               className="rounded-3xl p-5 flex items-center gap-4 text-left active:scale-[0.99] transition-all bg-surface border border-border hover:border-border-hover shadow-xs cursor-pointer group"
             >
-              {/* Badge con Tono y Primera Letra */}
               <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-border flex flex-col items-center justify-center flex-shrink-0 group-hover:border-accent transition-colors shadow-xs">
                 <span className="font-display text-fg font-bold text-base tracking-wide leading-none">{song.key}</span>
                 <span className="text-[10px] text-fg-muted uppercase font-bold mt-0.5 leading-none opacity-80">{song.title.charAt(0)}</span>
@@ -1851,7 +1997,6 @@ function SongViewScreen({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Controlador de Transposición */}
             <div className="flex items-center justify-between rounded-2xl p-4 bg-surface-2 border border-border">
               <span className="text-fg-muted text-xs font-semibold uppercase tracking-wider">Transposición</span>
               <div className="flex items-center gap-3">
@@ -1873,7 +2018,6 @@ function SongViewScreen({
               </div>
             </div>
 
-            {/* Selector de Instrumento */}
             <div className="flex gap-1 p-1 rounded-2xl bg-surface-2 border border-border items-center">
               {INSTRUMENTS_TABS.map(inst => (
                 <button
@@ -1885,7 +2029,7 @@ function SongViewScreen({
                       : 'text-fg-muted hover:text-fg'
                   }`}
                 >
-                  {INST_ICON[inst]}
+                  {getInstrumentIcon(inst)}
                   <span className="capitalize">{inst}</span>
                 </button>
               ))}
@@ -1893,7 +2037,6 @@ function SongViewScreen({
           </div>
         </div>
 
-        {/* Partitura / Hoja de Acordes y Letras */}
         <div className="rounded-3xl p-6 md:p-10 font-mono text-sm md:text-base bg-surface border border-border shadow-xs leading-relaxed">
           {transposedLyrics.map((line, li) => (
             <div key={li} className={li > 0 ? 'mt-6' : ''}>
@@ -1914,7 +2057,6 @@ function SongViewScreen({
           ))}
         </div>
 
-        {/* Acciones de la canción */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
           <button
             onClick={onEdit}
@@ -2032,7 +2174,6 @@ function AISuggestionModal({
               </button>
             </div>
 
-            {/* Opciones de filtro litúrgico */}
             <div className="grid grid-cols-2 gap-2">
               <select
                 value={moment}
@@ -2150,7 +2291,7 @@ function AISuggestionModal({
   )
 }
 
-// ─── SETLIST SONG PICKER (CON FILTROS Y PAGINACIÓN CONFIGURABLE) ───────────────
+// ─── SETLIST SONG PICKER ──────────────────────────────────────────────────────
 
 function SetlistSongPicker({
   songs,
@@ -2214,7 +2355,6 @@ function SetlistSongPicker({
         </div>
       </div>
 
-      {/* Controles de búsqueda y filtros */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="sm:col-span-1 relative">
           <input
@@ -2251,7 +2391,6 @@ function SetlistSongPicker({
         </div>
       </div>
 
-      {/* Lista de canciones paginadas */}
       <div className="flex flex-col gap-2">
         {paginatedSongs.map(song => {
           const isAdded = currentSetlist.includes(song.id)
@@ -2290,7 +2429,6 @@ function SetlistSongPicker({
         })}
       </div>
 
-      {/* Paginador */}
       <div className="flex items-center justify-between pt-2 border-t border-border">
         <button
           onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -2316,7 +2454,7 @@ function SetlistSongPicker({
   )
 }
 
-// ─── ADMIN SCREEN (CON GESTIÓN MULTI-ROL Y PROGRAMACIÓN) ─────────────────────────
+// ─── ADMIN SCREEN (CON GESTIÓN MULTI-INSTRUMENTOS Y MULTI-ROL) ─────────────────
 
 type AdminTab = 'usuarios' | 'programación' | 'setlist'
 
@@ -2343,7 +2481,7 @@ function AdminScreen({
   onDaySelect: (date: string) => void
   adminSetlist: string[]
   setAdminSetlist: (sl: string[]) => void
-  onAddMusician: (m: { name: string; instrument: Instrument; email: string; phone?: string; role?: Role }) => void
+  onAddMusician: (m: { name: string; instrument: string; secondary_instruments?: string[]; email: string; phone?: string; role?: Role }) => void
   onEditMusician: (id: string, updates: Partial<Musician>) => void
   onDeleteMusician: (id: string) => void
   onAddService: (ev: ServiceEvent) => void
@@ -2360,7 +2498,8 @@ function AdminScreen({
   // Estado para gestión de músicos
   const [musicianModal, setMusicianModal] = useState<{ mode: 'create' | 'edit'; musician?: Musician } | null>(null)
   const [musicianName, setMusicianName] = useState('')
-  const [musicianInst, setMusicianInst] = useState<Instrument>('guitarra')
+  const [musicianInst, setMusicianInst] = useState<string>('voz líder')
+  const [musicianSecondaries, setMusicianSecondaries] = useState<string[]>([])
   const [musicianEmail, setMusicianEmail] = useState('')
   const [musicianPhone, setMusicianPhone] = useState('')
   const [musicianIsMusician, setMusicianIsMusician] = useState(true)
@@ -2375,9 +2514,17 @@ function AdminScreen({
 
   const event = events.find(e => e.date === selectedAdminDate)
 
+  function toggleSecondary(instId: string) {
+    if (instId === musicianInst) return
+    setMusicianSecondaries(prev =>
+      prev.includes(instId) ? prev.filter(i => i !== instId) : [...prev, instId]
+    )
+  }
+
   function openCreateMusician() {
     setMusicianName('')
-    setMusicianInst('guitarra')
+    setMusicianInst('voz líder')
+    setMusicianSecondaries([])
     setMusicianEmail('')
     setMusicianPhone('')
     setMusicianIsMusician(true)
@@ -2387,7 +2534,8 @@ function AdminScreen({
 
   function openEditMusician(m: Musician) {
     setMusicianName(m.name)
-    setMusicianInst(m.instrument)
+    setMusicianInst(m.instrument || 'guitarra')
+    setMusicianSecondaries(m.secondary_instruments || [])
     setMusicianEmail(m.email)
     setMusicianPhone(m.phone || '')
     setMusicianIsMusician(hasRole(m, 'musician'))
@@ -2409,6 +2557,7 @@ function AdminScreen({
       onAddMusician({
         name: musicianName.trim(),
         instrument: musicianInst,
+        secondary_instruments: musicianSecondaries.filter(i => i !== musicianInst),
         email: musicianEmail.trim() || `${musicianName.toLowerCase().replace(/\s+/g, '.')}@ibami.org`,
         phone: musicianPhone.trim(),
         role: computedRole,
@@ -2417,6 +2566,7 @@ function AdminScreen({
       onEditMusician(musicianModal.musician.id, {
         name: musicianName.trim(),
         instrument: musicianInst,
+        secondary_instruments: musicianSecondaries.filter(i => i !== musicianInst),
         email: musicianEmail.trim(),
         phone: musicianPhone.trim(),
         role: computedRole,
@@ -2499,11 +2649,11 @@ function AdminScreen({
         />
       )}
 
-      {/* Modal Crear / Editar Músico con Multi-Rol */}
+      {/* Modal Crear / Editar Músico con Multi-Instrumentos y Multi-Rol */}
       {musicianModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setMusicianModal(null)} />
-          <div className="relative w-full max-w-md rounded-3xl bg-surface border border-border p-6 shadow-2xl">
+          <div className="relative w-full max-w-lg rounded-3xl bg-surface border border-border p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-display text-xl text-fg tracking-wide mb-4">
               {musicianModal.mode === 'create' ? 'REGISTRAR INTEGRANTE' : 'EDITAR INTEGRANTE'}
             </h3>
@@ -2519,17 +2669,58 @@ function AdminScreen({
                   className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                 />
               </div>
+
+              {/* Instrumento / Rol Principal */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-fg-muted uppercase">Instrumento Principal</label>
+                <label className="text-xs font-semibold text-fg-muted uppercase">Instrumento / Rol Principal *</label>
                 <select
                   value={musicianInst}
-                  onChange={e => setMusicianInst(e.target.value as Instrument)}
-                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
+                  onChange={e => {
+                    const newPri = e.target.value
+                    setMusicianInst(newPri)
+                    setMusicianSecondaries(prev => prev.filter(i => i !== newPri))
+                  }}
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
                 >
-                  {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(i => (
-                    <option key={i} value={i}>{i}</option>
-                  ))}
+                  <optgroup label="👑 Liderazgo & Voces">
+                    {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Liderazgo & Voces').map(inst => (
+                      <option key={inst.id} value={inst.id}>{inst.label}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="🎸 Instrumentos de Banda">
+                    {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Instrumentos de Banda').map(inst => (
+                      <option key={inst.id} value={inst.id}>{inst.label}</option>
+                    ))}
+                  </optgroup>
                 </select>
+              </div>
+
+              {/* Instrumentos / Habilidades Secundarias */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Instrumentos Secundarios (Toca más de uno)</label>
+                  <span className="text-[10px] text-fg-subtle">Habilidades adicionales</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 p-3 rounded-2xl bg-surface-2 border border-border max-h-44 overflow-y-auto">
+                  {AVAILABLE_INSTRUMENTS.filter(i => i.id !== musicianInst).map(opt => {
+                    const isSelected = musicianSecondaries.includes(opt.id)
+                    return (
+                      <button
+                        type="button"
+                        key={opt.id}
+                        onClick={() => toggleSecondary(opt.id)}
+                        className={`px-2.5 py-2 rounded-xl text-xs font-medium border flex items-center justify-between gap-1 transition cursor-pointer ${
+                          isSelected
+                            ? 'bg-accent text-accent-fg border-accent font-semibold shadow-xs'
+                            : 'bg-surface text-fg-muted border-border hover:text-fg'
+                        }`}
+                      >
+                        <span className="truncate">{opt.short}</span>
+                        <span>{isSelected ? '✓' : '+'}</span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
 
               {/* Checkboxes de Roles Multiples */}
@@ -2750,15 +2941,15 @@ function AdminScreen({
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO DE MÚSICOS</h2>
-                <p className="text-xs text-fg-muted">{musicians.length} {musicians.length === 1 ? 'músico registrado' : 'músicos registrados'}</p>
+                <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO DE MÚSICOS & VOCES</h2>
+                <p className="text-xs text-fg-muted">{musicians.length} {musicians.length === 1 ? 'integrante registrado' : 'integrantes registrados'}</p>
               </div>
               <button
                 onClick={openCreateMusician}
                 className="text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-4 py-2 rounded-xl flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer shadow-xs"
               >
                 <IconPlus size={13} />
-                Agregar Músico
+                Agregar Integrante
               </button>
             </div>
 
@@ -2768,45 +2959,54 @@ function AdminScreen({
                   <IconUser size={26} />
                 </div>
                 <div>
-                  <p className="font-semibold text-fg text-base">No hay músicos registrados</p>
-                  <p className="text-xs text-fg-muted mt-1">Has eliminado todos los músicos. Pulsa abajo para registrar un nuevo integrante.</p>
+                  <p className="font-semibold text-fg text-base">No hay integrantes registrados</p>
+                  <p className="text-xs text-fg-muted mt-1">Pulsa abajo para registrar el primer músico o vocalista del equipo.</p>
                 </div>
                 <button
                   onClick={openCreateMusician}
                   className="mt-2 text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <IconPlus size={13} />
-                  Agregar Músico
+                  Agregar Integrante
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {musicians.map(m => (
                   <div key={m.id} className="rounded-3xl p-5 flex items-start justify-between bg-surface border border-border shadow-xs">
-                    <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="flex items-start gap-3.5 min-w-0">
                       <Avatar initials={m.initials} size="md" />
                       <div className="min-w-0">
                         <p className="font-semibold text-fg text-sm truncate">{m.name}</p>
                         <p className="text-xs text-fg-muted truncate">{m.email || m.phone || 'Sin contacto'}</p>
-                        <div className="mt-2 flex items-center gap-1.5">
-                          <InstrumentChip instrument={m.instrument} />
+                        
+                        {/* Instrumento Principal & Secundarios */}
+                        <div className="mt-2 flex flex-wrap gap-1 items-center">
+                          <InstrumentChip instrument={m.instrument} isPrimary={true} />
                           <RoleBadges role={m.role} />
                         </div>
+                        {m.secondary_instruments && m.secondary_instruments.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1 items-center">
+                            {m.secondary_instruments.map(sec => (
+                              <InstrumentChip key={sec} instrument={sec} isPrimary={false} />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         onClick={() => openEditMusician(m)}
                         className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
-                        title="Editar Músico"
+                        title="Editar Integrante"
                       >
                         <IconEdit size={14} />
                       </button>
                       <button
                         onClick={() => onDeleteMusician(m.id)}
                         className="w-8 h-8 rounded-lg text-fg-muted hover:text-accent bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
-                        title="Eliminar Músico"
+                        title="Eliminar Integrante"
                       >
                         <IconTrash size={13} />
                       </button>
@@ -2958,7 +3158,6 @@ function AdminScreen({
               )}
             </div>
 
-            {/* Componente de búsqueda y selección paginada de canciones */}
             <div className="lg:col-span-6 bg-surface border border-border rounded-3xl p-5 shadow-xs">
               <SetlistSongPicker
                 songs={songs}
@@ -3022,7 +3221,6 @@ export default function App() {
         if (Array.isArray(loadedMusicians)) {
           setMusicians(loadedMusicians)
 
-          // Restaurar sesión activa si existe en localStorage
           const savedUserId = localStorage.getItem('acorde_logged_user_id')
           if (savedUserId) {
             const found = loadedMusicians.find(m => m.id === savedUserId)
@@ -3073,7 +3271,8 @@ export default function App() {
   const defaultUser: Musician = useMemo(() => ({
     id: 'user-default',
     name: 'Integrante IBAMI',
-    instrument: 'guitarra',
+    instrument: 'dirección',
+    secondary_instruments: ['voz líder'],
     initials: 'IB',
     email: 'pastor@ibami.org',
     phone: '+57 300 000 0000',
@@ -3111,7 +3310,14 @@ export default function App() {
     await updateAttendanceStatus(selectedDate, mid, status)
   }
 
-  async function handleAddMusician(m: { name: string; instrument: Instrument; email: string; phone?: string; role?: Role }) {
+  async function handleAddMusician(m: {
+    name: string
+    instrument: string
+    secondary_instruments?: string[]
+    email: string
+    phone?: string
+    role?: Role
+  }) {
     const created = await createMusician(m)
     setMusicians(prev => [...prev, created])
   }

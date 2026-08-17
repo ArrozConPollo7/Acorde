@@ -9,7 +9,8 @@ create extension if not exists "uuid-ossp";
 create table if not exists public.profiles (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  instrument text not null check (instrument in ('guitarra', 'piano', 'bajo', 'voz', 'batería')),
+  instrument text not null default 'guitarra',
+  secondary_instruments text[] not null default '{}',
   initials text not null,
   role text not null check (role in ('admin', 'musician', 'both')) default 'musician',
   email text,
@@ -18,9 +19,11 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
--- Asegurar constraint de multi-rol en tablas existentes
+-- Asegurar constraints flexibles en tablas existentes
+alter table public.profiles drop constraint if exists profiles_instrument_check;
 alter table public.profiles drop constraint if exists profiles_role_check;
 alter table public.profiles add constraint profiles_role_check check (role in ('admin', 'musician', 'both'));
+alter table public.profiles add column if not exists secondary_instruments text[] default '{}';
 
 -- 3. TABLA: songs (Repertorio de Canciones de IBAMI)
 create table if not exists public.songs (
