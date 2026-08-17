@@ -5,7 +5,17 @@
 -- 1. EXTENSIONS
 create extension if not exists "uuid-ossp";
 
--- 2. TABLA: profiles (Usuarios / Músicos del Ministerio)
+-- 2. ELIMINAR POLÍTICAS ANTERIORES QUE PUEDAN BLOQUEAR CAMBIOS DE COLUMNA
+do $$
+declare
+  r record;
+begin
+  for r in (select schemaname, tablename, policyname from pg_policies where schemaname = 'public') loop
+    execute format('drop policy if exists %I on %I.%I;', r.policyname, r.schemaname, r.tablename);
+  end loop;
+end $$;
+
+-- 3. TABLA: profiles (Usuarios / Músicos del Ministerio)
 create table if not exists public.profiles (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -26,7 +36,7 @@ alter table public.profiles drop constraint if exists profiles_role_check;
 alter table public.profiles alter column id set default gen_random_uuid();
 alter table public.profiles add column if not exists secondary_instruments text[] default '{}';
 
--- 3. TABLA: songs (Repertorio de Canciones)
+-- 4. TABLA: songs (Repertorio de Canciones)
 create table if not exists public.songs (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -54,7 +64,7 @@ alter table public.songs add column if not exists musical_type text default 'Wor
 alter table public.songs add column if not exists technical_complexity text default 'Básica';
 alter table public.songs add column if not exists is_classic boolean default false;
 
--- 4. TABLA: service_events (Servicios y Programación)
+-- 5. TABLA: service_events (Servicios y Programación)
 create table if not exists public.service_events (
   id uuid primary key default gen_random_uuid(),
   date date not null unique,
@@ -68,7 +78,7 @@ create table if not exists public.service_events (
 alter table public.service_events drop constraint if exists service_events_type_check;
 alter table public.service_events alter column id set default gen_random_uuid();
 
--- 5. TABLA: service_roster (Asignación de Músicos a Servicios)
+-- 6. TABLA: service_roster (Asignación de Músicos a Servicios)
 create table if not exists public.service_roster (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.service_events(id) on delete cascade,
@@ -85,7 +95,7 @@ alter table public.service_roster alter column user_id type text;
 alter table public.service_roster add column if not exists instrument text;
 alter table public.service_roster add column if not exists secondary_instruments text[] default '{}';
 
--- 6. TABLA: service_setlists (Canciones programadas por Servicio)
+-- 7. TABLA: service_setlists (Canciones programadas por Servicio)
 create table if not exists public.service_setlists (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.service_events(id) on delete cascade,
@@ -100,7 +110,7 @@ create table if not exists public.service_setlists (
 alter table public.service_setlists drop constraint if exists service_setlists_song_id_fkey;
 alter table public.service_setlists alter column song_id type text;
 
--- 7. ACCESO Y PERMISOS COMPLETOS
+-- 8. DESACTIVAR RLS Y OTORGAR ACCESO TOTAL
 alter table public.profiles disable row level security;
 alter table public.songs disable row level security;
 alter table public.service_events disable row level security;
