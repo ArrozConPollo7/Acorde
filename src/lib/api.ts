@@ -604,43 +604,64 @@ interface ThematicCategory {
 }
 
 const THEMATIC_KNOWLEDGE_BASE: Record<string, ThematicCategory> = {
-  gracia: {
-    keywords: ['gracia', 'perdon', 'favor', 'cruz', 'calvario', 'justificacion', 'sangre', 'redencion', 'rescate', 'libertad', 'pecado'],
+  gracia_cruz: {
+    keywords: ['gracia', 'perdon', 'cruz', 'calvario', 'justificacion', 'sangre', 'redencion', 'rescate', 'libertad', 'pecado', 'cordero', 'salvacion', 'romanos 5', 'romanos 8', 'efesios 2'],
     moment: 'Adoración',
-    description: 'Enfatiza el favor inmerecido y la obra redentora de Cristo en la cruz, preparando el corazón para el mensaje del evangelio.',
+    description: 'Enfatiza el favor inmerecido y la obra expiatoria de Cristo en la cruz, preparando a la congregación para recibir el mensaje del evangelio.',
   },
-  fidelidad: {
-    keywords: ['fidelidad', 'fiel', 'promesas', 'esperanza', 'confianza', 'roca', 'refugio', 'torre', 'seguridad', 'paz', 'tormenta', 'duda'],
+  fidelidad_paz: {
+    keywords: ['fidelidad', 'fiel', 'promesas', 'esperanza', 'confianza', 'roca', 'refugio', 'torre', 'seguridad', 'paz', 'tormenta', 'duda', 'salmo 23', 'salmo 91', 'descanso'],
     moment: 'Adoración',
-    description: 'Afirma la certeza en las promesas y el carácter inmutable de Dios ante momentos de prueba o aflicción.',
+    description: 'Afirma el reposo en las promesas y el carácter inmutable del Señor frente a tiempos de prueba, aflicción o incertidumbre.',
   },
-  santidad: {
-    keywords: ['santo', 'santidad', 'gloria', 'majestad', 'trono', 'exaltacion', 'rey', 'soberano', 'digno', 'honra', 'reyes', 'cordero'],
+  santidad_gloria: {
+    keywords: ['santo', 'santidad', 'gloria', 'majestad', 'trono', 'exaltacion', 'rey', 'soberano', 'digno', 'honra', 'reyes', 'isaias 6', 'apocalipsis 4', 'temor'],
     moment: 'Adoración',
-    description: 'Eleva una proclamación teocéntrica sobre la majestad y perfección absoluta de Dios en su trono celestial.',
+    description: 'Proclamación solemne y teocéntrica de la majestad, hermosura y trascendencia de Dios en su trono.',
   },
-  gozo: {
-    keywords: ['gozo', 'alegria', 'fiesta', 'celebracion', 'victoria', 'vencio', 'danza', 'cantad', 'aleluya', 'cantar', 'gratitud', 'resurreccion', 'triunfo'],
+  gozo_victoria: {
+    keywords: ['gozo', 'alegria', 'fiesta', 'celebracion', 'victoria', 'vencio', 'danza', 'cantad', 'aleluya', 'cantar', 'gratitud', 'resurreccion', 'triunfo', 'salmo 100', 'salmo 150'],
     moment: 'Apertura',
-    description: 'Ideal para la apertura del servicio: convoca a la congregación con celebración, victoria y alabanza viva.',
+    description: 'Ideal para la apertura del servicio: convoca a la congregación con celebración viva, gratitud y triunfo en Cristo.',
   },
-  consagracion: {
-    keywords: ['entrega', 'consagracion', 'rendicion', 'manos', 'altar', 'fuego', 'espiritu', 'rendido', 'llamado', 'obediencia', 'corazon', 'todo'],
+  consagracion_entrega: {
+    keywords: ['entrega', 'consagracion', 'rendicion', 'manos', 'altar', 'fuego', 'espiritu', 'rendido', 'llamado', 'obediencia', 'corazon', 'todo', 'romanos 12', 'mi vida'],
     moment: 'Ministración',
-    description: 'Canción de respuesta e introspección ideal para el llamado o ministración tras escuchar la Palabra.',
+    description: 'Canción de respuesta e introspección ideal para el tiempo de llamado, compromiso y ministración tras la predicación.',
   },
-  sanidad: {
-    keywords: ['sanidad', 'sanador', 'milagro', 'restauracion', 'herida', 'dolor', 'poder', 'resurreccion', 'vida', 'vencedor'],
+  espiritu_santo: {
+    keywords: ['espiritu', 'espiritu santo', 'fuego', 'viento', 'consolador', 'uncion', 'llenura', 'presencia', 'avivamiento', 'hechos 2', 'poder'],
     moment: 'Ministración',
-    description: 'Fomenta la fe activa y la intercesión por restauración física y espiritual en el pueblo de Dios.',
+    description: 'Invoca la guía, unción y llenura del Espíritu Santo para transformar los corazones durante la ministración.',
+  },
+  comunion_santa_cena: {
+    keywords: ['santa cena', 'comunion', 'pan', 'vino', 'cuerpo', 'sangre', 'pacto', 'mesa', 'memorial', 'partimiento', '1 corintios 11'],
+    moment: 'Adoración',
+    description: 'Especialmente diseñada para acompañar la mesa del Señor y la memoria del sacrificio de Cristo.',
+  },
+  sanidad_fe: {
+    keywords: ['sanidad', 'sanador', 'milagro', 'restauracion', 'herida', 'dolor', 'poder', 'creer', 'fe', 'isaias 53', 'medico', 'imposible'],
+    moment: 'Ministración',
+    description: 'Fortalece la fe en la soberanía y poder sanador de Dios sobre la aflicción física y espiritual.',
+  },
+  amor_padre: {
+    keywords: ['amor', 'padre', 'hijo', 'hijos', 'familia', 'abrazo', 'hogar', 'buen padre', 'bondad', '1 juan 4', 'misericordia', 'adopcion'],
+    moment: 'Adoración',
+    description: 'Medita en el amor paternal e incondicional de Dios que nos adopta y cuida eternamente.',
   },
 }
 
-export async function suggestSongsWithGroq(topic: string, currentSetlist: string[], catalog: Song[]): Promise<AISuggestion[]> {
+export async function suggestSongsWithGroq(
+  topic: string,
+  currentSetlist: string[],
+  catalog: Song[],
+  moment: 'todos' | 'Apertura' | 'Adoración' | 'Ministración' = 'todos',
+  limit: number = 8
+): Promise<AISuggestion[]> {
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase.functions.invoke('suggest-songs', {
-        body: { topic, currentSetlist },
+        body: { topic, currentSetlist, moment, limit },
       })
 
       if (!error && data?.suggestions && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
@@ -655,12 +676,11 @@ export async function suggestSongsWithGroq(topic: string, currentSetlist: string
   const cleanTopic = topic.toLowerCase().trim()
   const words = cleanTopic.split(/[\s,.-]+/).filter(w => w.length > 2)
 
-  // Determinar temas teológicos dominantes
-  let matchedTheme: ThematicCategory | null = null
+  // Encontrar categorías temáticas coincidentes
+  const matchedThemes: ThematicCategory[] = []
   for (const [, themeData] of Object.entries(THEMATIC_KNOWLEDGE_BASE)) {
     if (themeData.keywords.some(k => cleanTopic.includes(k))) {
-      matchedTheme = themeData
-      break
+      matchedThemes.push(themeData)
     }
   }
 
@@ -668,48 +688,55 @@ export async function suggestSongsWithGroq(topic: string, currentSetlist: string
     let score = 0
     const songText = `${song.title} ${song.artist} ${song.tags.join(' ')} ${song.lyrics.map(l => l.segments.map(s => s.text).join(' ')).join(' ')}`.toLowerCase()
 
+    // 1. Coincidencia directa por palabras del tema
     words.forEach(word => {
-      if (song.title.toLowerCase().includes(word)) score += 5
-      if (song.tags.some(t => t.toLowerCase().includes(word))) score += 4
-      if (songText.includes(word)) score += 2
+      if (song.title.toLowerCase().includes(word)) score += 8
+      if (song.tags.some(t => t.toLowerCase().includes(word))) score += 6
+      if (songText.includes(word)) score += 3
     })
 
-    if (matchedTheme) {
-      matchedTheme.keywords.forEach(kw => {
-        if (songText.includes(kw)) score += 3
+    // 2. Coincidencia con bases teológicas
+    matchedThemes.forEach(theme => {
+      theme.keywords.forEach(kw => {
+        if (song.title.toLowerCase().includes(kw)) score += 6
+        if (song.tags.some(t => t.toLowerCase().includes(kw))) score += 4
+        if (songText.includes(kw)) score += 2
       })
-    }
+    })
 
-    if (song.is_classic) score += 1
+    // 3. Filtro por momento litúrgico
+    if (moment === 'Apertura' && song.tempo === 'rápida') score += 5
+    if (moment === 'Adoración' && (song.tempo === 'media' || song.tempo === 'lenta')) score += 4
+    if (moment === 'Ministración' && song.tempo === 'lenta') score += 5
+
+    // 4. Bonificación para clásicos de la congregación
+    if (song.is_classic) score += 2
+
+    // 5. Descuento si ya está en el setlist
+    if (currentSetlist.includes(song.id)) score -= 15
 
     return { song, score }
   })
 
   scoredSongs.sort((a, b) => b.score - a.score)
-  const topMatches = scoredSongs.slice(0, 6)
+  const topMatches = scoredSongs.slice(0, Math.max(limit, 8))
 
-  if (topMatches.length > 0 && topMatches[0].score > 0) {
-    return topMatches.map(({ song }, idx) => {
-      let moment: 'Apertura' | 'Adoración' | 'Ministración' = 'Adoración'
-      if (song.tempo === 'rápida' || idx === 0) moment = 'Apertura'
-      else if (song.tempo === 'lenta' || idx >= 3) moment = 'Ministración'
+  return topMatches.map(({ song }, idx) => {
+    let songMoment: 'Apertura' | 'Adoración' | 'Ministración' = 'Adoración'
+    if (song.tempo === 'rápida' || idx === 0) songMoment = 'Apertura'
+    else if (song.tempo === 'lenta' || idx >= topMatches.length - 2) songMoment = 'Ministración'
 
-      const themeDesc = matchedTheme
-        ? matchedTheme.description
-        : `Su mensaje de "${song.tags.join(', ') || 'Alabanza'}" conecta con la enseñanza bíblica sobre ${topic}.`
+    if (moment !== 'todos') songMoment = moment
 
-      return {
-        songId: song.id,
-        moment,
-        reason: `[${moment}] ${themeDesc}`,
-      }
-    })
-  }
+    const primaryTheme = matchedThemes[0]
+    const themeDesc = primaryTheme
+      ? primaryTheme.description
+      : `Su mensaje y tags de "${song.tags.join(', ') || 'Alabanza'}" conectan con el sermón sobre "${topic}".`
 
-  // Fallback con las primeras canciones estructuradas litúrgicamente
-  return catalog.slice(0, 5).map((song, i) => ({
-    songId: song.id,
-    moment: i === 0 ? 'Apertura' : i === 4 ? 'Ministración' : 'Adoración',
-    reason: `[${i === 0 ? 'Apertura' : i === 4 ? 'Ministración' : 'Adoración'}] Canción cristocéntrica del repertorio para enriquecer el tiempo de adoración en ${song.key}.`,
-  }))
+    return {
+      songId: song.id,
+      moment: songMoment,
+      reason: `[${songMoment}] ${themeDesc}`,
+    }
+  })
 }

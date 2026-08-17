@@ -136,6 +136,14 @@ function IconChevronLeft({ size = 18 }: { size?: number }) {
   )
 }
 
+function IconChevronRight({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  )
+}
+
 function IconSearch({ size = 17 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -451,7 +459,7 @@ function AddSongModal({
         <div className="px-6 pt-6 pb-4 flex-shrink-0 border-b border-border flex items-center justify-between">
           <div>
             <h3 className="font-display text-xl text-fg tracking-wide">AGREGAR NUEVA CANCIÓN</h3>
-            <p className="text-fg-muted text-xs">Registra una canción en el repertorio del ministerio</p>
+            <p className="text-fg-muted text-xs">Registra una canción en el repertorio oficial</p>
           </div>
           <button onClick={onClose} className="text-fg-muted hover:text-fg transition-colors cursor-pointer">
             <IconX size={20} />
@@ -468,7 +476,7 @@ function AddSongModal({
                 placeholder="Ej: Grande es tu Fidelidad"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -479,7 +487,7 @@ function AddSongModal({
                 placeholder="Ej: Marcos Witt / Elevation"
                 value={artist}
                 onChange={e => setArtist(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
               />
             </div>
           </div>
@@ -490,7 +498,7 @@ function AddSongModal({
               <select
                 value={key}
                 onChange={e => setKey(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer"
               >
                 {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'Cm', 'C#m', 'Dm', 'D#m', 'Em', 'Fm', 'F#m', 'Gm', 'G#m', 'Am', 'A#m', 'Bm'].map(k => (
                   <option key={k} value={k}>{k}</option>
@@ -502,7 +510,7 @@ function AddSongModal({
               <select
                 value={tempo}
                 onChange={e => setTempo(e.target.value as 'rápida' | 'media' | 'lenta')}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
               >
                 <option value="lenta">Lenta (Adoración)</option>
                 <option value="media">Media</option>
@@ -516,7 +524,7 @@ function AddSongModal({
                 placeholder="Ej: Consagración, Gracia"
                 value={tagsInput}
                 onChange={e => setTagsInput(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
               />
             </div>
           </div>
@@ -528,7 +536,7 @@ function AddSongModal({
               placeholder="https://music.youtube.com/watch?v=..."
               value={mediaUrl}
               onChange={e => setMediaUrl(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
             />
           </div>
 
@@ -542,7 +550,7 @@ function AddSongModal({
               placeholder={`Verso 1\n[G]Tu fidelidad es [D]grande\n[Em]Tu fidelidad incom[C]parable es\n\nCoro\n[G]Grande es tu [D]fidelidad...`}
               value={lyricsRaw}
               onChange={e => setLyricsRaw(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border font-mono text-sm focus:outline-none focus:border-accent"
+              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent"
             />
           </div>
 
@@ -633,7 +641,7 @@ function EditSongModal({
                 required
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -643,7 +651,7 @@ function EditSongModal({
                 required
                 value={artist}
                 onChange={e => setArtist(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
               />
             </div>
           </div>
@@ -654,7 +662,7 @@ function EditSongModal({
               <select
                 value={key}
                 onChange={e => setKey(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer"
               >
                 {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'Cm', 'C#m', 'Dm', 'D#m', 'Em', 'Fm', 'F#m', 'Gm', 'G#m', 'Am', 'A#m', 'Bm'].map(k => (
                   <option key={k} value={k}>{k}</option>
@@ -666,7 +674,7 @@ function EditSongModal({
               <select
                 value={tempo}
                 onChange={e => setTempo(e.target.value as 'rápida' | 'media' | 'lenta')}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
               >
                 <option value="lenta">Lenta</option>
                 <option value="media">Media</option>
@@ -679,7 +687,7 @@ function EditSongModal({
                 type="text"
                 value={tagsInput}
                 onChange={e => setTagsInput(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
               />
             </div>
           </div>
@@ -690,7 +698,7 @@ function EditSongModal({
               type="url"
               value={mediaUrl}
               onChange={e => setMediaUrl(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
             />
           </div>
 
@@ -704,7 +712,7 @@ function EditSongModal({
               value={lyricsRaw}
               onChange={e => setLyricsRaw(e.target.value)}
               placeholder={`Verso 1\n[G]Tu fidelidad es [D]grande\n[Em]Tu fidelidad incom[C]parable es\n\nCoro\n[G]Grande es tu [D]fidelidad`}
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border font-mono text-sm focus:outline-none focus:border-accent leading-relaxed"
+              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent leading-relaxed"
             />
           </div>
 
@@ -904,7 +912,7 @@ function LoginScreen({
             <input
               type="email"
               defaultValue={role === 'admin' ? 'pastor@ibami.org' : 'carlos.mejia@ibami.org'}
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent transition"
+              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent transition"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -912,7 +920,7 @@ function LoginScreen({
             <input
               type="password"
               defaultValue="password"
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent transition"
+              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent transition"
             />
           </div>
 
@@ -1093,7 +1101,7 @@ function ProfileScreen({
                     required
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -1101,7 +1109,7 @@ function ProfileScreen({
                   <select
                     value={instrument}
                     onChange={e => setInstrument(e.target.value as Instrument)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
                   >
                     {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(inst => (
                       <option key={inst} value={inst}>{inst}</option>
@@ -1115,7 +1123,7 @@ function ProfileScreen({
                     required
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -1125,7 +1133,7 @@ function ProfileScreen({
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
                     placeholder="+57 300 000 0000"
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                   />
                 </div>
 
@@ -1225,8 +1233,8 @@ function CalendarScreen({
                 <h2 className="font-display text-2xl text-fg tracking-wide">{MONTH_NAMES[month].toUpperCase()}</h2>
                 <p className="text-fg-muted text-xs">{year}</p>
               </div>
-              <button onClick={nextMonth} className="w-9 h-9 rounded-xl flex items-center justify-center text-fg-muted hover:text-fg bg-surface-2 border border-border transition-colors rotate-180 cursor-pointer">
-                <IconChevronLeft />
+              <button onClick={nextMonth} className="w-9 h-9 rounded-xl flex items-center justify-center text-fg-muted hover:text-fg bg-surface-2 border border-border transition-colors cursor-pointer">
+                <IconChevronRight />
               </button>
             </div>
 
@@ -1544,7 +1552,7 @@ function LibraryScreen({
         {/* Cabecera del Repertorio */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="font-display text-3xl text-fg tracking-wide">REPERTORIO</h1>
+            <h1 className="font-display text-3xl text-fg tracking-wide">REPERTORIO OFICIAL</h1>
             <p className="text-xs text-fg-muted mt-0.5">
               {filtered.length} {filtered.length === 1 ? 'canción encontrada' : 'canciones registradas'}
             </p>
@@ -1559,7 +1567,7 @@ function LibraryScreen({
                 placeholder="Buscar por título o artista..."
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl text-fg bg-surface border border-border text-sm placeholder:text-fg-subtle focus:outline-none focus:border-accent transition"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl text-fg bg-surface border border-border text-base md:text-sm placeholder:text-fg-subtle focus:outline-none focus:border-accent transition"
               />
             </div>
             <button
@@ -1583,7 +1591,7 @@ function LibraryScreen({
             <select
               value={tempoFilter}
               onChange={e => setTempoFilter(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+              className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
             >
               <option value="all">Todos los tempos</option>
               <option value="lenta">Lenta (Adoración)</option>
@@ -1598,7 +1606,7 @@ function LibraryScreen({
             <select
               value={keyFilter}
               onChange={e => setKeyFilter(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+              className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
             >
               <option value="all">Todos los tonos</option>
               {allKeys.map(k => (
@@ -1613,7 +1621,7 @@ function LibraryScreen({
             <select
               value={tagFilter}
               onChange={e => setTagFilter(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+              className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
             >
               <option value="all">Todas las categorías</option>
               {allTags.map(tag => (
@@ -1849,6 +1857,8 @@ function AISuggestionModal({
   songs: Song[]
 }) {
   const [query, setQuery] = useState('')
+  const [moment, setMoment] = useState<'todos' | 'Apertura' | 'Adoración' | 'Ministración'>('todos')
+  const [limit, setLimit] = useState<number>(8)
   const [state, setState] = useState<AIState>('idle')
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([])
   const [added, setAdded] = useState<string[]>([])
@@ -1857,7 +1867,7 @@ function AISuggestionModal({
     if (!query.trim()) return
     setState('loading')
     try {
-      const results = await suggestSongsWithGroq(query, currentSetlist, songs)
+      const results = await suggestSongsWithGroq(query, currentSetlist, songs, moment, limit)
       setSuggestions(results)
       setState('results')
     } catch {
@@ -1873,7 +1883,7 @@ function AISuggestionModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-3xl flex flex-col max-h-[85vh] bg-surface border border-border shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-2xl rounded-3xl flex flex-col max-h-[85vh] bg-surface border border-border shadow-2xl overflow-hidden">
         <div className="px-6 pt-6 pb-4 flex-shrink-0 border-b border-border">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -1881,8 +1891,8 @@ function AISuggestionModal({
                 <IconSparkles size={18} />
               </div>
               <div>
-                <h3 className="font-display text-lg text-fg tracking-wide">SUGERIR CON IA (GROQ)</h3>
-                <p className="text-fg-muted text-xs">Selección litúrgica y teológica para el servicio</p>
+                <h3 className="font-display text-lg text-fg tracking-wide">RECOMENDADOR LITÚRGICO CON IA</h3>
+                <p className="text-fg-muted text-xs">Selección musical bíblica y coherente con el sermón</p>
               </div>
             </div>
             <button onClick={onClose} className="text-fg-muted hover:text-fg transition-colors cursor-pointer">
@@ -1890,22 +1900,50 @@ function AISuggestionModal({
             </button>
           </div>
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Ej: La justificación por la fe en Romanos 5..."
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleGenerate()}
-              className="flex-1 px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm placeholder:text-fg-subtle focus:outline-none focus:border-accent"
-            />
-            <button
-              onClick={handleGenerate}
-              disabled={!query.trim() || state === 'loading'}
-              className="px-5 py-3 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold text-sm flex items-center gap-1.5 active:scale-95 transition-all disabled:opacity-40 cursor-pointer"
-            >
-              {state === 'loading' ? <IconLoader size={16} /> : <IconSparkles size={16} />}
-            </button>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Ej: Romanos 8:31, La gracia y el sacrificio en la cruz..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleGenerate()}
+                className="flex-1 px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm placeholder:text-fg-subtle focus:outline-none focus:border-accent"
+              />
+              <button
+                onClick={handleGenerate}
+                disabled={!query.trim() || state === 'loading'}
+                className="px-5 py-3 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold text-sm flex items-center gap-1.5 active:scale-95 transition-all disabled:opacity-40 cursor-pointer"
+              >
+                {state === 'loading' ? <IconLoader size={16} /> : <IconSparkles size={16} />}
+                <span className="hidden sm:inline">Generar</span>
+              </button>
+            </div>
+
+            {/* Opciones de filtro litúrgico */}
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={moment}
+                onChange={e => setMoment(e.target.value as any)}
+                className="px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+              >
+                <option value="todos">Todos los momentos del servicio</option>
+                <option value="Apertura">Solo Apertura (Alabanza y júbilo)</option>
+                <option value="Adoración">Solo Adoración (Pre-sermón)</option>
+                <option value="Ministración">Solo Ministración (Llamado y respuesta)</option>
+              </select>
+
+              <select
+                value={limit}
+                onChange={e => setLimit(Number(e.target.value))}
+                className="px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+              >
+                <option value={6}>Mostrar 6 sugerencias</option>
+                <option value={8}>Mostrar 8 sugerencias</option>
+                <option value={10}>Mostrar 10 sugerencias</option>
+                <option value={12}>Mostrar 12 sugerencias</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -1916,8 +1954,8 @@ function AISuggestionModal({
                 <IconSparkles size={26} />
               </div>
               <p className="text-fg-muted text-sm text-center">
-                Ingresa el tema del sermón, versículo o momento litúrgico<br />
-                para recibir sugerencias estructuradas (Apertura, Adoración, Ministración)
+                Ingresa el pasaje bíblico, versículo o tema doctrinal<br />
+                para recibir sugerencias litúrgicas estructuradas con justificación pastoral.
               </p>
             </div>
           )}
@@ -1929,15 +1967,23 @@ function AISuggestionModal({
               </div>
               <div className="text-center">
                 <p className="text-fg text-sm font-medium">Analizando repertorio y coherencia teológica...</p>
-                <p className="text-fg-muted text-xs mt-1">Llama 3.3 construyendo el orden pastoral del servicio</p>
+                <p className="text-fg-muted text-xs mt-1">Llama 3.3 clasificando canciones por momento pastoral</p>
               </div>
             </div>
           )}
 
           {state === 'results' && (
             <div className="flex flex-col gap-3">
-              <p className="text-xs text-fg-muted">{suggestions.length} sugerencias para <span className="text-fg font-semibold">{`"${query}"`}</span></p>
-              {suggestions.map(({ songId, reason, moment }) => {
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-fg-muted">{suggestions.length} sugerencias para <span className="text-fg font-semibold">{`"${query}"`}</span></p>
+                <button
+                  onClick={handleGenerate}
+                  className="text-xs text-accent underline cursor-pointer font-medium"
+                >
+                  Regenerar opciones
+                </button>
+              </div>
+              {suggestions.map(({ songId, reason, moment: sMoment }) => {
                 const song = songs.find(s => s.id === songId)
                 if (!song) return null
                 const alreadyIn = currentSetlist.includes(songId)
@@ -1950,10 +1996,10 @@ function AISuggestionModal({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-fg text-sm leading-tight">{song.title}</p>
-                          {moment && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface text-accent border border-border">
-                              {moment}
+                          <p className="font-semibold text-fg text-sm leading-tight truncate">{song.title}</p>
+                          {sMoment && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface text-accent border border-border flex-shrink-0">
+                              {sMoment}
                             </span>
                           )}
                         </div>
@@ -1992,7 +2038,173 @@ function AISuggestionModal({
   )
 }
 
-// ─── ADMIN SCREEN (CON CRUD COMPLETO DE MÚSICOS Y SERVICIOS) ───────────────────
+// ─── SETLIST SONG PICKER (CON FILTROS Y PAGINACIÓN CONFIGURABLE) ───────────────
+
+function SetlistSongPicker({
+  songs,
+  currentSetlist,
+  onAddSong,
+  onRemoveSong,
+}: {
+  songs: Song[]
+  currentSetlist: string[]
+  onAddSong: (id: string) => void
+  onRemoveSong: (id: string) => void
+}) {
+  const [query, setQuery] = useState('')
+  const [tempoFilter, setTempoFilter] = useState('all')
+  const [tagFilter, setTagFilter] = useState('all')
+  const [pageSize, setPageSize] = useState<number>(5)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const allTags = Array.from(new Set(songs.flatMap(s => s.tags)))
+    .filter(t => !['rápida', 'media', 'lenta'].includes(t))
+    .sort()
+
+  const filtered = useMemo(() => {
+    return songs.filter(s => {
+      const q = query.toLowerCase()
+      if (q && !s.title.toLowerCase().includes(q) && !s.artist.toLowerCase().includes(q)) return false
+      if (tempoFilter !== 'all' && s.tempo !== tempoFilter) return false
+      if (tagFilter !== 'all' && !s.tags.includes(tagFilter)) return false
+      return true
+    })
+  }, [songs, query, tempoFilter, tagFilter])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const safePage = Math.min(currentPage, totalPages)
+  const paginatedSongs = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
+
+  function handleFilterChange(type: 'tempo' | 'tag' | 'query', value: string) {
+    if (type === 'tempo') setTempoFilter(value)
+    if (type === 'tag') setTagFilter(value)
+    if (type === 'query') setQuery(value)
+    setCurrentPage(1)
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold text-fg-muted uppercase tracking-widest">
+          Buscador de Repertorio ({filtered.length} disponibles)
+        </p>
+        <div className="flex items-center gap-1 text-xs text-fg-muted">
+          <span>Mostrar:</span>
+          <select
+            value={pageSize}
+            onChange={e => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+            className="px-2 py-1 rounded-lg text-base md:text-xs font-semibold text-fg bg-surface-2 border border-border cursor-pointer"
+          >
+            <option value={5}>5 por página</option>
+            <option value={10}>10 por página</option>
+            <option value={15}>15 por página</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Controles de búsqueda y filtros */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="sm:col-span-1 relative">
+          <input
+            type="text"
+            placeholder="Buscar canción..."
+            value={query}
+            onChange={e => handleFilterChange('query', e.target.value)}
+            className="w-full px-3 py-2 rounded-xl text-base md:text-xs text-fg bg-surface border border-border focus:outline-none focus:border-accent"
+          />
+        </div>
+        <div>
+          <select
+            value={tempoFilter}
+            onChange={e => handleFilterChange('tempo', e.target.value)}
+            className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+          >
+            <option value="all">Todos los tempos</option>
+            <option value="lenta">Lenta</option>
+            <option value="media">Media</option>
+            <option value="rápida">Rápida</option>
+          </select>
+        </div>
+        <div>
+          <select
+            value={tagFilter}
+            onChange={e => handleFilterChange('tag', e.target.value)}
+            className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+          >
+            <option value="all">Todas las categorías</option>
+            {allTags.map(tag => (
+              <option key={tag} value={tag}>{tag}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Lista de canciones paginadas */}
+      <div className="flex flex-col gap-2">
+        {paginatedSongs.map(song => {
+          const isAdded = currentSetlist.includes(song.id)
+          return (
+            <div
+              key={song.id}
+              className={`rounded-2xl p-3.5 flex items-center gap-3 border shadow-xs transition-colors ${
+                isAdded ? 'bg-surface-2 border-border' : 'bg-surface border-border'
+              }`}
+            >
+              <div className="w-10 h-10 rounded-xl bg-surface-2 border border-border flex items-center justify-center flex-shrink-0">
+                <span className="font-display text-fg font-bold text-sm">{song.key}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-fg truncate">{song.title}</p>
+                <p className="text-xs text-fg-muted truncate">{song.artist} · <span className="capitalize">{song.tempo}</span></p>
+              </div>
+              {isAdded ? (
+                <button
+                  onClick={() => onRemoveSong(song.id)}
+                  className="text-xs font-semibold text-fg-muted hover:text-accent bg-surface px-3 py-1.5 rounded-xl border border-border transition cursor-pointer flex-shrink-0"
+                >
+                  Quitar
+                </button>
+              ) : (
+                <button
+                  onClick={() => onAddSong(song.id)}
+                  className="text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-3.5 py-1.5 rounded-xl active:scale-95 transition-transform flex-shrink-0 flex items-center gap-1 cursor-pointer shadow-xs"
+                >
+                  <IconPlus size={12} />
+                  Añadir
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Paginador */}
+      <div className="flex items-center justify-between pt-2 border-t border-border">
+        <button
+          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          disabled={safePage <= 1}
+          className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-border bg-surface text-fg disabled:opacity-40 transition cursor-pointer flex items-center gap-1"
+        >
+          <IconChevronLeft size={14} />
+          Anterior
+        </button>
+        <span className="text-xs text-fg-muted">
+          Página <strong className="text-fg">{safePage}</strong> de {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          disabled={safePage >= totalPages}
+          className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-border bg-surface text-fg disabled:opacity-40 transition cursor-pointer flex items-center gap-1"
+        >
+          Siguiente
+          <IconChevronRight size={14} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── ADMIN SCREEN (CON GESTIÓN COMPLETA Y SETLIST PAGINADO) ────────────────────
 
 type AdminTab = 'usuarios' | 'programación' | 'setlist'
 
@@ -2183,7 +2395,7 @@ function AdminScreen({
                   placeholder="Ej: Daniel Gómez"
                   value={musicianName}
                   onChange={e => setMusicianName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -2192,7 +2404,7 @@ function AdminScreen({
                   <select
                     value={musicianInst}
                     onChange={e => setMusicianInst(e.target.value as Instrument)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
                   >
                     {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(i => (
                       <option key={i} value={i}>{i}</option>
@@ -2204,7 +2416,7 @@ function AdminScreen({
                   <select
                     value={musicianRole}
                     onChange={e => setMusicianRole(e.target.value as Role)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
                   >
                     <option value="musician">Músico</option>
                     <option value="admin">Admin</option>
@@ -2218,7 +2430,7 @@ function AdminScreen({
                   placeholder="ejemplo@ibami.org"
                   value={musicianEmail}
                   onChange={e => setMusicianEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -2228,7 +2440,7 @@ function AdminScreen({
                   placeholder="+57 300 000 0000"
                   value={musicianPhone}
                   onChange={e => setMusicianPhone(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                 />
               </div>
 
@@ -2269,7 +2481,7 @@ function AdminScreen({
                     required
                     value={serviceDate}
                     onChange={e => setServiceDate(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -2277,7 +2489,7 @@ function AdminScreen({
                   <select
                     value={serviceType}
                     onChange={e => setServiceType(e.target.value as 'domingo' | 'midweek')}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer"
                   >
                     <option value="domingo">Domingo</option>
                     <option value="midweek">Entre semana</option>
@@ -2293,7 +2505,7 @@ function AdminScreen({
                   placeholder="Ej: Servicio Dominical - Comunión"
                   value={serviceLabel}
                   onChange={e => setServiceLabel(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
                 />
               </div>
 
@@ -2311,7 +2523,7 @@ function AdminScreen({
                             isSelected ? prev.filter(id => id !== m.id) : [...prev, m.id]
                           )
                         }}
-                        className={`p-2 rounded-lg text-left text-xs font-medium border flex items-center justify-between transition cursor-pointer ${
+                        className={`p-2 rounded-lg text-left text-base md:text-xs font-medium border flex items-center justify-between transition cursor-pointer ${
                           isSelected
                             ? 'bg-surface text-fg border-accent font-semibold shadow-xs'
                             : 'bg-surface-3 text-fg-muted border-transparent hover:text-fg'
@@ -2516,7 +2728,7 @@ function AdminScreen({
                 <select
                   value={selectedAdminDate}
                   onChange={e => setSelectedAdminDate(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl text-fg bg-surface border border-border text-sm focus:outline-none focus:border-accent cursor-pointer"
+                  className="w-full px-4 py-3 rounded-2xl text-fg bg-surface border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer"
                 >
                   {events.map(ev => {
                     const date = new Date(ev.date + 'T12:00:00')
@@ -2539,59 +2751,51 @@ function AdminScreen({
 
               {event && (
                 <div>
-                  <p className="text-xs font-bold text-fg-muted uppercase tracking-widest mb-3">Setlist actual ({adminSetlist.length})</p>
-                  <div className="flex flex-col gap-2.5">
-                    {adminSetlist.map((sid, idx) => {
-                      const song = songs.find(s => s.id === sid)
-                      if (!song) return null
-                      return (
-                        <div key={sid} className="rounded-2xl p-4 flex items-center gap-3 bg-surface border border-border shadow-xs">
-                          <span className="font-display text-fg-muted font-bold text-sm w-6 text-center">{idx + 1}</span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-fg truncate">{song.title}</p>
-                            <p className="text-xs text-fg-muted">{song.key} · {song.tempo}</p>
+                  <p className="text-xs font-bold text-fg-muted uppercase tracking-widest mb-3">Orden de Canciones ({adminSetlist.length})</p>
+                  {adminSetlist.length === 0 ? (
+                    <div className="rounded-2xl p-6 bg-surface border border-border text-center text-xs text-fg-muted">
+                      No hay canciones añadidas al setlist todavía. Selecciona canciones del buscador.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2.5">
+                      {adminSetlist.map((sid, idx) => {
+                        const song = songs.find(s => s.id === sid)
+                        if (!song) return null
+                        return (
+                          <div key={sid} className="rounded-2xl p-4 flex items-center gap-3 bg-surface border border-border shadow-xs">
+                            <span className="font-display text-fg-muted font-bold text-sm w-6 text-center">{idx + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-fg truncate">{song.title}</p>
+                              <p className="text-xs text-fg-muted">{song.key} · {song.tempo}</p>
+                            </div>
+                            <div className="flex gap-1.5">
+                              <button onClick={() => moveUp(idx)} className="w-8 h-8 rounded-xl text-fg-muted flex items-center justify-center bg-surface-2 border border-border hover:text-fg transition-colors cursor-pointer" title="Subir orden">
+                                <IconArrowUp size={13} />
+                              </button>
+                              <button onClick={() => moveDown(idx)} className="w-8 h-8 rounded-xl text-fg-muted flex items-center justify-center bg-surface-2 border border-border hover:text-fg transition-colors cursor-pointer" title="Bajar orden">
+                                <IconArrowDown size={13} />
+                              </button>
+                              <button onClick={() => removeSong(sid)} className="w-8 h-8 rounded-xl text-fg-muted flex items-center justify-center bg-surface-2 border border-border hover:text-accent transition-colors cursor-pointer" title="Quitar del setlist">
+                                <IconTrash size={13} />
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex gap-1.5">
-                            <button onClick={() => moveUp(idx)} className="w-8 h-8 rounded-xl text-fg-muted flex items-center justify-center bg-surface-2 border border-border hover:text-fg transition-colors cursor-pointer">
-                              <IconArrowUp size={13} />
-                            </button>
-                            <button onClick={() => moveDown(idx)} className="w-8 h-8 rounded-xl text-fg-muted flex items-center justify-center bg-surface-2 border border-border hover:text-fg transition-colors cursor-pointer">
-                              <IconArrowDown size={13} />
-                            </button>
-                            <button onClick={() => removeSong(sid)} className="w-8 h-8 rounded-xl text-fg-muted flex items-center justify-center bg-surface-2 border border-border hover:text-accent transition-colors cursor-pointer">
-                              <IconTrash size={13} />
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            <div className="lg:col-span-6">
-              <p className="text-xs font-bold text-fg-muted uppercase tracking-widest mb-3">Agregar canciones del repertorio</p>
-              <div className="flex flex-col gap-2.5 max-h-[600px] overflow-y-auto pr-1">
-                {songs.filter(s => !adminSetlist.includes(s.id)).map(song => (
-                  <div key={song.id} className="rounded-2xl p-4 flex items-center gap-3 bg-surface border border-border shadow-xs">
-                    <div className="w-10 h-10 rounded-xl bg-surface-2 border border-border flex items-center justify-center flex-shrink-0">
-                      <span className="font-display text-fg font-bold text-sm">{song.key}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-fg truncate">{song.title}</p>
-                      <p className="text-xs text-fg-muted">{song.artist}</p>
-                    </div>
-                    <button
-                      onClick={() => addSong(song.id)}
-                      className="text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-3.5 py-2 rounded-xl active:scale-95 transition-transform flex-shrink-0 flex items-center gap-1 cursor-pointer shadow-xs"
-                    >
-                      <IconPlus size={12} />
-                      Añadir
-                    </button>
-                  </div>
-                ))}
-              </div>
+            {/* Componente de búsqueda y selección paginada de canciones */}
+            <div className="lg:col-span-6 bg-surface border border-border rounded-3xl p-5 shadow-xs">
+              <SetlistSongPicker
+                songs={songs}
+                currentSetlist={adminSetlist}
+                onAddSong={addSong}
+                onRemoveSong={removeSong}
+              />
             </div>
           </div>
         )}

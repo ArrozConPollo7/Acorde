@@ -9,6 +9,8 @@ const corsHeaders = {
 interface RequestBody {
   topic: string
   currentSetlist?: string[]
+  moment?: 'todos' | 'Apertura' | 'Adoración' | 'Ministración'
+  limit?: number
 }
 
 serve(async (req) => {
@@ -17,7 +19,12 @@ serve(async (req) => {
   }
 
   try {
-    const { topic, currentSetlist = [] }: RequestBody = await req.json()
+    const {
+      topic,
+      currentSetlist = [],
+      moment = 'todos',
+      limit = 8,
+    }: RequestBody = await req.json()
 
     if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
       return new Response(
@@ -60,35 +67,36 @@ serve(async (req) => {
       tags: s.tags?.join(', ') || '',
     }))
 
-    const systemPrompt = `Eres un pastor de adoración y teólogo musical con más de 20 años de experiencia dirigiendo el ministerio de alabanza en la iglesia cristiana IBAMI.
-Tu misión es seleccionar y recomendar exactamente entre 4 y 6 canciones del catálogo proporcionado que construyan un orden de servicio (setlist) coherente y bíblicamente sólido en torno al tema de la prédica o pasaje bíblico.
+    const systemPrompt = `Eres un pastor de adoración y teólogo musical de la iglesia cristiana IBAMI.
+Tu tarea es seleccionar exactamente ${limit} canciones del catálogo oficial de IBAMI que mejor se conecten con el tema bíblico o sermón provisto.
 
-PRINCIPIOS LITÚRGICOS DE IBAMI:
-1. APERTURA (1-2 canciones): De tempo alegre/rápido o proclamación festiva que congregue y enfoque la atención en el Señor.
-2. ADORACIÓN & ENFOQUE (2-3 canciones): De tempo medio o lento, cristocéntricas, que preparen el corazón de la iglesia para la predicación de la Palabra.
-3. MINISTRACIÓN & RESPUESTA (1-2 canciones): De tempo lento/íntimo, de consagración, entrega, fe o clamor para sellar el mensaje pastoral.
+REGLAS LITÚRGICAS DE IBAMI:
+1. "Apertura": Canciones festivas, rítmicas o de llamado a la alabanza que convocan a la congregación (tempos rápidos o medios).
+2. "Adoración": Canciones profundas, cristocéntricas y reverentes que preparan el corazón antes de la predicación (tempos medios o lentos).
+3. "Ministración": Canciones de entrega, consagración, fe, sanidad o llamado tras escuchar la Palabra (tempos lentos o íntimos).
+
+${moment !== 'todos' ? `ENFOQUE SOLICITADO: Recomienda únicamente canciones para el momento de "${moment}".` : 'DISTRIBUCIÓN: Proporciona una mezcla equilibrada de Apertura, Adoración y Ministración.'}
 
 REGLAS ESTRICTAS:
-- Usa ÚNICAMENTE canciones que estén en la lista provista (usando su id y título exactos).
-- Para cada canción indica en qué momento del servicio encaja ("Apertura", "Adoración" o "Ministración") y una justificación teológico-pastoral clara y concisa (1 o 2 oraciones).
-- No inventes canciones ni títulos externos.
+- Usa ÚNICAMENTE canciones que existan en el catálogo provisto (utilizando su id exacto).
+- No inventes canciones ni cambies los IDs.
 - Cero emojis en cualquier parte del texto.
-- Devuelve ÚNICAMENTE un JSON válido con el siguiente formato exacto:
-
+- Justificación: Explica en 1 o 2 oraciones profundas y claras por qué la letra o temática conecta con el mensaje bíblico.
+- Devuelve ÚNICAMENTE un JSON con esta estructura exacta:
 {
   "suggestions": [
     {
-      "songId": "id-exacto",
+      "songId": "id-de-la-cancion",
       "moment": "Apertura",
-      "reason": "Explicación teológica y litúrgica de por qué conecta con el tema."
+      "reason": "Justificación pastoral fundamentada."
     }
   ]
 }`
 
     const userPrompt = `Tema o pasaje del sermón: "${topic}"
-Canciones ya seleccionadas en el setlist: ${JSON.stringify(currentSetlist)}
+Canciones que ya están en el setlist: ${JSON.stringify(currentSetlist)}
 
-Catálogo disponible de canciones de IBAMI:
+Catálogo oficial de canciones de IBAMI:
 ${JSON.stringify(songsCatalogText, null, 2)}`
 
     // 3. Llamada a Groq API

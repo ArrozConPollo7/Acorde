@@ -75,11 +75,26 @@ body {
   background-color: var(--bg);
   color: var(--fg);
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
   transition: background-color 0.2s ease, color 0.2s ease;
+  touch-action: manipulation;
+}
+
+/* Prevent auto-zoom on mobile devices */
+input, select, textarea {
+  font-size: 16px !important;
+  touch-action: manipulation;
+}
+
+@media (min-width: 768px) {
+  input, select, textarea {
+    font-size: 14px !important;
+  }
 }
 
 * {
   scrollbar-width: none;
+  -webkit-tap-highlight-color: transparent;
 }
 *::-webkit-scrollbar {
   display: none;
