@@ -3116,8 +3116,23 @@ function AdminScreen({
   onToggleTheme: () => void
 }) {
   const [tab, setTab] = useState<AdminTab>('usuarios')
-  const [selectedAdminDate, setSelectedAdminDate] = useState('2026-08-16')
+  const [selectedAdminDate, setSelectedAdminDate] = useState(() => events[0]?.date || '2026-08-16')
   const [aiModalOpen, setAiModalOpen] = useState(false)
+
+  // Sincronizar fecha de administración con los eventos existentes
+  useEffect(() => {
+    if (events.length > 0 && (!selectedAdminDate || !events.some(e => e.date === selectedAdminDate))) {
+      setSelectedAdminDate(events[0].date)
+    }
+  }, [events, selectedAdminDate])
+
+  // Cargar el setlist del evento seleccionado
+  useEffect(() => {
+    const target = events.find(e => e.date === selectedAdminDate)
+    if (target) {
+      setAdminSetlist(target.setlist || [])
+    }
+  }, [selectedAdminDate, events])
 
   // Estado para gestión de músicos
   const [musicianModal, setMusicianModal] = useState<{ mode: 'create' | 'edit'; musician?: Musician } | null>(null)
@@ -3299,6 +3314,7 @@ function AdminScreen({
         type: serviceType,
         label: serviceLabel.trim(),
         roster,
+        setlist: serviceModal.event.setlist || [],
       })
     }
     setServiceModal(null)
@@ -3309,18 +3325,34 @@ function AdminScreen({
     const next = [...adminSetlist]
     ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
     setAdminSetlist(next)
+    if (selectedAdminDate) {
+      onEditService(selectedAdminDate, { setlist: next })
+    }
   }
   function moveDown(idx: number) {
     if (idx === adminSetlist.length - 1) return
     const next = [...adminSetlist]
     ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
     setAdminSetlist(next)
+    if (selectedAdminDate) {
+      onEditService(selectedAdminDate, { setlist: next })
+    }
   }
   function removeSong(id: string) {
-    setAdminSetlist(adminSetlist.filter(s => s !== id))
+    const next = adminSetlist.filter(s => s !== id)
+    setAdminSetlist(next)
+    if (selectedAdminDate) {
+      onEditService(selectedAdminDate, { setlist: next })
+    }
   }
   function addSong(id: string) {
-    if (!adminSetlist.includes(id)) setAdminSetlist([...adminSetlist, id])
+    if (!adminSetlist.includes(id)) {
+      const next = [...adminSetlist, id]
+      setAdminSetlist(next)
+      if (selectedAdminDate) {
+        onEditService(selectedAdminDate, { setlist: next })
+      }
+    }
   }
 
   return (

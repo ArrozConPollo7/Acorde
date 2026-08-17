@@ -77,13 +77,13 @@ export function generateIndividualMusicianMessage({
 
   const directLink = generateDirectServiceLink(event.date, musician.id)
 
-  const scheduledSongs = event.setlist
+  const songList = Array.isArray(event.setlist) ? event.setlist : []
+  const scheduledSongs = songList
     .map((sid, idx) => {
-      const s = songs.find(x => x.id === sid)
-      if (!s) return null
-      return `${idx + 1}. *${s.title}* (${s.key} - ${s.tempo})`
+      const s = songs.find(x => x.id === sid || String(x.id) === String(sid) || x.title.toLowerCase() === String(sid).toLowerCase())
+      if (!s) return `${idx + 1}. *${sid}*`
+      return `${idx + 1}. *${s.title}* (${s.key || 'N/A'}${s.tempo ? ` - ${s.tempo}` : ''})`
     })
-    .filter(Boolean)
     .join('\n')
 
   const lines = [
@@ -96,7 +96,7 @@ export function generateIndividualMusicianMessage({
     `*Rol Principal:* ${primaryRole.toUpperCase()}`,
     secondaries ? `*Instrumentos Secundarios:* ${secondaries}` : '',
     ``,
-    `*SETLIST PROGRAMADO (${event.setlist.length} Canciones):*`,
+    `*SETLIST PROGRAMADO (${songList.length} Canciones):*`,
     scheduledSongs || '_Setlist en preparación_',
     ``,
     `*Por favor confirma o actualiza tu asistencia en el siguiente enlace:*`,
@@ -128,8 +128,9 @@ export function generateGroupServiceMessage({
   const vocals: string[] = []
   const band: string[] = []
 
-  event.roster.forEach(entry => {
-    const m = musicians.find(x => x.id === entry.mid)
+  const rosterList = Array.isArray(event.roster) ? event.roster : []
+  rosterList.forEach(entry => {
+    const m = musicians.find(x => x.id === entry.mid || String(x.id) === String(entry.mid))
     if (!m) return
     const inst = (entry.instrument || m.instrument || '').toLowerCase()
     const desc = `${m.name} (${(entry.instrument || m.instrument).toUpperCase()})`
@@ -142,13 +143,13 @@ export function generateGroupServiceMessage({
     }
   })
 
-  const scheduledSongs = event.setlist
+  const songList = Array.isArray(event.setlist) ? event.setlist : []
+  const scheduledSongs = songList
     .map((sid, idx) => {
-      const s = songs.find(x => x.id === sid)
-      if (!s) return null
-      return `${idx + 1}. *${s.title}* - ${s.artist} [Tono: ${s.key} / ${s.tempo}]`
+      const s = songs.find(x => x.id === sid || String(x.id) === String(sid) || x.title.toLowerCase() === String(sid).toLowerCase())
+      if (!s) return `${idx + 1}. *${sid}*`
+      return `${idx + 1}. *${s.title}* - ${s.artist || 'IBAMI'} [Tono: ${s.key || 'N/A'}${s.tempo ? ` / ${s.tempo}` : ''}]`
     })
-    .filter(Boolean)
     .join('\n')
 
   const lines = [
