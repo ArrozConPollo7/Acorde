@@ -178,26 +178,18 @@ export function formatLyricsToChordPro(lyrics: LyricLine[]): string {
 
 export const INITIAL_SONGS: Song[] = NOTION_SONGS
 
-export const INITIAL_MUSICIANS: Musician[] = [
-  { id: 'm1', name: 'Carlos Mejía', instrument: 'guitarra', initials: 'CM', email: 'carlos.mejia@ibami.org', phone: '+57 310 123 4567', role: 'musician' },
-  { id: 'm2', name: 'Sofía Rodríguez', instrument: 'voz', initials: 'SR', email: 'sofia.rodriguez@ibami.org', phone: '+57 311 234 5678', role: 'musician' },
-  { id: 'm3', name: 'Andrés Peña', instrument: 'piano', initials: 'AP', email: 'andres.pena@ibami.org', phone: '+57 312 345 6789', role: 'musician' },
-  { id: 'm4', name: 'Juliana Torres', instrument: 'batería', initials: 'JT', email: 'juliana.torres@ibami.org', phone: '+57 313 456 7890', role: 'musician' },
-  { id: 'm5', name: 'Miguel Lozano', instrument: 'bajo', initials: 'ML', email: 'miguel.lozano@ibami.org', phone: '+57 314 567 8901', role: 'musician' },
-  { id: 'm6', name: 'Valentina Suárez', instrument: 'voz', initials: 'VS', email: 'valentina.suarez@ibami.org', phone: '+57 315 678 9012', role: 'musician' },
-  { id: 'm-admin', name: 'Pastor Marcos', instrument: 'piano', initials: 'PM', email: 'pastor@ibami.org', phone: '+57 300 000 0000', role: 'admin' },
-]
+export const INITIAL_MUSICIANS: Musician[] = []
 
 export const INITIAL_EVENTS: ServiceEvent[] = [
-  { date: '2026-08-02', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-1', 'notion-2', 'notion-5'], roster: [{ mid: 'm1', status: 'confirmado' }, { mid: 'm2', status: 'confirmado' }, { mid: 'm3', status: 'confirmado' }, { mid: 'm4', status: 'pendiente' }, { mid: 'm5', status: 'confirmado' }] },
-  { date: '2026-08-06', type: 'midweek', label: 'Oración y Alabanza', setlist: ['notion-3', 'notion-4'], roster: [{ mid: 'm1', status: 'confirmado' }, { mid: 'm2', status: 'pendiente' }, { mid: 'm6', status: 'confirmado' }] },
-  { date: '2026-08-09', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-4', 'notion-1', 'notion-3'], roster: [{ mid: 'm1', status: 'confirmado' }, { mid: 'm6', status: 'confirmado' }, { mid: 'm3', status: 'pendiente' }, { mid: 'm4', status: 'confirmado' }, { mid: 'm5', status: 'pendiente' }] },
-  { date: '2026-08-13', type: 'midweek', label: 'Célula de Adoración', setlist: ['notion-5', 'notion-2'], roster: [{ mid: 'm2', status: 'confirmado' }, { mid: 'm3', status: 'confirmado' }] },
-  { date: '2026-08-16', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-2', 'notion-5', 'notion-1', 'notion-3'], roster: [{ mid: 'm1', status: 'confirmado' }, { mid: 'm2', status: 'confirmado' }, { mid: 'm3', status: 'confirmado' }, { mid: 'm4', status: 'pendiente' }, { mid: 'm5', status: 'confirmado' }, { mid: 'm6', status: 'pendiente' }] },
-  { date: '2026-08-20', type: 'midweek', label: 'Oración y Alabanza', setlist: ['notion-3', 'notion-1'], roster: [{ mid: 'm1', status: 'pendiente' }, { mid: 'm6', status: 'confirmado' }] },
-  { date: '2026-08-23', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-1', 'notion-4', 'notion-2'], roster: [{ mid: 'm1', status: 'pendiente' }, { mid: 'm2', status: 'pendiente' }, { mid: 'm3', status: 'confirmado' }, { mid: 'm4', status: 'pendiente' }, { mid: 'm5', status: 'confirmado' }] },
-  { date: '2026-08-27', type: 'midweek', label: 'Célula de Adoración', setlist: ['notion-4', 'notion-5'], roster: [{ mid: 'm2', status: 'pendiente' }, { mid: 'm3', status: 'pendiente' }, { mid: 'm6', status: 'pendiente' }] },
-  { date: '2026-08-30', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-5', 'notion-3', 'notion-4', 'notion-1'], roster: [{ mid: 'm1', status: 'pendiente' }, { mid: 'm2', status: 'pendiente' }, { mid: 'm3', status: 'pendiente' }, { mid: 'm4', status: 'pendiente' }, { mid: 'm5', status: 'pendiente' }] },
+  { date: '2026-08-02', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-1', 'notion-2', 'notion-5'], roster: [] },
+  { date: '2026-08-06', type: 'midweek', label: 'Oración y Alabanza', setlist: ['notion-3', 'notion-4'], roster: [] },
+  { date: '2026-08-09', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-4', 'notion-1', 'notion-3'], roster: [] },
+  { date: '2026-08-13', type: 'midweek', label: 'Célula de Adoración', setlist: ['notion-5', 'notion-2'], roster: [] },
+  { date: '2026-08-16', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-2', 'notion-5', 'notion-1', 'notion-3'], roster: [] },
+  { date: '2026-08-20', type: 'midweek', label: 'Oración y Alabanza', setlist: ['notion-3', 'notion-1'], roster: [] },
+  { date: '2026-08-23', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-1', 'notion-4', 'notion-2'], roster: [] },
+  { date: '2026-08-27', type: 'midweek', label: 'Célula de Adoración', setlist: ['notion-4', 'notion-5'], roster: [] },
+  { date: '2026-08-30', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-5', 'notion-3', 'notion-4', 'notion-1'], roster: [] },
 ]
 
 // ─── CANCIONES API ────────────────────────────────────────────────────────────

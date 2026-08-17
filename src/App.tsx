@@ -877,7 +877,7 @@ function BottomNav({ screen, setScreen, currentUser }: { screen: Screen; setScre
   )
 }
 
-// ─── LOGIN SCREEN (SIN CONTRASEÑA, POR CORREO O CELULAR) ──────────────────────
+// ─── LOGIN SCREEN (SIN CONTRASEÑA, CON MEMORIA LOCAL POR DISPOSITIVO) ─────────
 
 function LoginScreen({
   onLogin,
@@ -892,6 +892,23 @@ function LoginScreen({
 }) {
   const [identifier, setIdentifier] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [savedAccounts, setSavedAccounts] = useState<Musician[]>(() => {
+    if (typeof window === 'undefined') return []
+    try {
+      const raw = localStorage.getItem('acorde_saved_device_accounts')
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  })
+
+  function removeSavedAccount(id: string) {
+    const next = savedAccounts.filter(a => a.id !== id)
+    setSavedAccounts(next)
+    try {
+      localStorage.setItem('acorde_saved_device_accounts', JSON.stringify(next))
+    } catch {}
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -906,10 +923,15 @@ function LoginScreen({
     const matched = findMusicianByIdentifier(trimmed, musicians)
 
     if (matched) {
+      // Guardar en la memoria local de este dispositivo
+      try {
+        const next = [matched, ...savedAccounts.filter(a => a.id !== matched.id)].slice(0, 5)
+        localStorage.setItem('acorde_saved_device_accounts', JSON.stringify(next))
+      } catch {}
       onLogin(matched)
     } else {
       if (musicians.length === 0) {
-        // Si no hay ningún músico en la base de datos, crear perfil de inicio
+        // Si la base de datos está recién iniciada
         const firstAdmin: Musician = {
           id: `m-${Date.now()}`,
           name: trimmed.includes('@') ? trimmed.split('@')[0] : 'Líder de Alabanza',
@@ -921,7 +943,7 @@ function LoginScreen({
         }
         onLogin(firstAdmin)
       } else {
-        setErrorMsg('No encontramos ningún integrante registrado con ese correo o celular. Solicita a un líder o administrador que te registre en el equipo.')
+        setErrorMsg('No encontramos ningún integrante registrado con ese correo o celular. Solicita al líder o administrador que te registre en el equipo.')
       }
     }
   }
@@ -957,7 +979,7 @@ function LoginScreen({
               className="w-full px-4 py-3.5 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent transition"
             />
             <p className="text-[11px] text-fg-subtle">
-              Ingresa el correo o celular registrado por el líder de alabanza.
+              Ingresa el correo o celular registrado por el líder del ministerio.
             </p>
           </div>
 
@@ -975,19 +997,39 @@ function LoginScreen({
           </button>
         </form>
 
-        {/* Sugerencias de acceso para pruebas */}
-        {musicians.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-border flex flex-col gap-2 text-center">
-            <p className="text-[11px] text-fg-muted font-medium">Acceso rápido con integrantes registrados:</p>
-            <div className="flex flex-wrap gap-1.5 justify-center">
-              {musicians.slice(0, 3).map(m => (
-                <button
-                  key={m.id}
-                  onClick={() => onLogin(m)}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-surface-2 hover:bg-surface-3 text-fg border border-border transition cursor-pointer"
+        {/* Solo mostrar cuentas que hayan iniciado sesión en este dispositivo */}
+        {savedAccounts.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-border flex flex-col gap-2.5">
+            <p className="text-[10px] text-fg-muted font-bold uppercase tracking-wider text-center">
+              Cuentas en este dispositivo
+            </p>
+            <div className="flex flex-col gap-2">
+              {savedAccounts.map(account => (
+                <div
+                  key={account.id}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-surface-2 border border-border hover:border-border-hover transition"
                 >
-                  {m.name} {hasRole(m, 'admin') ? '(Admin)' : ''}
-                </button>
+                  <button
+                    onClick={() => {
+                      const latest = musicians.find(m => m.id === account.id) || account
+                      onLogin(latest)
+                    }}
+                    className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
+                  >
+                    <Avatar initials={account.initials} size="sm" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-fg truncate">{account.name}</p>
+                      <p className="text-[10px] text-fg-muted truncate">{account.email || account.phone}</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => removeSavedAccount(account.id)}
+                    className="w-7 h-7 rounded-lg text-fg-muted hover:text-accent flex items-center justify-center transition cursor-pointer"
+                    title="Olvidar en este dispositivo"
+                  >
+                    <IconX size={13} />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -1089,31 +1131,6 @@ function ProfileScreen({
               <IconEdit size={14} />
               Editar Información
             </button>
-
-            {/* Alternar Permisos de Administrador al Instante */}
-            <div className="w-full mt-3 p-3.5 rounded-2xl bg-surface-2 border border-border flex items-center justify-between">
-              <div className="text-left">
-                <p className="text-xs font-semibold text-fg">Acceso de Administrador</p>
-                <p className="text-[10px] text-fg-muted">
-                  {hasRole(musician, 'admin') ? 'Activo (Panel habilitado)' : 'Desactivado (Solo músico)'}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const currentIsAdmin = hasRole(musician, 'admin')
-                  const newRole: Role = currentIsAdmin ? 'musician' : 'both'
-                  onUpdateMusician({ role: newRole })
-                }}
-                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition cursor-pointer ${
-                  hasRole(musician, 'admin')
-                    ? 'bg-surface text-fg-muted border-border hover:text-accent'
-                    : 'bg-accent text-accent-fg border-accent shadow-xs'
-                }`}
-              >
-                {hasRole(musician, 'admin') ? 'Quitar Admin' : 'Hacerme Admin'}
-              </button>
-            </div>
           </div>
 
           {/* Columna Derecha: Próximos Servicios Asignados */}
