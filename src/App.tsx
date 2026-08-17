@@ -1782,52 +1782,47 @@ function DayDetailScreen({
   const date = new Date(event.date + 'T12:00:00')
   const myEntry = roster.find(r => r.mid === currentUser.id)
 
-  const [feedbackStatus, setFeedbackStatus] = useState<'confirming' | 'confirmed' | 'rejecting' | 'rejected' | null>(null)
-  const [isBannerDismissed, setIsBannerDismissed] = useState(myEntry?.status !== 'pendiente')
-  const [isExiting, setIsExiting] = useState(false)
+  const [feedbackStatus, setFeedbackStatus] = useState<'confirmed' | 'rejected' | null>(null)
+  const [isBannerDismissed, setIsBannerDismissed] = useState(() => myEntry?.status !== 'pendiente')
+  const [isCollapsing, setIsCollapsing] = useState(false)
 
+  // Solo reiniciar cuando se cambia de servicio (fecha distinta), no en medio de la animación
   useEffect(() => {
     setIsBannerDismissed(myEntry?.status !== 'pendiente')
     setFeedbackStatus(null)
-    setIsExiting(false)
-  }, [event.date, myEntry?.status])
+    setIsCollapsing(false)
+  }, [event.date])
 
   function handleConfirm() {
-    setFeedbackStatus('confirming')
+    if (feedbackStatus) return
+    setFeedbackStatus('confirmed')
     onAttendance(currentUser.id, 'confirmado')
 
     setTimeout(() => {
-      setFeedbackStatus('confirmed')
-    }, 120)
-
-    setTimeout(() => {
-      setIsExiting(true)
+      setIsCollapsing(true)
     }, 1300)
 
     setTimeout(() => {
       setIsBannerDismissed(true)
-      setIsExiting(false)
+      setIsCollapsing(false)
       setFeedbackStatus(null)
-    }, 1750)
+    }, 1800)
   }
 
   function handleReject() {
-    setFeedbackStatus('rejecting')
+    if (feedbackStatus) return
+    setFeedbackStatus('rejected')
     onAttendance(currentUser.id, 'rechazado')
 
     setTimeout(() => {
-      setFeedbackStatus('rejected')
-    }, 120)
-
-    setTimeout(() => {
-      setIsExiting(true)
+      setIsCollapsing(true)
     }, 1100)
 
     setTimeout(() => {
       setIsBannerDismissed(true)
-      setIsExiting(false)
+      setIsCollapsing(false)
       setFeedbackStatus(null)
-    }, 1550)
+    }, 1600)
   }
 
   const ministryGroups = useMemo(() => {
@@ -1869,8 +1864,10 @@ function DayDetailScreen({
         {/* Anuncio y Confirmación de Asistencia con Animación y Auto-Eliminación */}
         {myEntry && !isBannerDismissed && (
           <div
-            className={`rounded-3xl p-6 mb-8 bg-surface border border-border shadow-md transition-all duration-500 overflow-hidden ${
-              isExiting ? 'opacity-0 -translate-y-4 max-h-0 py-0 mb-0 pointer-events-none' : 'opacity-100 max-h-96'
+            className={`rounded-3xl p-6 mb-8 bg-surface border border-border shadow-md transition-all duration-500 ease-in-out overflow-hidden ${
+              isCollapsing
+                ? 'opacity-0 max-h-0 py-0 mb-0 scale-95 border-transparent pointer-events-none'
+                : 'opacity-100 max-h-96 scale-100'
             }`}
           >
             {feedbackStatus === 'confirmed' ? (
@@ -1881,7 +1878,7 @@ function DayDetailScreen({
                 <div className="flex-1">
                   <h3 className="font-display text-xl text-fg tracking-wide">¡ASISTENCIA CONFIRMADA!</h3>
                   <p className="text-xs text-fg-muted mt-0.5">
-                    Tu participación ha sido confirmada con éxito para este servicio. ¡Nos vemos en la alabanza!
+                    Tu participación ha sido confirmada para este servicio. ¡Nos vemos en la alabanza!
                   </p>
                 </div>
                 <span className="px-3.5 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-accent">
@@ -1922,16 +1919,14 @@ function DayDetailScreen({
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={handleConfirm}
-                    disabled={feedbackStatus === 'confirming'}
-                    className="flex-1 sm:flex-none px-5 py-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 text-accent-fg bg-accent hover:bg-accent-hover active:scale-95 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                    className="flex-1 sm:flex-none px-5 py-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 text-accent-fg bg-accent hover:bg-accent-hover active:scale-95 transition-all shadow-sm cursor-pointer"
                   >
                     <IconCheck size={16} />
                     <span>Confirmar asistencia</span>
                   </button>
                   <button
                     onClick={handleReject}
-                    disabled={feedbackStatus === 'rejecting'}
-                    className="flex-1 sm:flex-none px-4 py-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1.5 text-fg-muted hover:text-fg bg-surface-2 hover:bg-surface-3 border border-border active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                    className="flex-1 sm:flex-none px-4 py-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1.5 text-fg-muted hover:text-fg bg-surface-2 hover:bg-surface-3 border border-border active:scale-95 transition-all cursor-pointer"
                   >
                     <IconX size={15} />
                     <span>No podré asistir</span>
