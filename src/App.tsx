@@ -30,6 +30,13 @@ import {
   INITIAL_MUSICIANS,
 } from './lib/api'
 import { generateSongPDF } from './lib/pdf'
+import {
+  cleanPhoneForWhatsApp,
+  formatServiceDateText,
+  generateIndividualMusicianMessage,
+  generateGroupServiceMessage,
+  openWhatsAppChat,
+} from './lib/whatsapp'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -245,6 +252,23 @@ function IconArrowDown({ size = 13 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="12" y1="5" x2="12" y2="19" />
       <polyline points="19 12 12 19 5 12" />
+    </svg>
+  )
+}
+
+function IconBrandWhatsapp({ size = 16, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    </svg>
+  )
+}
+
+function IconCopy({ size = 15, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
     </svg>
   )
 }
@@ -1754,6 +1778,198 @@ function CalendarScreen({
   )
 }
 
+// ─── WHATSAPP NOTIFICATION MODAL ──────────────────────────────────────────────
+
+function WhatsAppNotificationModal({
+  event,
+  roster,
+  musicians,
+  songs,
+  onClose,
+}: {
+  event: ServiceEvent
+  roster: { mid: string; status: Status; instrument?: string; secondary_instruments?: string[] }[]
+  musicians: Musician[]
+  songs: Song[]
+  onClose: () => void
+}) {
+  const [tab, setTab] = useState<'individual' | 'group'>('individual')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [sentMap, setSentMap] = useState<Record<string, boolean>>({})
+
+  const groupMessage = useMemo(() => {
+    return generateGroupServiceMessage({ event, musicians, songs })
+  }, [event, musicians, songs])
+
+  function handleSendIndividual(m: Musician, entry?: RosterEntry) {
+    const text = generateIndividualMusicianMessage({ event, musician: m, entry, songs })
+    openWhatsAppChat(m.phone || '', text)
+    setSentMap(prev => ({ ...prev, [m.id]: true }))
+  }
+
+  function handleCopyIndividual(m: Musician, entry?: RosterEntry) {
+    const text = generateIndividualMusicianMessage({ event, musician: m, entry, songs })
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text)
+      setCopiedId(m.id)
+      setTimeout(() => setCopiedId(null), 2000)
+    }
+  }
+
+  function handleSendGroup() {
+    openWhatsAppChat('', groupMessage)
+  }
+
+  function handleCopyGroup() {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(groupMessage)
+      setCopiedId('group')
+      setTimeout(() => setCopiedId(null), 2000)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={onClose} />
+      <div className="relative w-full max-w-2xl rounded-3xl flex flex-col max-h-[90vh] bg-surface border border-border shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="px-6 pt-6 pb-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center">
+              <IconBrandWhatsapp size={22} />
+            </div>
+            <div>
+              <h3 className="font-display text-lg text-fg tracking-wide">NOTIFICAR CONVOCATORIA POR WHATSAPP</h3>
+              <p className="text-fg-muted text-xs">{event.label} · {formatServiceDateText(event.date)}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-xl text-fg-muted hover:text-fg flex items-center justify-center bg-surface-2 border border-border transition cursor-pointer">
+            <IconX size={15} />
+          </button>
+        </div>
+
+        {/* Selector de Pestañas */}
+        <div className="flex border-b border-border bg-surface-2/40 px-6 pt-2">
+          <button
+            onClick={() => setTab('individual')}
+            className={`pb-3 px-4 text-xs font-semibold border-b-2 transition flex items-center gap-2 cursor-pointer ${
+              tab === 'individual'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-fg-muted hover:text-fg'
+            }`}
+          >
+            <span>Convocatorias Individuales</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-surface-3 text-fg font-bold">
+              {roster.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setTab('group')}
+            className={`pb-3 px-4 text-xs font-semibold border-b-2 transition flex items-center gap-2 cursor-pointer ${
+              tab === 'group'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-fg-muted hover:text-fg'
+            }`}
+          >
+            <span>Mensaje General para Grupo</span>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          {tab === 'individual' ? (
+            <div className="flex flex-col gap-3">
+              {roster.length === 0 ? (
+                <div className="text-center py-10 text-fg-muted text-xs">
+                  No hay músicos asignados a este servicio aún. Agrega integrantes al servicio para enviarles su convocatoria.
+                </div>
+              ) : (
+                roster.map(entry => {
+                  const m = musicians.find(x => x.id === entry.mid)
+                  if (!m) return null
+                  const primary = entry.instrument || m.instrument
+                  const hasPhone = Boolean(m.phone && m.phone.trim())
+                  const isSent = sentMap[m.id]
+                  const isCopied = copiedId === m.id
+
+                  return (
+                    <div
+                      key={entry.mid}
+                      className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-border-hover transition"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <Avatar initials={m.initials} size="md" />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-fg text-sm truncate">{m.name}</span>
+                            <StatusBadge status={entry.status} />
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-fg-muted capitalize">{primary}</span>
+                            <span className="text-[10px] text-fg-subtle">·</span>
+                            <span className={`text-[11px] ${hasPhone ? 'text-fg-subtle' : 'text-accent'}`}>
+                              {hasPhone ? m.phone : 'Sin celular'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={() => handleCopyIndividual(m, entry)}
+                          className="p-2.5 rounded-xl bg-surface border border-border hover:text-fg text-fg-muted transition cursor-pointer"
+                          title="Copiar texto del mensaje"
+                        >
+                          {isCopied ? <IconCheck size={14} className="text-emerald-500" /> : <IconCopy size={14} />}
+                        </button>
+                        <button
+                          onClick={() => handleSendIndividual(m, entry)}
+                          className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer ${
+                            isSent
+                              ? 'bg-emerald-600/20 text-emerald-500 border border-emerald-500/40'
+                              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                          }`}
+                        >
+                          <IconBrandWhatsapp size={15} />
+                          <span>{isSent ? 'Reenviar WhatsApp' : 'Enviar WhatsApp'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="p-4 rounded-2xl bg-surface-2 border border-border">
+                <p className="text-[11px] text-fg-muted font-bold uppercase tracking-wider mb-2">Vista previa del mensaje consolidado:</p>
+                <pre className="text-xs font-mono text-fg bg-surface p-4 rounded-xl border border-border whitespace-pre-wrap max-h-64 overflow-y-auto leading-relaxed">
+                  {groupMessage}
+                </pre>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  onClick={handleSendGroup}
+                  className="w-full sm:flex-1 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-xs transition active:scale-95 cursor-pointer"
+                >
+                  <IconBrandWhatsapp size={16} />
+                  <span>Compartir en Grupo de WhatsApp</span>
+                </button>
+                <button
+                  onClick={handleCopyGroup}
+                  className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-surface-2 hover:bg-surface-3 border border-border text-fg font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer"
+                >
+                  {copiedId === 'group' ? <IconCheck size={14} className="text-emerald-500" /> : <IconCopy size={14} />}
+                  <span>{copiedId === 'group' ? '¡Copiado!' : 'Copiar Texto'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── DAY DETAIL SCREEN ────────────────────────────────────────────────────────
 
 function DayDetailScreen({
@@ -1785,6 +2001,7 @@ function DayDetailScreen({
   const [feedbackStatus, setFeedbackStatus] = useState<'confirmed' | 'rejected' | null>(null)
   const [isBannerDismissed, setIsBannerDismissed] = useState(() => myEntry?.status !== 'pendiente')
   const [isCollapsing, setIsCollapsing] = useState(false)
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false)
 
   // Solo reiniciar cuando se cambia de servicio (fecha distinta), no en medio de la animación
   useEffect(() => {
@@ -1858,7 +2075,16 @@ function DayDetailScreen({
             <IconChevronLeft size={16} />
             <span>Volver al Calendario</span>
           </button>
-          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setWhatsappModalOpen(true)}
+              className="px-3.5 py-2 rounded-2xl bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-2 transition cursor-pointer"
+            >
+              <IconBrandWhatsapp size={15} />
+              <span>Notificar WhatsApp</span>
+            </button>
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          </div>
         </div>
 
         {/* Anuncio y Confirmación de Asistencia con Animación y Auto-Eliminación */}
@@ -1998,7 +2224,16 @@ function DayDetailScreen({
           </div>
 
           <div className="lg:col-span-5 flex flex-col gap-4">
-            <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO ASIGNADO</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO ASIGNADO</h2>
+              <button
+                onClick={() => setWhatsappModalOpen(true)}
+                className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <IconBrandWhatsapp size={13} />
+                <span>Notificar a todos</span>
+              </button>
+            </div>
             <div className="flex flex-col gap-3">
               {ministryGroups.map(group => (
                 <div key={group.title} className="rounded-3xl p-5 bg-surface border border-border shadow-xs">
@@ -2026,7 +2261,19 @@ function DayDetailScreen({
                               </div>
                             </div>
                           </div>
-                          <StatusBadge status={entry.status} />
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <StatusBadge status={entry.status} />
+                            <button
+                              onClick={() => {
+                                const text = generateIndividualMusicianMessage({ event, musician: m, entry, songs })
+                                openWhatsAppChat(m.phone || '', text)
+                              }}
+                              className="p-1.5 rounded-xl bg-surface-2 hover:bg-emerald-600/15 hover:text-emerald-500 border border-border text-fg-muted transition cursor-pointer"
+                              title={`Enviar convocatoria por WhatsApp a ${m.name}`}
+                            >
+                              <IconBrandWhatsapp size={14} />
+                            </button>
+                          </div>
                         </div>
                       )
                     })}
@@ -2037,6 +2284,17 @@ function DayDetailScreen({
           </div>
         </div>
       </div>
+
+      {/* Modal de Notificaciones por WhatsApp */}
+      {whatsappModalOpen && (
+        <WhatsAppNotificationModal
+          event={event}
+          roster={roster}
+          musicians={musicians}
+          songs={songs}
+          onClose={() => setWhatsappModalOpen(false)}
+        />
+      )}
     </div>
   )
 }
@@ -3771,13 +4029,27 @@ export default function App() {
         if (Array.isArray(loadedMusicians)) {
           setMusicians(loadedMusicians)
 
+          // Leer parámetros de URL para enlaces directos de WhatsApp
+          const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+          const urlDate = urlParams?.get('date')
+          const urlUser = urlParams?.get('user') || urlParams?.get('mid')
+
           const savedUserId = localStorage.getItem('acorde_logged_user_id')
-          if (savedUserId) {
-            const found = loadedMusicians.find(m => m.id === savedUserId)
+          const targetUserId = urlUser || savedUserId
+
+          if (targetUserId) {
+            const found = loadedMusicians.find(m => m.id === targetUserId)
             if (found) {
               setActiveUser(found)
-              setScreen('calendar')
+              localStorage.setItem('acorde_logged_user_id', found.id)
             }
+          }
+
+          if (urlDate) {
+            setSelectedDate(urlDate)
+            setScreen('day-detail')
+          } else if (targetUserId) {
+            setScreen('calendar')
           }
         }
       } catch (err) {
