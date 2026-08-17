@@ -2016,9 +2016,7 @@ function DayDetailScreen({
                       const m = musicians.find(x => x.id === entry.mid)
                       if (!m) return null
                       const primaryInst = entry.instrument || m.instrument
-                      const secondaries = entry.secondary_instruments && entry.secondary_instruments.length > 0
-                        ? entry.secondary_instruments
-                        : (m.secondary_instruments || [])
+                      const secondaries = Array.isArray(entry.secondary_instruments) ? entry.secondary_instruments : []
                       return (
                         <div key={entry.mid} className="flex items-start justify-between gap-2">
                           <div className="flex items-start gap-2.5 min-w-0">
@@ -2027,7 +2025,7 @@ function DayDetailScreen({
                               <span className="text-sm font-semibold text-fg block truncate">{m.name}</span>
                               <div className="flex flex-wrap gap-1 mt-1">
                                 <InstrumentChip instrument={primaryInst} isPrimary={true} />
-                                {secondaries.slice(0, 2).map(sec => (
+                                {secondaries.map(sec => (
                                   <InstrumentChip key={sec} instrument={sec} isPrimary={false} />
                                 ))}
                               </div>
@@ -2972,9 +2970,7 @@ function AdminScreen({
       return {
         mid: r.mid,
         instrument: r.instrument || m?.instrument || 'guitarra',
-        secondary_instruments: r.secondary_instruments && r.secondary_instruments.length > 0
-          ? r.secondary_instruments
-          : (m?.secondary_instruments || []),
+        secondary_instruments: Array.isArray(r.secondary_instruments) ? r.secondary_instruments : [],
         status: r.status,
       }
     })
@@ -2990,7 +2986,7 @@ function AdminScreen({
       {
         mid: m.id,
         instrument: m.instrument || 'guitarra',
-        secondary_instruments: m.secondary_instruments || [],
+        secondary_instruments: [],
         status: 'pendiente',
       }
     ])
