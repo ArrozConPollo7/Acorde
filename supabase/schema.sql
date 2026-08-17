@@ -5,16 +5,9 @@
 -- 1. EXTENSIONS
 create extension if not exists "uuid-ossp";
 
--- 2. ENUMS & DOMAINS
--- Instrumentos: guitarra, piano, bajo, voz, batería
--- Roles: admin, musician
--- Status: confirmado, pendiente, rechazado
--- Tempos: rápida, media, lenta
--- Tipos de servicio: domingo, midweek
-
--- 3. TABLA: profiles (Usuarios / Músicos vinculados con auth.users)
+-- 2. TABLA: profiles (Usuarios / Músicos del Ministerio)
 create table if not exists public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
+  id uuid primary key default gen_random_uuid(),
   name text not null,
   instrument text not null check (instrument in ('guitarra', 'piano', 'bajo', 'voz', 'batería')),
   initials text not null,
@@ -25,7 +18,7 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
--- 4. TABLA: songs (Repertorio de Canciones)
+-- 3. TABLA: songs (Repertorio de Canciones de IBAMI)
 create table if not exists public.songs (
   id uuid primary key default gen_random_uuid(),
   title text not null unique,
@@ -42,7 +35,7 @@ create table if not exists public.songs (
   updated_at timestamptz not null default now()
 );
 
--- 5. TABLA: service_events (Servicios y Programación)
+-- 4. TABLA: service_events (Servicios y Programación)
 create table if not exists public.service_events (
   id uuid primary key default gen_random_uuid(),
   date date not null unique,
@@ -53,7 +46,7 @@ create table if not exists public.service_events (
   updated_at timestamptz not null default now()
 );
 
--- 6. TABLA: service_roster (Asignación de Músicos a Servicios)
+-- 5. TABLA: service_roster (Asignación de Músicos a Servicios)
 create table if not exists public.service_roster (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.service_events(id) on delete cascade,
@@ -63,7 +56,7 @@ create table if not exists public.service_roster (
   unique(event_id, user_id)
 );
 
--- 7. TABLA: service_setlists (Canciones programadas por Servicio)
+-- 6. TABLA: service_setlists (Canciones programadas por Servicio)
 create table if not exists public.service_setlists (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.service_events(id) on delete cascade,
@@ -76,7 +69,7 @@ create table if not exists public.service_setlists (
 );
 
 -- ==============================================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- ROW LEVEL SECURITY (RLS) POLICIES PERMISIVAS PARA LA WEB APP
 -- ==============================================================================
 
 alter table public.profiles enable row level security;
@@ -86,229 +79,51 @@ alter table public.service_roster enable row level security;
 alter table public.service_setlists enable row level security;
 
 -- PROFILES POLICIES
-create policy "Cualquier usuario autenticado puede ver perfiles"
-  on public.profiles for select
-  to authenticated
-  using (true);
+drop policy if exists "Permitir lectura de perfiles" on public.profiles;
+drop policy if exists "Permitir insercion de perfiles" on public.profiles;
+drop policy if exists "Permitir actualizacion de perfiles" on public.profiles;
+drop policy if exists "Permitir eliminacion de perfiles" on public.profiles;
 
-create policy "Los usuarios pueden actualizar su propio perfil"
-  on public.profiles for update
-  to authenticated
-  using (auth.uid() = id);
-
-create policy "Admins pueden insertar y modificar cualquier perfil"
-  on public.profiles for all
-  to authenticated
-  using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid() and profiles.role = 'admin'
-    )
-  );
+create policy "Permitir lectura de perfiles" on public.profiles for select to public using (true);
+create policy "Permitir insercion de perfiles" on public.profiles for insert to public with check (true);
+create policy "Permitir actualizacion de perfiles" on public.profiles for update to public using (true);
+create policy "Permitir eliminacion de perfiles" on public.profiles for delete to public using (true);
 
 -- SONGS POLICIES
-create policy "Cualquier usuario puede ver canciones"
-  on public.songs for select
-  to public
-  using (true);
+drop policy if exists "Cualquier usuario puede ver canciones" on public.songs;
+drop policy if exists "Permitir creación de canciones" on public.songs;
+drop policy if exists "Permitir actualización de letras y acordes" on public.songs;
+drop policy if exists "Solo admins pueden eliminar canciones" on public.songs;
+drop policy if exists "Permitir eliminacion de canciones" on public.songs;
 
-create policy "Permitir creación de canciones"
-  on public.songs for insert
-  to public
-  with check (true);
-
-create policy "Permitir actualización de letras y acordes"
-  on public.songs for update
-  to public
-  using (true);
-
-create policy "Solo admins pueden eliminar canciones"
-  on public.songs for delete
-  to authenticated
-  using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid() and profiles.role = 'admin'
-    )
-  );
+create policy "Permitir lectura de canciones" on public.songs for select to public using (true);
+create policy "Permitir insercion de canciones" on public.songs for insert to public with check (true);
+create policy "Permitir actualizacion de canciones" on public.songs for update to public using (true);
+create policy "Permitir eliminacion de canciones" on public.songs for delete to public using (true);
 
 -- SERVICE EVENTS POLICIES
-create policy "Cualquier usuario autenticado puede ver eventos"
-  on public.service_events for select
-  to authenticated
-  using (true);
+drop policy if exists "Permitir lectura de eventos" on public.service_events;
+drop policy if exists "Permitir gestion de eventos" on public.service_events;
 
-create policy "Admins pueden gestionar eventos"
-  on public.service_events for all
-  to authenticated
-  using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid() and profiles.role = 'admin'
-    )
-  );
+create policy "Permitir lectura de eventos" on public.service_events for select to public using (true);
+create policy "Permitir insercion de eventos" on public.service_events for insert to public with check (true);
+create policy "Permitir actualizacion de eventos" on public.service_events for update to public using (true);
+create policy "Permitir eliminacion de eventos" on public.service_events for delete to public using (true);
 
 -- SERVICE ROSTER POLICIES
-create policy "Cualquier usuario autenticado puede ver el roster"
-  on public.service_roster for select
-  to authenticated
-  using (true);
+drop policy if exists "Permitir lectura de roster" on public.service_roster;
+drop policy if exists "Permitir gestion de roster" on public.service_roster;
 
-create policy "Músicos pueden actualizar su propio estado de asistencia"
-  on public.service_roster for update
-  to authenticated
-  using (user_id = auth.uid())
-  with check (user_id = auth.uid());
-
-create policy "Admins pueden gestionar todo el roster"
-  on public.service_roster for all
-  to authenticated
-  using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid() and profiles.role = 'admin'
-    )
-  );
+create policy "Permitir lectura de roster" on public.service_roster for select to public using (true);
+create policy "Permitir insercion de roster" on public.service_roster for insert to public with check (true);
+create policy "Permitir actualizacion de roster" on public.service_roster for update to public using (true);
+create policy "Permitir eliminacion de roster" on public.service_roster for delete to public using (true);
 
 -- SERVICE SETLISTS POLICIES
-create policy "Cualquier usuario autenticado puede ver setlists"
-  on public.service_setlists for select
-  to authenticated
-  using (true);
+drop policy if exists "Permitir lectura de setlists" on public.service_setlists;
+drop policy if exists "Permitir gestion de setlists" on public.service_setlists;
 
-create policy "Admins pueden gestionar setlists"
-  on public.service_setlists for all
-  to authenticated
-  using (
-    exists (
-      select 1 from public.profiles
-      where profiles.id = auth.uid() and profiles.role = 'admin'
-    )
-  );
-
--- ==============================================================================
--- AUTH TRIGGER: Auto-crear perfil al registrarse un usuario en Supabase Auth
--- ==============================================================================
-
-create or replace function public.handle_new_user()
-returns trigger as $$
-declare
-  user_name text;
-  user_role text;
-  user_instrument text;
-  user_initials text;
-begin
-  user_name := coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1));
-  user_role := coalesce(new.raw_user_meta_data->>'role', 'musician');
-  user_instrument := coalesce(new.raw_user_meta_data->>'instrument', 'voz');
-  
-  -- Generar iniciales (primeras letras de las dos primeras palabras)
-  user_initials := upper(
-    substring(split_part(user_name, ' ', 1) from 1 for 1) ||
-    coalesce(substring(split_part(user_name, ' ', 2) from 1 for 1), '')
-  );
-  if length(user_initials) = 0 then
-    user_initials := 'IB';
-  end if;
-
-  insert into public.profiles (id, name, instrument, initials, role, email)
-  values (
-    new.id,
-    user_name,
-    user_instrument,
-    user_initials,
-    user_role,
-    new.email
-  )
-  on conflict (id) do update
-  set name = excluded.name,
-      email = excluded.email;
-
-  return new;
-end;
-$$ language plpgsql security definer;
-
--- Trigger tras registro en auth.users
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
-
--- ==============================================================================
--- SEED DATA (Datos Iniciales)
--- ==============================================================================
-
-insert into public.songs (id, title, artist, key, tempo, tags, lyrics) values
-(
-  'a0000000-0000-0000-0000-000000000001',
-  'Grande es tu Amor',
-  'Hillsong en Español',
-  'G',
-  'lenta',
-  array['adoración', 'amor'],
-  '[
-    {"label": "Verso 1", "segments": [{"chord": "G", "text": "Grande es "}, {"chord": "D", "text": "tu amor, "}, {"chord": "Em", "text": "grande es "}, {"chord": "C", "text": "tu gracia"}]},
-    {"segments": [{"chord": "G", "text": "Tu misericordia "}, {"chord": "D", "text": "no tiene fin"}]},
-    {"label": "Coro", "segments": [{"chord": "Em", "text": "Canto de "}, {"chord": "C", "text": "alabanza "}, {"chord": "G", "text": "a ti, mi Rey"}]},
-    {"segments": [{"chord": "D", "text": "Por siempre "}, {"chord": "G", "text": "alabaré tu nombre"}]},
-    {"label": "Puente", "segments": [{"chord": "C", "text": "Con todo mi ser "}, {"chord": "G", "text": "te alabaré"}]},
-    {"segments": [{"chord": "D", "text": "Eterno "}, {"chord": "Em", "text": "Salvador, "}, {"chord": "C", "text": "mi Dios fiel"}]}
-  ]'::jsonb
-),
-(
-  'a0000000-0000-0000-0000-000000000002',
-  'Rey de Reyes',
-  'Hillsong Worship',
-  'D',
-  'rápida',
-  array['alabanza', 'exaltación'],
-  '[
-    {"label": "Verso 1", "segments": [{"chord": "D", "text": "Rey de reyes, "}, {"chord": "A", "text": "Señor de señores"}]},
-    {"segments": [{"chord": "Bm", "text": "Gloria, "}, {"chord": "G", "text": "gloria, "}, {"chord": "D", "text": "aleluya"}]},
-    {"label": "Coro", "segments": [{"chord": "A", "text": "Por siempre "}, {"chord": "D", "text": "es su amor,"}, {"chord": "G", "text": " eterno"}]},
-    {"segments": [{"chord": "Bm", "text": "Su gracia "}, {"chord": "A", "text": "es sin igual"}]}
-  ]'::jsonb
-),
-(
-  'a0000000-0000-0000-0000-000000000003',
-  'En tu Presencia',
-  'Marco Barrientos',
-  'E',
-  'lenta',
-  array['adoración', 'presencia'],
-  '[
-    {"label": "Verso 1", "segments": [{"chord": "E", "text": "En tu presencia "}, {"chord": "B", "text": "es donde quiero estar"}]},
-    {"segments": [{"chord": "C#m", "text": "Guardado "}, {"chord": "A", "text": "bajo la sombra "}, {"chord": "E", "text": "de tus alas"}]},
-    {"label": "Coro", "segments": [{"chord": "A", "text": "Aquí me rindo, "}, {"chord": "E", "text": "aquí me entrego"}]},
-    {"segments": [{"chord": "B", "text": "A ti, "}, {"chord": "C#m", "text": "Señor, "}, {"chord": "A", "text": "mi todo eres"}]}
-  ]'::jsonb
-),
-(
-  'a0000000-0000-0000-0000-000000000004',
-  'Poderoso',
-  'Elevation Worship',
-  'C',
-  'rápida',
-  array['alabanza', 'poder'],
-  '[
-    {"label": "Verso 1", "segments": [{"chord": "C", "text": "Eres poderoso, "}, {"chord": "G", "text": "eres victorioso"}]},
-    {"segments": [{"chord": "Am", "text": "Tu nombre "}, {"chord": "F", "text": "es exaltado "}, {"chord": "C", "text": "sobre todo"}]},
-    {"label": "Coro", "segments": [{"chord": "F", "text": "Poderoso, "}, {"chord": "C", "text": "poderoso eres"}]},
-    {"segments": [{"chord": "G", "text": "Rey eterno, "}, {"chord": "Am", "text": "soberano "}, {"chord": "F", "text": "Dios"}]}
-  ]'::jsonb
-),
-(
-  'a0000000-0000-0000-0000-000000000005',
-  'Maravilloso',
-  'Redimi2',
-  'A',
-  'media',
-  array['adoración', 'maravilla'],
-  '[
-    {"label": "Verso 1", "segments": [{"chord": "A", "text": "Maravilloso, "}, {"chord": "E", "text": "Dios "}, {"chord": "F#m", "text": "maravilloso"}]},
-    {"segments": [{"chord": "D", "text": "No hay otro "}, {"chord": "A", "text": "como tú, mi Dios"}]},
-    {"label": "Coro", "segments": [{"chord": "E", "text": "Eres digno "}, {"chord": "D", "text": "de toda gloria"}]},
-    {"segments": [{"chord": "A", "text": "Maravilloso "}, {"chord": "E", "text": "eres, "}, {"chord": "D", "text": "Señor"}]}
-  ]'::jsonb
-)
-on conflict (id) do nothing;
+create policy "Permitir lectura de setlists" on public.service_setlists for select to public using (true);
+create policy "Permitir insercion de setlists" on public.service_setlists for insert to public with check (true);
+create policy "Permitir actualizacion de setlists" on public.service_setlists for update to public using (true);
+create policy "Permitir eliminacion de setlists" on public.service_setlists for delete to public using (true);

@@ -2599,7 +2599,10 @@ function AdminScreen({
         {tab === 'usuarios' && (
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO DE MÚSICOS</h2>
+              <div>
+                <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO DE MÚSICOS</h2>
+                <p className="text-xs text-fg-muted">{musicians.length} {musicians.length === 1 ? 'músico registrado' : 'músicos registrados'}</p>
+              </div>
               <button
                 onClick={openCreateMusician}
                 className="text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-4 py-2 rounded-xl flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer shadow-xs"
@@ -2609,42 +2612,61 @@ function AdminScreen({
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {musicians.map(m => (
-                <div key={m.id} className="rounded-3xl p-5 flex items-start justify-between bg-surface border border-border shadow-xs">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <Avatar initials={m.initials} size="md" />
-                    <div className="min-w-0">
-                      <p className="font-semibold text-fg text-sm truncate">{m.name}</p>
-                      <p className="text-xs text-fg-muted truncate">{m.email}</p>
-                      <div className="mt-2 flex items-center gap-1.5">
-                        <InstrumentChip instrument={m.instrument} />
-                        {m.role === 'admin' && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-2 text-accent border border-border">Admin</span>
-                        )}
+            {musicians.length === 0 ? (
+              <div className="rounded-3xl p-10 bg-surface border border-border text-center flex flex-col items-center justify-center gap-3 shadow-xs">
+                <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-border flex items-center justify-center text-fg-muted">
+                  <IconUser size={26} />
+                </div>
+                <div>
+                  <p className="font-semibold text-fg text-base">No hay músicos registrados</p>
+                  <p className="text-xs text-fg-muted mt-1">Has eliminado todos los músicos. Pulsa abajo para registrar un nuevo integrante.</p>
+                </div>
+                <button
+                  onClick={openCreateMusician}
+                  className="mt-2 text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <IconPlus size={13} />
+                  Agregar Músico
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {musicians.map(m => (
+                  <div key={m.id} className="rounded-3xl p-5 flex items-start justify-between bg-surface border border-border shadow-xs">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <Avatar initials={m.initials} size="md" />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-fg text-sm truncate">{m.name}</p>
+                        <p className="text-xs text-fg-muted truncate">{m.email}</p>
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <InstrumentChip instrument={m.instrument} />
+                          {m.role === 'admin' && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-2 text-accent border border-border">Admin</span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => openEditMusician(m)}
-                      className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
-                      title="Editar Músico"
-                    >
-                      <IconEdit size={14} />
-                    </button>
-                    <button
-                      onClick={() => onDeleteMusician(m.id)}
-                      className="w-8 h-8 rounded-lg text-fg-muted hover:text-accent bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
-                      title="Eliminar Músico"
-                    >
-                      <IconTrash size={13} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => openEditMusician(m)}
+                        className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
+                        title="Editar Músico"
+                      >
+                        <IconEdit size={14} />
+                      </button>
+                      <button
+                        onClick={() => onDeleteMusician(m.id)}
+                        className="w-8 h-8 rounded-lg text-fg-muted hover:text-accent bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
+                        title="Eliminar Músico"
+                      >
+                        <IconTrash size={13} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -2834,11 +2856,11 @@ export default function App() {
   const [editingSong, setEditingSong] = useState<Song | null>(null)
 
   // Database State
-  const [songs, setSongs] = useState<Song[]>(INITIAL_SONGS)
-  const [events, setEvents] = useState<ServiceEvent[]>(INITIAL_EVENTS)
-  const [musicians, setMusicians] = useState<Musician[]>(INITIAL_MUSICIANS)
+  const [songs, setSongs] = useState<Song[]>([])
+  const [events, setEvents] = useState<ServiceEvent[]>([])
+  const [musicians, setMusicians] = useState<Musician[]>([])
 
-  // Carga inicial de datos desde Supabase
+  // Carga inicial de datos desde Supabase / LocalCache
   useEffect(() => {
     async function loadData() {
       try {
@@ -2847,11 +2869,11 @@ export default function App() {
           fetchEvents(),
           fetchMusicians(),
         ])
-        if (loadedSongs && loadedSongs.length > 0) setSongs(loadedSongs)
-        if (loadedEvents && loadedEvents.length > 0) setEvents(loadedEvents)
-        if (loadedMusicians && loadedMusicians.length > 0) setMusicians(loadedMusicians)
+        if (Array.isArray(loadedSongs)) setSongs(loadedSongs)
+        if (Array.isArray(loadedEvents)) setEvents(loadedEvents)
+        if (Array.isArray(loadedMusicians)) setMusicians(loadedMusicians)
       } catch (err) {
-        console.warn('Carga de datos con fallback local:', err)
+        console.warn('Carga de datos con fallback:', err)
       }
     }
     loadData()
@@ -2887,7 +2909,24 @@ export default function App() {
     setTheme(t => (t === 'dark' ? 'light' : 'dark'))
   }
 
-  const currentMusician = musicians.find(m => role === 'admin' ? m.role === 'admin' : m.id === 'm1') || musicians[0]
+  // Usuario predeterminado seguro en caso de que no haya músicos registrados
+  const defaultUser: Musician = useMemo(() => ({
+    id: 'user-default',
+    name: role === 'admin' ? 'Administrador' : 'Músico IBAMI',
+    instrument: 'guitarra',
+    initials: role === 'admin' ? 'AD' : 'IB',
+    email: role === 'admin' ? 'pastor@ibami.org' : 'musico@ibami.org',
+    phone: '+57 300 000 0000',
+    role,
+  }), [role])
+
+  const currentMusician: Musician = useMemo(() => {
+    if (!musicians || musicians.length === 0) return defaultUser
+    if (role === 'admin') {
+      return musicians.find(m => m.role === 'admin') || musicians[0] || defaultUser
+    }
+    return musicians.find(m => m.id === 'm1') || musicians[0] || defaultUser
+  }, [musicians, role, defaultUser])
 
   function nav(to: Screen, from?: Screen) {
     if (from) setPrevScreen(from)

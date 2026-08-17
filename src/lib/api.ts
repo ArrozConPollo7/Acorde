@@ -56,6 +56,33 @@ export interface AISuggestion {
   moment?: 'Apertura' | 'Adoración' | 'Ministración'
 }
 
+// ─── LOCAL STORAGE PERSISTENCE HELPERS ────────────────────────────────────────
+
+const STORAGE_KEYS = {
+  SONGS: 'acorde_custom_songs',
+  EVENTS: 'acorde_custom_events',
+  MUSICIANS: 'acorde_custom_musicians',
+}
+
+function getStored<T>(key: string): T | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function setStored<T>(key: string, value: T): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch (err) {
+    console.warn('Error guardando en localStorage:', err)
+  }
+}
+
 // ─── PARSER DE CHORDPRO / TEXTO PARA NUEVAS CANCIONES ─────────────────────────
 
 export function parseChordProText(text: string): LyricLine[] {
@@ -122,7 +149,7 @@ export function formatLyricsToChordPro(lyrics: LyricLine[]): string {
     .join('\n')
 }
 
-// ─── REPERTORIO INICIAL DESDE NOTION ──────────────────────────────────────────
+// ─── REPERTORIO INICIAL ───────────────────────────────────────────────────────
 
 export const INITIAL_SONGS: Song[] = NOTION_SONGS
 
@@ -151,38 +178,44 @@ export const INITIAL_EVENTS: ServiceEvent[] = [
 // ─── CANCIONES API ────────────────────────────────────────────────────────────
 
 export async function fetchSongs(): Promise<Song[]> {
-  if (!isSupabaseConfigured || !supabase) {
-    return INITIAL_SONGS
-  }
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('songs')
+        .select('*')
+        .order('title', { ascending: true })
 
-  try {
-    const { data, error } = await supabase
-      .from('songs')
-      .select('*')
-      .order('title', { ascending: true })
-
-    if (error || !data || data.length === 0) {
-      return INITIAL_SONGS
+      if (!error && data) {
+        const mapped = data.map(item => ({
+          id: item.id,
+          title: item.title,
+          artist: item.artist,
+          key: item.key,
+          tempo: item.tempo,
+          tags: item.tags || [],
+          lyrics: Array.isArray(item.lyrics) ? item.lyrics : [],
+          media_url: item.media_url,
+          is_classic: item.is_classic,
+        }))
+        setStored(STORAGE_KEYS.SONGS, mapped)
+        return mapped
+      }
+    } catch (err) {
+      console.error('Error al obtener canciones de Supabase:', err)
     }
-
-    return data.map(item => ({
-      id: item.id,
-      title: item.title,
-      artist: item.artist,
-      key: item.key,
-      tempo: item.tempo,
-      tags: item.tags || [],
-      lyrics: Array.isArray(item.lyrics) ? item.lyrics : [],
-      media_url: item.media_url,
-      is_classic: item.is_classic,
-    }))
-  } catch (err) {
-    console.error('Error al obtener canciones de Supabase:', err)
-    return INITIAL_SONGS
   }
+
+  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS)
+  if (cached !== null) return cached
+  return INITIAL_SONGS
 }
 
 export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
+  let created: Song = {
+    id: `custom-${Date.now()}`,
+    ...newSong,
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
@@ -201,7 +234,7 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
         .single()
 
       if (!error && data) {
-        return {
+        created = {
           id: data.id,
           title: data.title,
           artist: data.artist,
@@ -218,18 +251,27 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
     }
   }
 
-  return {
-    id: `custom-${Date.now()}`,
-    ...newSong,
-  }
+  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
+  setStored(STORAGE_KEYS.SONGS, [created, ...cached])
+  return created
 }
 
 export async function updateSong(id: string, updates: Partial<Song>): Promise<Song> {
+  let updated: Song = {
+    id,
+    title: updates.title || '',
+    artist: updates.artist || '',
+    key: updates.key || 'G',
+    tempo: updates.tempo || 'media',
+    tags: updates.tags || [],
+    lyrics: updates.lyrics || [],
+    media_url: updates.media_url,
+    is_classic: updates.is_classic,
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
-      const payload: any = {
-        updated_at: new Date().toISOString(),
-      }
+      const payload: any = { updated_at: new Date().toISOString() }
       if (updates.title !== undefined) payload.title = updates.title
       if (updates.artist !== undefined) payload.artist = updates.artist
       if (updates.key !== undefined) payload.key = updates.key
@@ -247,7 +289,7 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
         .single()
 
       if (!error && data) {
-        return {
+        updated = {
           id: data.id,
           title: data.title,
           artist: data.artist,
@@ -264,17 +306,9 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
     }
   }
 
-  return {
-    id,
-    title: updates.title || '',
-    artist: updates.artist || '',
-    key: updates.key || 'G',
-    tempo: updates.tempo || 'media',
-    tags: updates.tags || [],
-    lyrics: updates.lyrics || [],
-    media_url: updates.media_url,
-    is_classic: updates.is_classic,
-  }
+  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
+  setStored(STORAGE_KEYS.SONGS, cached.map(s => s.id === id ? { ...s, ...updated } : s))
+  return updated
 }
 
 export async function deleteSong(id: string): Promise<void> {
@@ -285,48 +319,51 @@ export async function deleteSong(id: string): Promise<void> {
       console.error('Error eliminando canción en Supabase:', err)
     }
   }
+  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
+  setStored(STORAGE_KEYS.SONGS, cached.filter(s => s.id !== id))
 }
 
 // ─── SERVICIOS / EVENTOS API ──────────────────────────────────────────────────
 
 export async function fetchEvents(): Promise<ServiceEvent[]> {
-  if (!isSupabaseConfigured || !supabase) {
-    return INITIAL_EVENTS
-  }
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data: events, error: eventsError } = await supabase
+        .from('service_events')
+        .select(`
+          id,
+          date,
+          type,
+          label,
+          service_setlists ( song_id, position ),
+          service_roster ( user_id, status )
+        `)
+        .order('date', { ascending: true })
 
-  try {
-    const { data: events, error: eventsError } = await supabase
-      .from('service_events')
-      .select(`
-        id,
-        date,
-        type,
-        label,
-        service_setlists ( song_id, position ),
-        service_roster ( user_id, status )
-      `)
-      .order('date', { ascending: true })
-
-    if (eventsError || !events || events.length === 0) {
-      return INITIAL_EVENTS
+      if (!eventsError && events) {
+        const mapped = events.map((ev: any) => ({
+          date: ev.date,
+          type: ev.type,
+          label: ev.label,
+          setlist: (ev.service_setlists || [])
+            .sort((a: any, b: any) => a.position - b.position)
+            .map((s: any) => s.song_id),
+          roster: (ev.service_roster || []).map((r: any) => ({
+            mid: r.user_id,
+            status: r.status,
+          })),
+        }))
+        setStored(STORAGE_KEYS.EVENTS, mapped)
+        return mapped
+      }
+    } catch (err) {
+      console.error('Error al obtener eventos de Supabase:', err)
     }
-
-    return events.map((ev: any) => ({
-      date: ev.date,
-      type: ev.type,
-      label: ev.label,
-      setlist: (ev.service_setlists || [])
-        .sort((a: any, b: any) => a.position - b.position)
-        .map((s: any) => s.song_id),
-      roster: (ev.service_roster || []).map((r: any) => ({
-        mid: r.user_id,
-        status: r.status,
-      })),
-    }))
-  } catch (err) {
-    console.error('Error al obtener eventos de Supabase:', err)
-    return INITIAL_EVENTS
   }
+
+  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS)
+  if (cached !== null) return cached
+  return INITIAL_EVENTS
 }
 
 export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEvent> {
@@ -343,7 +380,6 @@ export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEv
         .single()
 
       if (!evErr && eventRow) {
-        // Insert setlist
         if (event.setlist.length > 0) {
           await supabase.from('service_setlists').insert(
             event.setlist.map((song_id, position) => ({
@@ -353,7 +389,6 @@ export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEv
             }))
           )
         }
-        // Insert roster
         if (event.roster.length > 0) {
           await supabase.from('service_roster').insert(
             event.roster.map(r => ({
@@ -369,6 +404,9 @@ export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEv
     }
   }
 
+  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS) || INITIAL_EVENTS
+  const updated = [...cached.filter(e => e.date !== event.date), event].sort((a, b) => a.date.localeCompare(b.date))
+  setStored(STORAGE_KEYS.EVENTS, updated)
   return event
 }
 
@@ -423,6 +461,9 @@ export async function updateServiceEvent(date: string, updates: Partial<ServiceE
       console.error('Error actualizando servicio en Supabase:', err)
     }
   }
+
+  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS) || INITIAL_EVENTS
+  setStored(STORAGE_KEYS.EVENTS, cached.map(e => e.date === date ? { ...e, ...updates } : e))
 }
 
 export async function deleteServiceEvent(date: string): Promise<void> {
@@ -433,43 +474,55 @@ export async function deleteServiceEvent(date: string): Promise<void> {
       console.error('Error eliminando servicio en Supabase:', err)
     }
   }
+  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS) || INITIAL_EVENTS
+  setStored(STORAGE_KEYS.EVENTS, cached.filter(e => e.date !== date))
 }
 
 // ─── MÚSICOS & PERFILES API ───────────────────────────────────────────────────
 
 export async function fetchMusicians(): Promise<Musician[]> {
-  if (!isSupabaseConfigured || !supabase) {
-    return INITIAL_MUSICIANS
-  }
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('name', { ascending: true })
 
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('name', { ascending: true })
-
-    if (error || !data || data.length === 0) {
-      return INITIAL_MUSICIANS
+      if (!error && data) {
+        const mapped = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          instrument: item.instrument,
+          initials: item.initials || item.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
+          email: item.email || '',
+          phone: item.phone || '',
+          role: item.role,
+        }))
+        setStored(STORAGE_KEYS.MUSICIANS, mapped)
+        return mapped
+      }
+    } catch (err) {
+      console.error('Error al obtener músicos de Supabase:', err)
     }
-
-    return data.map(item => ({
-      id: item.id,
-      name: item.name,
-      instrument: item.instrument,
-      initials: item.initials || item.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
-      email: item.email || '',
-      phone: item.phone || '',
-      role: item.role,
-    }))
-  } catch (err) {
-    console.error('Error al obtener músicos de Supabase:', err)
-    return INITIAL_MUSICIANS
   }
+
+  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS)
+  if (cached !== null) return cached
+  return INITIAL_MUSICIANS
 }
 
 export async function createMusician(musician: { name: string; instrument: Instrument; email: string; phone?: string; role?: Role }): Promise<Musician> {
   const initials = musician.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-  
+  let created: Musician = {
+    id: `m-${Date.now()}`,
+    name: musician.name,
+    instrument: musician.instrument,
+    initials,
+    email: musician.email,
+    phone: musician.phone,
+    role: musician.role || 'musician',
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
@@ -486,7 +539,7 @@ export async function createMusician(musician: { name: string; instrument: Instr
         .single()
 
       if (!error && data) {
-        return {
+        created = {
           id: data.id,
           name: data.name,
           instrument: data.instrument,
@@ -501,18 +554,22 @@ export async function createMusician(musician: { name: string; instrument: Instr
     }
   }
 
-  return {
-    id: `m-${Date.now()}`,
-    name: musician.name,
-    instrument: musician.instrument,
-    initials,
-    email: musician.email,
-    phone: musician.phone,
-    role: musician.role || 'musician',
-  }
+  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || INITIAL_MUSICIANS
+  setStored(STORAGE_KEYS.MUSICIANS, [...cached, created])
+  return created
 }
 
 export async function updateMusician(id: string, updates: Partial<Musician>): Promise<Musician> {
+  let updated: Musician = {
+    id,
+    name: updates.name || '',
+    instrument: updates.instrument || 'guitarra',
+    initials: updates.name ? updates.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : 'IB',
+    email: updates.email || '',
+    phone: updates.phone,
+    role: updates.role || 'musician',
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
       const payload: any = { updated_at: new Date().toISOString() }
@@ -533,7 +590,7 @@ export async function updateMusician(id: string, updates: Partial<Musician>): Pr
         .single()
 
       if (!error && data) {
-        return {
+        updated = {
           id: data.id,
           name: data.name,
           instrument: data.instrument,
@@ -548,15 +605,9 @@ export async function updateMusician(id: string, updates: Partial<Musician>): Pr
     }
   }
 
-  return {
-    id,
-    name: updates.name || '',
-    instrument: updates.instrument || 'guitarra',
-    initials: updates.name ? updates.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : 'IB',
-    email: updates.email || '',
-    phone: updates.phone,
-    role: updates.role || 'musician',
-  }
+  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || INITIAL_MUSICIANS
+  setStored(STORAGE_KEYS.MUSICIANS, cached.map(m => m.id === id ? { ...m, ...updated } : m))
+  return updated
 }
 
 export async function deleteMusician(id: string): Promise<void> {
@@ -567,6 +618,8 @@ export async function deleteMusician(id: string): Promise<void> {
       console.error('Error eliminando músico en Supabase:', err)
     }
   }
+  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || INITIAL_MUSICIANS
+  setStored(STORAGE_KEYS.MUSICIANS, cached.filter(m => m.id !== id))
 }
 
 export async function updateAttendanceStatus(date: string, mid: string, status: Status): Promise<void> {
