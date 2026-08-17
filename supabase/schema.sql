@@ -11,12 +11,16 @@ create table if not exists public.profiles (
   name text not null,
   instrument text not null check (instrument in ('guitarra', 'piano', 'bajo', 'voz', 'batería')),
   initials text not null,
-  role text not null check (role in ('admin', 'musician')) default 'musician',
+  role text not null check (role in ('admin', 'musician', 'both')) default 'musician',
   email text,
   phone text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Asegurar constraint de multi-rol en tablas existentes
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check check (role in ('admin', 'musician', 'both'));
 
 -- 3. TABLA: songs (Repertorio de Canciones de IBAMI)
 create table if not exists public.songs (
@@ -69,7 +73,7 @@ create table if not exists public.service_setlists (
 );
 
 -- ==============================================================================
--- ROW LEVEL SECURITY (RLS) POLICIES PERMISIVAS PARA LA WEB APP
+-- ROW LEVEL SECURITY (RLS) POLICIES PERMISIVAS
 -- ==============================================================================
 
 alter table public.profiles enable row level security;
@@ -90,10 +94,9 @@ create policy "Permitir actualizacion de perfiles" on public.profiles for update
 create policy "Permitir eliminacion de perfiles" on public.profiles for delete to public using (true);
 
 -- SONGS POLICIES
-drop policy if exists "Cualquier usuario puede ver canciones" on public.songs;
-drop policy if exists "Permitir creación de canciones" on public.songs;
-drop policy if exists "Permitir actualización de letras y acordes" on public.songs;
-drop policy if exists "Solo admins pueden eliminar canciones" on public.songs;
+drop policy if exists "Permitir lectura de canciones" on public.songs;
+drop policy if exists "Permitir insercion de canciones" on public.songs;
+drop policy if exists "Permitir actualizacion de canciones" on public.songs;
 drop policy if exists "Permitir eliminacion de canciones" on public.songs;
 
 create policy "Permitir lectura de canciones" on public.songs for select to public using (true);
@@ -103,7 +106,9 @@ create policy "Permitir eliminacion de canciones" on public.songs for delete to 
 
 -- SERVICE EVENTS POLICIES
 drop policy if exists "Permitir lectura de eventos" on public.service_events;
-drop policy if exists "Permitir gestion de eventos" on public.service_events;
+drop policy if exists "Permitir insercion de eventos" on public.service_events;
+drop policy if exists "Permitir actualizacion de eventos" on public.service_events;
+drop policy if exists "Permitir eliminacion de eventos" on public.service_events;
 
 create policy "Permitir lectura de eventos" on public.service_events for select to public using (true);
 create policy "Permitir insercion de eventos" on public.service_events for insert to public with check (true);
@@ -112,7 +117,9 @@ create policy "Permitir eliminacion de eventos" on public.service_events for del
 
 -- SERVICE ROSTER POLICIES
 drop policy if exists "Permitir lectura de roster" on public.service_roster;
-drop policy if exists "Permitir gestion de roster" on public.service_roster;
+drop policy if exists "Permitir insercion de roster" on public.service_roster;
+drop policy if exists "Permitir actualizacion de roster" on public.service_roster;
+drop policy if exists "Permitir eliminacion de roster" on public.service_roster;
 
 create policy "Permitir lectura de roster" on public.service_roster for select to public using (true);
 create policy "Permitir insercion de roster" on public.service_roster for insert to public with check (true);
@@ -121,7 +128,9 @@ create policy "Permitir eliminacion de roster" on public.service_roster for dele
 
 -- SERVICE SETLISTS POLICIES
 drop policy if exists "Permitir lectura de setlists" on public.service_setlists;
-drop policy if exists "Permitir gestion de setlists" on public.service_setlists;
+drop policy if exists "Permitir insercion de setlists" on public.service_setlists;
+drop policy if exists "Permitir actualizacion de setlists" on public.service_setlists;
+drop policy if exists "Permitir eliminacion de setlists" on public.service_setlists;
 
 create policy "Permitir lectura de setlists" on public.service_setlists for select to public using (true);
 create policy "Permitir insercion de setlists" on public.service_setlists for insert to public with check (true);

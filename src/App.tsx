@@ -1089,6 +1089,31 @@ function ProfileScreen({
               <IconEdit size={14} />
               Editar Información
             </button>
+
+            {/* Alternar Permisos de Administrador al Instante */}
+            <div className="w-full mt-3 p-3.5 rounded-2xl bg-surface-2 border border-border flex items-center justify-between">
+              <div className="text-left">
+                <p className="text-xs font-semibold text-fg">Acceso de Administrador</p>
+                <p className="text-[10px] text-fg-muted">
+                  {hasRole(musician, 'admin') ? 'Activo (Panel habilitado)' : 'Desactivado (Solo músico)'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const currentIsAdmin = hasRole(musician, 'admin')
+                  const newRole: Role = currentIsAdmin ? 'musician' : 'both'
+                  onUpdateMusician({ role: newRole })
+                }}
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition cursor-pointer ${
+                  hasRole(musician, 'admin')
+                    ? 'bg-surface text-fg-muted border-border hover:text-accent'
+                    : 'bg-accent text-accent-fg border-accent shadow-xs'
+                }`}
+              >
+                {hasRole(musician, 'admin') ? 'Quitar Admin' : 'Hacerme Admin'}
+              </button>
+            </div>
           </div>
 
           {/* Columna Derecha: Próximos Servicios Asignados */}
