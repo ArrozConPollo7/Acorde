@@ -1149,17 +1149,27 @@ function BottomNav({ screen, setScreen, currentUser }: { screen: Screen; setScre
 
 function LoginScreen({
   onLogin,
+  onRegisterAdmin,
   musicians,
   theme,
   onToggleTheme,
 }: {
   onLogin: (musician: Musician) => void
+  onRegisterAdmin: (m: { name: string; instrument: string; secondary_instruments?: string[]; email: string; phone?: string; role?: Role }) => Promise<void>
   musicians: Musician[]
   theme: Theme
   onToggleTheme: () => void
 }) {
   const [identifier, setIdentifier] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [showAdminForm, setShowAdminForm] = useState(musicians.length === 0)
+  const [adminName, setAdminName] = useState('')
+  const [adminInst, setAdminInst] = useState('dirección')
+  const [adminSecondaries, setAdminSecondaries] = useState<string[]>(['voz líder'])
+  const [adminEmail, setAdminEmail] = useState('')
+  const [adminPhone, setAdminPhone] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const [savedAccounts, setSavedAccounts] = useState<Musician[]>(() => {
     if (typeof window === 'undefined') return []
     try {
@@ -1169,6 +1179,13 @@ function LoginScreen({
       return []
     }
   })
+
+  function toggleAdminSecondary(instId: string) {
+    if (instId === adminInst) return
+    setAdminSecondaries(prev =>
+      prev.includes(instId) ? prev.filter(i => i !== instId) : [...prev, instId]
+    )
+  }
 
   function removeSavedAccount(id: string) {
     const next = savedAccounts.filter(a => a.id !== id)
@@ -1198,20 +1215,30 @@ function LoginScreen({
       onLogin(matched)
     } else {
       if (musicians.length === 0) {
-        const firstAdmin: Musician = {
-          id: `m-${Date.now()}`,
-          name: trimmed.includes('@') ? trimmed.split('@')[0] : 'Líder de Alabanza',
-          instrument: 'dirección',
-          secondary_instruments: ['voz líder'],
-          initials: 'LA',
-          email: trimmed.includes('@') ? trimmed : 'pastor@ibami.org',
-          phone: !trimmed.includes('@') ? trimmed : '+57 300 000 0000',
-          role: 'both',
-        }
-        onLogin(firstAdmin)
+        setShowAdminForm(true)
       } else {
         setErrorMsg('No encontramos ningún integrante registrado con ese correo o celular. Solicita al líder o administrador que te registre en el equipo.')
       }
+    }
+  }
+
+  async function handleAdminRegister(e: React.FormEvent) {
+    e.preventDefault()
+    if (!adminName.trim()) return
+    setIsSubmitting(true)
+    try {
+      await onRegisterAdmin({
+        name: adminName.trim(),
+        instrument: adminInst,
+        secondary_instruments: adminSecondaries.filter(i => i !== adminInst),
+        email: adminEmail.trim() || `${adminName.toLowerCase().replace(/\s+/g, '.')}@ibami.org`,
+        phone: adminPhone.trim(),
+        role: 'both',
+      })
+    } catch {
+      setErrorMsg('Error al registrar administrador en Supabase.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -1232,40 +1259,164 @@ function LoginScreen({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold text-fg-muted uppercase tracking-widest">
-              Correo o número de celular
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Ej: carlos@ibami.org o 3101234567"
-              value={identifier}
-              onChange={e => { setIdentifier(e.target.value); setErrorMsg(''); }}
-              className="w-full px-4 py-3.5 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent transition"
-            />
-            <p className="text-[11px] text-fg-subtle">
-              Ingresa el correo o celular registrado por el líder del ministerio.
-            </p>
-          </div>
-
-          {errorMsg && (
-            <div className="p-3.5 rounded-xl bg-surface-2 border border-accent/40 text-accent text-xs leading-relaxed">
-              {errorMsg}
+        {showAdminForm ? (
+          <form onSubmit={handleAdminRegister} className="flex flex-col gap-4">
+            <div className="text-center mb-2">
+              <h2 className="font-display text-xl text-fg">REGISTRO DE ADMINISTRADOR</h2>
+              <p className="text-xs text-fg-muted mt-1">Configura el perfil de liderazgo del ministerio para comenzar a gestionar el equipo y los servicios.</p>
             </div>
-          )}
 
-          <button
-            type="submit"
-            className="w-full py-3.5 mt-2 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold tracking-wide active:scale-[0.99] transition-all text-sm shadow-sm cursor-pointer"
-          >
-            Ingresar al Ministerio
-          </button>
-        </form>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-fg-muted uppercase">Nombre Completo *</label>
+              <input
+                type="text"
+                required
+                placeholder="Ej: Juan David"
+                value={adminName}
+                onChange={e => setAdminName(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-fg-muted uppercase">Rol / Instrumento Principal *</label>
+              <select
+                value={adminInst}
+                onChange={e => {
+                  const newPri = e.target.value
+                  setAdminInst(newPri)
+                  setAdminSecondaries(prev => prev.filter(i => i !== newPri))
+                }}
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
+              >
+                <optgroup label="Liderazgo & Voces">
+                  {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Liderazgo & Voces').map(inst => (
+                    <option key={inst.id} value={inst.id}>{inst.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Instrumentos de Banda">
+                  {AVAILABLE_INSTRUMENTS.filter(i => i.category === 'Instrumentos de Banda').map(inst => (
+                    <option key={inst.id} value={inst.id}>{inst.label}</option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-fg-muted uppercase">Instrumentos Secundarios</label>
+              <div className="flex flex-wrap gap-1 p-2 rounded-xl bg-surface-2 border border-border max-h-28 overflow-y-auto">
+                {AVAILABLE_INSTRUMENTS.filter(i => i.id !== adminInst).map(opt => {
+                  const isSelected = adminSecondaries.includes(opt.id)
+                  return (
+                    <button
+                      type="button"
+                      key={opt.id}
+                      onClick={() => toggleAdminSecondary(opt.id)}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-medium border flex items-center gap-1 transition cursor-pointer ${
+                        isSelected
+                          ? 'bg-accent text-accent-fg border-accent font-semibold shadow-xs'
+                          : 'bg-surface text-fg-muted border-border hover:text-fg'
+                      }`}
+                    >
+                      <span>{opt.short}</span>
+                      <span>{isSelected ? <IconCheck size={9} /> : <IconPlus size={9} />}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-fg-muted uppercase">Número de Celular / WhatsApp *</label>
+              <input
+                type="tel"
+                required
+                placeholder="Ej: 3101234567"
+                value={adminPhone}
+                onChange={e => setAdminPhone(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-fg-muted uppercase">Correo Electrónico</label>
+              <input
+                type="email"
+                placeholder="Ej: pastor@ibami.org"
+                value={adminEmail}
+                onChange={e => setAdminEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
+              />
+            </div>
+
+            {errorMsg && (
+              <div className="p-3 rounded-xl bg-surface-2 border border-accent/40 text-accent text-xs">
+                {errorMsg}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3.5 mt-2 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold tracking-wide active:scale-[0.99] transition-all text-sm shadow-sm cursor-pointer disabled:opacity-50"
+            >
+              {isSubmitting ? 'Guardando en Base de Datos...' : 'Crear Administrador y Entrar'}
+            </button>
+
+            {musicians.length > 0 && (
+              <button
+                type="button"
+                onClick={() => { setShowAdminForm(false); setErrorMsg(''); }}
+                className="text-xs text-fg-muted hover:text-fg text-center mt-1 cursor-pointer"
+              >
+                Volver a Iniciar Sesión con Correo / Celular
+              </button>
+            )}
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold text-fg-muted uppercase tracking-widest">
+                Correo o número de celular
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Ej: carlos@ibami.org o 3101234567"
+                value={identifier}
+                onChange={e => { setIdentifier(e.target.value); setErrorMsg(''); }}
+                className="w-full px-4 py-3.5 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent transition"
+              />
+              <p className="text-[11px] text-fg-subtle">
+                Ingresa el correo o celular registrado por el líder del ministerio.
+              </p>
+            </div>
+
+            {errorMsg && (
+              <div className="p-3.5 rounded-xl bg-surface-2 border border-accent/40 text-accent text-xs leading-relaxed">
+                {errorMsg}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3.5 mt-2 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold tracking-wide active:scale-[0.99] transition-all text-sm shadow-sm cursor-pointer"
+            >
+              Ingresar al Ministerio
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setShowAdminForm(true); setErrorMsg(''); }}
+              className="text-xs text-fg-muted hover:text-accent text-center mt-2 cursor-pointer"
+            >
+              ¿Eres el director y no tienes cuenta? Registrar Administrador
+            </button>
+          </form>
+        )}
 
         {/* Solo mostrar cuentas que hayan iniciado sesión en este dispositivo */}
-        {savedAccounts.length > 0 && (
+        {!showAdminForm && savedAccounts.length > 0 && (
           <div className="mt-8 pt-6 border-t border-border flex flex-col gap-2.5">
             <p className="text-[10px] text-fg-muted font-bold uppercase tracking-wider text-center">
               Cuentas en este dispositivo
@@ -3867,10 +4018,24 @@ export default function App() {
     setEditingSong(null)
   }
 
+  async function handleRegisterAdmin(m: {
+    name: string
+    instrument: string
+    secondary_instruments?: string[]
+    email: string
+    phone?: string
+    role?: Role
+  }) {
+    const created = await createMusician({ ...m, role: 'both' })
+    setMusicians(prev => [...prev, created])
+    handleLogin(created)
+  }
+
   if (screen === 'login') {
     return (
       <LoginScreen
         onLogin={handleLogin}
+        onRegisterAdmin={handleRegisterAdmin}
         musicians={musicians}
         theme={theme}
         onToggleTheme={toggleTheme}

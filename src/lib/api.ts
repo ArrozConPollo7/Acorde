@@ -197,21 +197,24 @@ export function formatLyricsToChordPro(lyrics: LyricLine[]): string {
 
 // ─── REPERTORIO INICIAL ───────────────────────────────────────────────────────
 
+export function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
+// ─── REPERTORIO INICIAL ───────────────────────────────────────────────────────
+
 export const INITIAL_SONGS: Song[] = NOTION_SONGS
 
 export const INITIAL_MUSICIANS: Musician[] = []
 
-export const INITIAL_EVENTS: ServiceEvent[] = [
-  { date: '2026-08-02', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-1', 'notion-2', 'notion-5'], roster: [] },
-  { date: '2026-08-06', type: 'midweek', label: 'Oración y Alabanza', setlist: ['notion-3', 'notion-4'], roster: [] },
-  { date: '2026-08-09', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-4', 'notion-1', 'notion-3'], roster: [] },
-  { date: '2026-08-13', type: 'midweek', label: 'Célula de Adoración', setlist: ['notion-5', 'notion-2'], roster: [] },
-  { date: '2026-08-16', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-2', 'notion-5', 'notion-1', 'notion-3'], roster: [] },
-  { date: '2026-08-20', type: 'midweek', label: 'Oración y Alabanza', setlist: ['notion-3', 'notion-1'], roster: [] },
-  { date: '2026-08-23', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-1', 'notion-4', 'notion-2'], roster: [] },
-  { date: '2026-08-27', type: 'midweek', label: 'Célula de Adoración', setlist: ['notion-4', 'notion-5'], roster: [] },
-  { date: '2026-08-30', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-5', 'notion-3', 'notion-4', 'notion-1'], roster: [] },
-]
+export const INITIAL_EVENTS: ServiceEvent[] = []
 
 // ─── CANCIONES API ────────────────────────────────────────────────────────────
 
@@ -436,11 +439,13 @@ export async function fetchEvents(): Promise<ServiceEvent[]> {
 }
 
 export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEvent> {
+  const newEventId = generateUUID()
   if (isSupabaseConfigured && supabase) {
     try {
       const { data: eventRow, error: evErr } = await supabase
         .from('service_events')
         .insert({
+          id: newEventId,
           date: event.date,
           type: event.type,
           label: event.label,
@@ -448,27 +453,27 @@ export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEv
         .select()
         .single()
 
-      if (!evErr && eventRow) {
-        if (event.setlist.length > 0) {
-          await supabase.from('service_setlists').insert(
-            event.setlist.map((song_id, position) => ({
-              event_id: eventRow.id,
-              song_id,
-              position: position + 1,
-            }))
-          )
-        }
-        if (event.roster.length > 0) {
-          await supabase.from('service_roster').insert(
-            event.roster.map(r => ({
-              event_id: eventRow.id,
-              user_id: r.mid,
-              status: r.status,
-              instrument: r.instrument || null,
-              secondary_instruments: r.secondary_instruments || [],
-            }))
-          )
-        }
+      const targetId = eventRow ? eventRow.id : newEventId
+
+      if (event.setlist.length > 0) {
+        await supabase.from('service_setlists').insert(
+          event.setlist.map((song_id, position) => ({
+            event_id: targetId,
+            song_id,
+            position: position + 1,
+          }))
+        )
+      }
+      if (event.roster.length > 0) {
+        await supabase.from('service_roster').insert(
+          event.roster.map(r => ({
+            event_id: targetId,
+            user_id: r.mid,
+            status: r.status,
+            instrument: r.instrument || null,
+            secondary_instruments: r.secondary_instruments || [],
+          }))
+        )
       }
     } catch (err) {
       console.error('Error creando servicio en Supabase:', err)
@@ -593,9 +598,10 @@ export async function createMusician(musician: {
   phone?: string
   role?: Role
 }): Promise<Musician> {
+  const newId = generateUUID()
   const initials = musician.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
   let created: Musician = {
-    id: `m-${Date.now()}`,
+    id: newId,
     name: musician.name,
     instrument: musician.instrument,
     secondary_instruments: musician.secondary_instruments || [],
@@ -610,6 +616,7 @@ export async function createMusician(musician: {
       const { data, error } = await supabase
         .from('profiles')
         .insert({
+          id: newId,
           name: musician.name,
           instrument: musician.instrument,
           secondary_instruments: musician.secondary_instruments || [],
