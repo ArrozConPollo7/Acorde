@@ -22,6 +22,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# Supabase CLI temp files
+supabase/.temp
+
 # Logs
 logs
 *.log
