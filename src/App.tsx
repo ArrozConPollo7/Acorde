@@ -1782,6 +1782,54 @@ function DayDetailScreen({
   const date = new Date(event.date + 'T12:00:00')
   const myEntry = roster.find(r => r.mid === currentUser.id)
 
+  const [feedbackStatus, setFeedbackStatus] = useState<'confirming' | 'confirmed' | 'rejecting' | 'rejected' | null>(null)
+  const [isBannerDismissed, setIsBannerDismissed] = useState(myEntry?.status !== 'pendiente')
+  const [isExiting, setIsExiting] = useState(false)
+
+  useEffect(() => {
+    setIsBannerDismissed(myEntry?.status !== 'pendiente')
+    setFeedbackStatus(null)
+    setIsExiting(false)
+  }, [event.date, myEntry?.status])
+
+  function handleConfirm() {
+    setFeedbackStatus('confirming')
+    onAttendance(currentUser.id, 'confirmado')
+
+    setTimeout(() => {
+      setFeedbackStatus('confirmed')
+    }, 120)
+
+    setTimeout(() => {
+      setIsExiting(true)
+    }, 1300)
+
+    setTimeout(() => {
+      setIsBannerDismissed(true)
+      setIsExiting(false)
+      setFeedbackStatus(null)
+    }, 1750)
+  }
+
+  function handleReject() {
+    setFeedbackStatus('rejecting')
+    onAttendance(currentUser.id, 'rechazado')
+
+    setTimeout(() => {
+      setFeedbackStatus('rejected')
+    }, 120)
+
+    setTimeout(() => {
+      setIsExiting(true)
+    }, 1100)
+
+    setTimeout(() => {
+      setIsBannerDismissed(true)
+      setIsExiting(false)
+      setFeedbackStatus(null)
+    }, 1550)
+  }
+
   const ministryGroups = useMemo(() => {
     const leadership: typeof roster = []
     const vocals: typeof roster = []
@@ -1818,51 +1866,102 @@ function DayDetailScreen({
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
 
-        {myEntry && (
-          <div className="rounded-3xl p-5 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface border border-border shadow-xs">
-            <div className="flex items-center gap-3">
-              <Avatar initials={currentUser.initials} size="md" />
-              <div>
-                <p className="font-semibold text-fg text-sm">Tu participación en este servicio</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-fg-muted">Estado actual:</span>
-                  <StatusBadge status={myEntry.status} />
+        {/* Anuncio y Confirmación de Asistencia con Animación y Auto-Eliminación */}
+        {myEntry && !isBannerDismissed && (
+          <div
+            className={`rounded-3xl p-6 mb-8 bg-surface border border-border shadow-md transition-all duration-500 overflow-hidden ${
+              isExiting ? 'opacity-0 -translate-y-4 max-h-0 py-0 mb-0 pointer-events-none' : 'opacity-100 max-h-96'
+            }`}
+          >
+            {feedbackStatus === 'confirmed' ? (
+              <div className="flex flex-col sm:flex-row items-center gap-4 py-2 text-center sm:text-left">
+                <div className="w-14 h-14 rounded-2xl bg-accent text-accent-fg flex items-center justify-center animate-check-pop shadow-md flex-shrink-0">
+                  <IconCheck size={28} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-display text-xl text-fg tracking-wide">¡ASISTENCIA CONFIRMADA!</h3>
+                  <p className="text-xs text-fg-muted mt-0.5">
+                    Tu participación ha sido confirmada con éxito para este servicio. ¡Nos vemos en la alabanza!
+                  </p>
+                </div>
+                <span className="px-3.5 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-accent">
+                  Confirmado
+                </span>
+              </div>
+            ) : feedbackStatus === 'rejected' ? (
+              <div className="flex flex-col sm:flex-row items-center gap-4 py-2 text-center sm:text-left">
+                <div className="w-14 h-14 rounded-2xl bg-surface-2 text-fg-muted flex items-center justify-center animate-check-pop shadow-sm flex-shrink-0 border border-border">
+                  <IconX size={24} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-display text-xl text-fg tracking-wide">RESPUESTA REGISTRADA</h3>
+                  <p className="text-xs text-fg-muted mt-0.5">
+                    Marcaste que no podrás asistir. El líder del ministerio ha sido notificado.
+                  </p>
+                </div>
+                <span className="px-3.5 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg-muted">
+                  No asistirá
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Avatar initials={currentUser.initials} size="md" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-fg text-sm">Tu participación en este servicio</p>
+                      <span className="text-[10px] uppercase tracking-wider font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-md border border-accent/20">
+                        Convocado
+                      </span>
+                    </div>
+                    <p className="text-xs text-fg-muted mt-0.5">
+                      Por favor confirma si podrás estar presente en el ensayo y la ministración.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={handleConfirm}
+                    disabled={feedbackStatus === 'confirming'}
+                    className="flex-1 sm:flex-none px-5 py-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 text-accent-fg bg-accent hover:bg-accent-hover active:scale-95 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    <IconCheck size={16} />
+                    <span>Confirmar asistencia</span>
+                  </button>
+                  <button
+                    onClick={handleReject}
+                    disabled={feedbackStatus === 'rejecting'}
+                    className="flex-1 sm:flex-none px-4 py-3 rounded-2xl text-xs font-semibold flex items-center justify-center gap-1.5 text-fg-muted hover:text-fg bg-surface-2 hover:bg-surface-3 border border-border active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <IconX size={15} />
+                    <span>No podré asistir</span>
+                  </button>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={() => onAttendance(currentUser.id, 'confirmado')}
-                className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer ${
-                  myEntry.status === 'confirmado'
-                    ? 'bg-accent text-accent-fg'
-                    : 'bg-surface-2 hover:bg-surface-3 text-fg border border-border'
-                }`}
-              >
-                <IconCheck size={14} />
-                <span>Confirmar asistencia</span>
-              </button>
-              <button
-                onClick={() => onAttendance(currentUser.id, 'rechazado')}
-                className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  myEntry.status === 'rechazado'
-                    ? 'bg-surface-3 text-fg-muted border border-border'
-                    : 'bg-surface-2 hover:bg-surface-3 text-fg-muted border border-border'
-                }`}
-              >
-                <IconX size={14} />
-                <span>No podré asistir</span>
-              </button>
-            </div>
+            )}
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7 flex flex-col gap-6">
             <div>
-              <span className="text-xs font-semibold text-accent uppercase tracking-widest block mb-1">
-                {event.type === 'domingo' ? 'Servicio Principal' : 'Reunión Congregacional'}
-              </span>
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <span className="text-xs font-semibold text-accent uppercase tracking-widest block">
+                  {event.type === 'domingo' ? 'Servicio Principal' : 'Reunión Congregacional'}
+                </span>
+                {myEntry && isBannerDismissed && (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-surface border border-border text-[11px]">
+                    <span className="text-fg-subtle">Tu asistencia:</span>
+                    <StatusBadge status={myEntry.status} />
+                    <button
+                      onClick={() => setIsBannerDismissed(false)}
+                      className="text-[10px] text-accent hover:underline font-semibold ml-1 cursor-pointer"
+                    >
+                      Cambiar
+                    </button>
+                  </div>
+                )}
+              </div>
               <h1 className="font-display text-3xl md:text-4xl text-fg tracking-wide">{event.label}</h1>
               <p className="text-fg-muted text-sm mt-1 capitalize">{date.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
             </div>
@@ -1927,14 +2026,14 @@ function DayDetailScreen({
                             <div className="min-w-0">
                               <span className="text-sm font-semibold text-fg block truncate">{m.name}</span>
                               <div className="flex flex-wrap gap-1 mt-1">
-                                <InstrumentChip instrument={m.instrument} isPrimary={true} />
-                                {m.secondary_instruments && m.secondary_instruments.slice(0, 2).map(sec => (
+                                <InstrumentChip instrument={primaryInst} isPrimary={true} />
+                                {secondaries.slice(0, 2).map(sec => (
                                   <InstrumentChip key={sec} instrument={sec} isPrimary={false} />
                                 ))}
                               </div>
                             </div>
                           </div>
-                          <StatusBadge status={status} />
+                          <StatusBadge status={entry.status} />
                         </div>
                       )
                     })}
