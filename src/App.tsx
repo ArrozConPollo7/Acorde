@@ -2902,13 +2902,7 @@ function AdminScreen({
     setServiceDate(new Date().toISOString().split('T')[0])
     setServiceType('domingo')
     setServiceLabel('Servicio Dominical')
-    const initialRoster: ServiceRosterDraftItem[] = (musicians || []).slice(0, 4).map(m => ({
-      mid: m.id,
-      instrument: m.instrument || 'guitarra',
-      secondary_instruments: m.secondary_instruments || [],
-      status: 'pendiente',
-    }))
-    setServiceRoster(initialRoster)
+    setServiceRoster([])
     setServiceModal({ mode: 'create' })
   }
 
@@ -3254,8 +3248,9 @@ function AdminScreen({
                 </div>
 
                 {serviceRoster.length === 0 ? (
-                  <div className="p-4 rounded-2xl bg-surface-2 border border-border text-center text-xs text-fg-muted">
-                    No hay músicos convocados para este servicio todavía. Selecciona integrantes abajo.
+                  <div className="p-4 rounded-2xl bg-surface-2 border border-dashed border-border text-center flex flex-col items-center justify-center gap-1.5 py-6">
+                    <p className="text-xs font-semibold text-fg">El servicio no tiene integrantes asignados aún</p>
+                    <p className="text-[11px] text-fg-muted">Toca en cualquiera de los músicos disponibles abajo para convocarlo a este servicio:</p>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2.5 max-h-72 overflow-y-auto pr-1">
@@ -3339,10 +3334,12 @@ function AdminScreen({
                 )}
 
                 {/* Sección para agregar más músicos registrados */}
-                {musicians.filter(m => !serviceRoster.some(r => r.mid === m.id)).length > 0 && (
+                {musicians.filter(m => !serviceRoster.some(r => r.mid === m.id)).length > 0 ? (
                   <div className="flex flex-col gap-1.5 pt-1">
-                    <label className="text-[11px] font-semibold text-fg-muted uppercase">Convocar más integrantes:</label>
-                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 rounded-xl bg-surface-2 border border-border">
+                    <label className="text-[11px] font-semibold text-fg-muted uppercase">
+                      {serviceRoster.length === 0 ? 'Músicos disponibles para convocar:' : 'Convocar más integrantes:'}
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto p-2 rounded-xl bg-surface-2 border border-border">
                       {musicians
                         .filter(m => !serviceRoster.some(r => r.mid === m.id))
                         .map(m => (
@@ -3350,15 +3347,25 @@ function AdminScreen({
                             type="button"
                             key={m.id}
                             onClick={() => addMusicianToService(m.id)}
-                            className="px-2.5 py-1.5 rounded-xl text-xs font-medium bg-surface text-fg-muted hover:text-fg border border-border flex items-center gap-1.5 transition cursor-pointer hover:border-accent/40"
+                            className="px-3 py-2 rounded-xl text-xs font-medium bg-surface text-fg hover:text-accent border border-border flex items-center justify-between gap-2 transition cursor-pointer hover:border-accent/40 shadow-xs active:scale-[0.99]"
                           >
-                            <IconPlus size={11} className="text-accent" />
-                            <span className="font-semibold">{m.name}</span>
-                            <span className="text-[10px] text-fg-subtle capitalize">({m.instrument})</span>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Avatar initials={m.initials} size="sm" />
+                              <div className="text-left min-w-0">
+                                <span className="font-semibold block truncate">{m.name}</span>
+                                <span className="text-[10px] text-fg-subtle capitalize block truncate">{m.instrument}</span>
+                              </div>
+                            </div>
+                            <span className="text-xs font-bold text-accent flex items-center gap-0.5 flex-shrink-0">
+                              <IconPlus size={12} />
+                              <span>Agregar</span>
+                            </span>
                           </button>
                         ))}
                     </div>
                   </div>
+                ) : (
+                  <p className="text-[11px] text-fg-subtle italic text-center py-1">Todos los integrantes registrados han sido convocados.</p>
                 )}
               </div>
 
