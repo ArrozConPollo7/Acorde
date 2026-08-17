@@ -5,6 +5,13 @@ import {
   fetchMusicians,
   createSong,
   updateSong,
+  deleteSong,
+  createMusician,
+  updateMusician,
+  deleteMusician,
+  createServiceEvent,
+  updateServiceEvent,
+  deleteServiceEvent,
   parseChordProText,
   formatLyricsToChordPro,
   updateAttendanceStatus,
@@ -295,6 +302,33 @@ function IconPiano({ size = 13 }: { size?: number }) {
   )
 }
 
+function IconLogOut({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  )
+}
+
+function IconPhone({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  )
+}
+
+function IconMail({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  )
+}
+
 const INST_ICON: Record<Instrument, ReactNode> = {
   guitarra: <IconGuitar size={13} />,
   piano: <IconPiano size={13} />,
@@ -318,7 +352,7 @@ function ThemeToggle({ theme, onToggle }: { theme: Theme; onToggle: () => void }
   )
 }
 
-// ─── SMALL COMPONENTS ─────────────────────────────────────────────────────────
+// ─── BADGES & AVATAR ──────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<Status, string> = {
   confirmado: 'bg-surface-2 text-fg border-border font-medium',
@@ -348,10 +382,15 @@ function InstrumentChip({ instrument }: { instrument: Instrument }) {
   )
 }
 
-function Avatar({ initials, size = 'md' }: { initials: string; size?: 'sm' | 'md' | 'lg' }) {
-  const sizes = { sm: 'w-7 h-7 text-xs', md: 'w-9 h-9 text-sm', lg: 'w-11 h-11 text-base' }
+function Avatar({ initials, size = 'md' }: { initials: string; size?: 'sm' | 'md' | 'lg' | 'xl' }) {
+  const sizes = {
+    sm: 'w-7 h-7 text-xs',
+    md: 'w-9 h-9 text-sm',
+    lg: 'w-12 h-12 text-base font-bold',
+    xl: 'w-16 h-16 text-xl font-bold',
+  }
   return (
-    <div className={`${sizes[size]} bg-surface-3 text-fg border border-border rounded-full flex items-center justify-center font-bold flex-shrink-0`}>
+    <div className={`${sizes[size]} bg-surface-3 text-fg border border-border rounded-2xl flex items-center justify-center font-display tracking-wider flex-shrink-0 shadow-xs`}>
       {initials}
     </div>
   )
@@ -495,7 +534,7 @@ function AddSongModal({
 
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Letra y Acordes</label>
+              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Letra y Acordes en ChordPro</label>
               <span className="text-[11px] text-fg-subtle">Formato: [G]Letra o por secciones</span>
             </div>
             <textarea
@@ -658,7 +697,7 @@ function EditSongModal({
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Letra y Acordes en ChordPro</label>
-              <span className="text-[11px] text-fg-subtle">Inserta acordes con [G], [Em], etc.</span>
+              <span className="text-[11px] text-fg-subtle">Inserta acordes entre corchetes ej: [G]Subo mis [D]manos</span>
             </div>
             <textarea
               rows={12}
@@ -705,12 +744,13 @@ function DesktopHeader({
   role: Role
   theme: Theme
   onToggleTheme: () => void
-  currentUser: { name: string; initials: string }
+  currentUser: { name: string; initials: string; instrument?: Instrument }
 }) {
   const isActive = (s: Screen) =>
     (['calendar', 'day-detail'].includes(screen) && s === 'calendar') ||
     (['library', 'song'].includes(screen) && s === 'library') ||
-    (screen === 'admin' && s === 'admin')
+    (screen === 'admin' && s === 'admin') ||
+    (screen === 'profile' && s === 'profile')
 
   const navItems = [
     { id: 'calendar' as Screen, label: 'Inicio', icon: <IconCalendar size={18} /> },
@@ -755,13 +795,18 @@ function DesktopHeader({
 
         <div className="flex items-center gap-3">
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          <div className="flex items-center gap-2.5 pl-3 border-l border-border">
+          <button
+            onClick={() => setScreen('profile')}
+            className={`flex items-center gap-2.5 pl-3 border-l border-border hover:opacity-80 transition cursor-pointer ${
+              screen === 'profile' ? 'opacity-100 font-semibold' : ''
+            }`}
+          >
             <Avatar initials={currentUser.initials} size="sm" />
             <div className="text-left hidden lg:block">
               <p className="text-xs font-semibold text-fg leading-tight">{currentUser.name}</p>
-              <p className="text-[10px] text-fg-muted capitalize">{role === 'admin' ? 'Administrador' : 'Músico'}</p>
+              <p className="text-[10px] text-fg-muted capitalize">{role === 'admin' ? 'Administrador' : currentUser.instrument || 'Músico'}</p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </header>
@@ -772,7 +817,8 @@ function BottomNav({ screen, setScreen, role }: { screen: Screen; setScreen: (s:
   const isActive = (s: Screen) =>
     (['calendar', 'day-detail'].includes(screen) && s === 'calendar') ||
     (['library', 'song'].includes(screen) && s === 'library') ||
-    (screen === 'admin' && s === 'admin')
+    (screen === 'admin' && s === 'admin') ||
+    (screen === 'profile' && s === 'profile')
 
   const tabs = [
     { id: 'calendar' as Screen, label: 'Inicio', icon: <IconCalendar /> },
@@ -789,8 +835,8 @@ function BottomNav({ screen, setScreen, role }: { screen: Screen; setScreen: (s:
           return (
             <button
               key={tab.id}
-              onClick={() => tab.id !== 'profile' && setScreen(tab.id as Screen)}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${
+              onClick={() => setScreen(tab.id as Screen)}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors cursor-pointer ${
                 active ? 'text-accent font-semibold' : 'text-fg-muted hover:text-fg'
               }`}
             >
@@ -882,6 +928,226 @@ function LoginScreen({
           {"¿Olvidaste tu contraseña? "}
           <span className="text-accent underline underline-offset-2 cursor-pointer font-medium">Recupérala aquí</span>
         </p>
+      </div>
+    </div>
+  )
+}
+
+// ─── PROFILE SCREEN ───────────────────────────────────────────────────────────
+
+function ProfileScreen({
+  musician,
+  role,
+  setRole,
+  onUpdateMusician,
+  onLogout,
+  events,
+  songs,
+  onSelectEvent,
+  theme,
+  onToggleTheme,
+}: {
+  musician: Musician
+  role: Role
+  setRole: (r: Role) => void
+  onUpdateMusician: (updates: Partial<Musician>) => void
+  onLogout: () => void
+  events: ServiceEvent[]
+  songs: Song[]
+  onSelectEvent: (date: string) => void
+  theme: Theme
+  onToggleTheme: () => void
+}) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [name, setName] = useState(musician.name)
+  const [instrument, setInstrument] = useState<Instrument>(musician.instrument)
+  const [email, setEmail] = useState(musician.email)
+  const [phone, setPhone] = useState(musician.phone || '')
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    onUpdateMusician({
+      name: name.trim(),
+      instrument,
+      email: email.trim(),
+      phone: phone.trim(),
+    })
+    setIsEditing(false)
+  }
+
+  const assignedEvents = events.filter(e => e.roster.some(r => r.mid === musician.id))
+
+  return (
+    <div className="min-h-screen bg-bg text-fg pb-12">
+      <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="font-display text-3xl text-fg tracking-wide">MI PERFIL</h1>
+          <div className="flex items-center gap-3">
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            <button
+              onClick={onLogout}
+              className="px-3.5 py-2 rounded-xl text-fg-muted hover:text-accent border border-border bg-surface text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <IconLogOut size={14} />
+              <span>Cerrar Sesión</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+          {/* Tarjeta de Información Principal */}
+          <div className="md:col-span-5 bg-surface border border-border rounded-3xl p-6 shadow-xs flex flex-col items-center text-center">
+            <div className="mb-4">
+              <Avatar initials={musician.initials} size="xl" />
+            </div>
+
+            <h2 className="font-display text-2xl text-fg tracking-wide">{musician.name}</h2>
+            <div className="flex items-center gap-2 mt-2">
+              <InstrumentChip instrument={musician.instrument} />
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-2 text-fg border border-border capitalize">
+                {role === 'admin' ? 'Administrador' : 'Músico'}
+              </span>
+            </div>
+
+            <div className="w-full flex flex-col gap-2.5 mt-6 pt-6 border-t border-border text-left text-xs">
+              <div className="flex items-center gap-2.5 text-fg-muted">
+                <IconMail size={14} />
+                <span className="truncate text-fg">{musician.email}</span>
+              </div>
+              {musician.phone && (
+                <div className="flex items-center gap-2.5 text-fg-muted">
+                  <IconPhone size={14} />
+                  <span className="text-fg">{musician.phone}</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setIsEditing(true)}
+              className="w-full mt-6 py-3 rounded-xl text-fg bg-surface-2 hover:bg-surface-3 border border-border font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+            >
+              <IconEdit size={14} />
+              Editar Información
+            </button>
+
+            {/* Alternar Rol para Pruebas */}
+            <div className="w-full mt-4 p-3 rounded-2xl bg-surface-2 border border-border flex items-center justify-between">
+              <span className="text-xs text-fg-muted font-medium">Modo de cuenta</span>
+              <button
+                onClick={() => setRole(role === 'admin' ? 'musician' : 'admin')}
+                className="text-xs font-bold text-accent underline cursor-pointer"
+              >
+                Cambiar a {role === 'admin' ? 'Músico' : 'Admin'}
+              </button>
+            </div>
+          </div>
+
+          {/* Columna Derecha: Próximos Servicios Asignados */}
+          <div className="md:col-span-7 flex flex-col gap-4">
+            <h3 className="font-display text-xl text-fg tracking-wide">MIS SERVICIOS ASIGNADOS</h3>
+            {assignedEvents.length === 0 ? (
+              <div className="bg-surface border border-border rounded-3xl p-8 text-center text-fg-muted text-sm">
+                No tienes servicios asignados programados actualmente.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {assignedEvents.map(ev => {
+                  const entry = ev.roster.find(r => r.mid === musician.id)
+                  const date = new Date(ev.date + 'T12:00:00')
+                  return (
+                    <button
+                      key={ev.date}
+                      onClick={() => onSelectEvent(ev.date)}
+                      className="bg-surface border border-border hover:border-border-hover rounded-3xl p-5 flex items-center justify-between text-left transition shadow-xs cursor-pointer"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl flex flex-col items-center justify-center bg-surface-2 border border-border text-fg flex-shrink-0">
+                          <span className="text-sm font-bold leading-none">{date.toLocaleDateString('es', { day: '2-digit' })}</span>
+                          <span className="text-[10px] uppercase leading-none mt-0.5 opacity-80">{date.toLocaleDateString('es', { month: 'short' })}</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-fg text-sm">{ev.label}</p>
+                          <p className="text-xs text-fg-muted">{ev.setlist.length} canciones programadas</p>
+                        </div>
+                      </div>
+                      {entry && <StatusBadge status={entry.status} />}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Modal para Editar Perfil */}
+        {isEditing && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setIsEditing(false)} />
+            <div className="relative w-full max-w-md rounded-3xl bg-surface border border-border p-6 shadow-2xl">
+              <h3 className="font-display text-xl text-fg tracking-wide mb-4">EDITAR PERFIL</h3>
+              <form onSubmit={handleSave} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Nombre</label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Instrumento Principal</label>
+                  <select
+                    value={instrument}
+                    onChange={e => setInstrument(e.target.value as Instrument)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer capitalize"
+                  >
+                    {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(inst => (
+                      <option key={inst} value={inst}>{inst}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Correo Electrónico</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Teléfono / WhatsApp</label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="+57 300 000 0000"
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="flex-1 py-3 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover text-sm font-semibold shadow-xs cursor-pointer"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -1228,7 +1494,7 @@ function DayDetailScreen({
   )
 }
 
-// ─── LIBRARY SCREEN ───────────────────────────────────────────────────────────
+// ─── LIBRARY SCREEN WITH COMPACT DROPDOWNS ────────────────────────────────────
 
 function LibraryScreen({
   songs,
@@ -1244,36 +1510,53 @@ function LibraryScreen({
   onToggleTheme: () => void
 }) {
   const [query, setQuery] = useState('')
-  const [tempoFilter, setTempoFilter] = useState<string | null>(null)
-  const [tagFilter, setTagFilter] = useState<string | null>(null)
+  const [tempoFilter, setTempoFilter] = useState<string>('all')
+  const [keyFilter, setKeyFilter] = useState<string>('all')
+  const [tagFilter, setTagFilter] = useState<string>('all')
 
-  const allTags = Array.from(new Set(songs.flatMap(s => s.tags))).filter(t => !['rápida', 'media', 'lenta'].includes(t))
-  const tempos = ['rápida', 'media', 'lenta']
+  const allTags = Array.from(new Set(songs.flatMap(s => s.tags)))
+    .filter(t => !['rápida', 'media', 'lenta'].includes(t))
+    .sort()
+
+  const allKeys = Array.from(new Set(songs.map(s => s.key))).sort()
 
   const filtered = useMemo(() => songs.filter(s => {
     const q = query.toLowerCase()
     if (q && !s.title.toLowerCase().includes(q) && !s.artist.toLowerCase().includes(q)) return false
-    if (tempoFilter && s.tempo !== tempoFilter) return false
-    if (tagFilter && !s.tags.includes(tagFilter)) return false
+    if (tempoFilter !== 'all' && s.tempo !== tempoFilter) return false
+    if (keyFilter !== 'all' && s.key !== keyFilter) return false
+    if (tagFilter !== 'all' && !s.tags.includes(tagFilter)) return false
     return true
-  }), [songs, query, tempoFilter, tagFilter])
+  }), [songs, query, tempoFilter, keyFilter, tagFilter])
+
+  const hasActiveFilters = tempoFilter !== 'all' || keyFilter !== 'all' || tagFilter !== 'all' || query.trim() !== ''
+
+  function clearFilters() {
+    setQuery('')
+    setTempoFilter('all')
+    setKeyFilter('all')
+    setTagFilter('all')
+  }
 
   return (
     <div className="min-h-screen bg-bg text-fg pb-12">
       <div className="max-w-6xl mx-auto px-4 lg:px-8 pt-6">
+        {/* Cabecera del Repertorio */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="font-display text-3xl text-fg tracking-wide">REPERTORIO</h1>
-            <p className="text-xs text-fg-muted mt-0.5">{filtered.length} {filtered.length === 1 ? 'canción' : 'canciones registradas'}</p>
+            <p className="text-xs text-fg-muted mt-0.5">
+              {filtered.length} {filtered.length === 1 ? 'canción encontrada' : 'canciones registradas'}
+            </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative flex-1 md:w-80">
+            <div className="relative flex-1 md:w-72">
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-muted">
                 <IconSearch />
               </div>
               <input
                 type="text"
-                placeholder="Buscar canciones o artistas..."
+                placeholder="Buscar por título o artista..."
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl text-fg bg-surface border border-border text-sm placeholder:text-fg-subtle focus:outline-none focus:border-accent transition"
@@ -1292,45 +1575,66 @@ function LibraryScreen({
           </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-6 border-b border-border">
-          <button
-            onClick={() => { setTempoFilter(null); setTagFilter(null) }}
-            className={`flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-full border transition-all cursor-pointer ${
-              !tempoFilter && !tagFilter
-                ? 'bg-accent text-accent-fg border-accent shadow-xs'
-                : 'bg-surface text-fg-muted border-border hover:border-border-hover'
-            }`}
-          >
-            Todas
-          </button>
-          {tempos.map(t => (
-            <button
-              key={t}
-              onClick={() => setTempoFilter(tempoFilter === t ? null : t)}
-              className={`flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-full border transition-all capitalize cursor-pointer ${
-                tempoFilter === t
-                  ? 'bg-accent text-accent-fg border-accent shadow-xs'
-                  : 'bg-surface text-fg-muted border-border hover:border-border-hover'
-              }`}
+        {/* Filtros Desplegables Elegantes */}
+        <div className="bg-surface border border-border rounded-2xl p-4 mb-6 shadow-xs flex flex-wrap items-center gap-3">
+          {/* Desplegable Tempo */}
+          <div className="flex-1 min-w-[140px]">
+            <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Tempo</label>
+            <select
+              value={tempoFilter}
+              onChange={e => setTempoFilter(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
             >
-              {t}
-            </button>
-          ))}
-          {allTags.slice(0, 12).map(tag => (
-            <button
-              key={tag}
-              onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
-              className={`flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-full border transition-all capitalize cursor-pointer ${
-                tagFilter === tag
-                  ? 'bg-accent text-accent-fg border-accent shadow-xs'
-                  : 'bg-surface text-fg-muted border-border hover:border-border-hover'
-              }`}
+              <option value="all">Todos los tempos</option>
+              <option value="lenta">Lenta (Adoración)</option>
+              <option value="media">Media</option>
+              <option value="rápida">Rápida (Alabanza)</option>
+            </select>
+          </div>
+
+          {/* Desplegable Tonalidad */}
+          <div className="flex-1 min-w-[130px]">
+            <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Tono Original</label>
+            <select
+              value={keyFilter}
+              onChange={e => setKeyFilter(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
             >
-              {tag}
+              <option value="all">Todos los tonos</option>
+              {allKeys.map(k => (
+                <option key={k} value={k}>Tono {k}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Desplegable Categoría / Temática */}
+          <div className="flex-1 min-w-[180px]">
+            <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Categoría</label>
+            <select
+              value={tagFilter}
+              onChange={e => setTagFilter(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+            >
+              <option value="all">Todas las categorías</option>
+              {allTags.map(tag => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Botón Limpiar Filtros */}
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="self-end py-2 px-3 rounded-xl bg-surface-2 hover:bg-surface-3 text-accent text-xs font-semibold border border-border transition cursor-pointer flex items-center gap-1"
+            >
+              <IconX size={12} />
+              Limpiar
             </button>
-          ))}
+          )}
         </div>
 
+        {/* Cuadrícula de Canciones */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(song => (
             <button
@@ -1338,9 +1642,12 @@ function LibraryScreen({
               onClick={() => onSongSelect(song.id)}
               className="rounded-3xl p-5 flex items-center gap-4 text-left active:scale-[0.99] transition-all bg-surface border border-border hover:border-border-hover shadow-xs cursor-pointer group"
             >
-              <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-border flex items-center justify-center flex-shrink-0 group-hover:border-accent transition-colors">
-                <span className="font-display text-fg font-bold text-xl tracking-wide">{song.key}</span>
+              {/* Badge con Tono y Primera Letra */}
+              <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-border flex flex-col items-center justify-center flex-shrink-0 group-hover:border-accent transition-colors shadow-xs">
+                <span className="font-display text-fg font-bold text-base tracking-wide leading-none">{song.key}</span>
+                <span className="text-[10px] text-fg-muted uppercase font-bold mt-0.5 leading-none opacity-80">{song.title.charAt(0)}</span>
               </div>
+
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-fg text-base leading-tight truncate">{song.title}</p>
                 <p className="text-xs text-fg-muted mt-0.5 truncate">{song.artist}</p>
@@ -1575,7 +1882,7 @@ function AISuggestionModal({
               </div>
               <div>
                 <h3 className="font-display text-lg text-fg tracking-wide">SUGERIR CON IA (GROQ)</h3>
-                <p className="text-fg-muted text-xs">Recomendaciones del repertorio según la prédica</p>
+                <p className="text-fg-muted text-xs">Selección litúrgica y teológica para el servicio</p>
               </div>
             </div>
             <button onClick={onClose} className="text-fg-muted hover:text-fg transition-colors cursor-pointer">
@@ -1586,7 +1893,7 @@ function AISuggestionModal({
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Ej: La fidelidad de Dios en momentos difíciles..."
+              placeholder="Ej: La justificación por la fe en Romanos 5..."
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleGenerate()}
@@ -1608,7 +1915,10 @@ function AISuggestionModal({
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-surface-2 border border-border text-fg-muted">
                 <IconSparkles size={26} />
               </div>
-              <p className="text-fg-muted text-sm text-center">Ingresa el tema de la prédica o versículo clave<br />para recibir canciones recomendadas</p>
+              <p className="text-fg-muted text-sm text-center">
+                Ingresa el tema del sermón, versículo o momento litúrgico<br />
+                para recibir sugerencias estructuradas (Apertura, Adoración, Ministración)
+              </p>
             </div>
           )}
 
@@ -1618,8 +1928,8 @@ function AISuggestionModal({
                 <IconLoader size={36} />
               </div>
               <div className="text-center">
-                <p className="text-fg text-sm font-medium">Analizando repertorio con Llama 3.3...</p>
-                <p className="text-fg-muted text-xs mt-1">Buscando canciones que complementen el mensaje pastoral</p>
+                <p className="text-fg text-sm font-medium">Analizando repertorio y coherencia teológica...</p>
+                <p className="text-fg-muted text-xs mt-1">Llama 3.3 construyendo el orden pastoral del servicio</p>
               </div>
             </div>
           )}
@@ -1627,7 +1937,7 @@ function AISuggestionModal({
           {state === 'results' && (
             <div className="flex flex-col gap-3">
               <p className="text-xs text-fg-muted">{suggestions.length} sugerencias para <span className="text-fg font-semibold">{`"${query}"`}</span></p>
-              {suggestions.map(({ songId, reason }) => {
+              {suggestions.map(({ songId, reason, moment }) => {
                 const song = songs.find(s => s.id === songId)
                 if (!song) return null
                 const alreadyIn = currentSetlist.includes(songId)
@@ -1639,7 +1949,14 @@ function AISuggestionModal({
                         <span className="font-display font-bold text-lg tracking-wide">{song.key}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-fg text-sm leading-tight">{song.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-fg text-sm leading-tight">{song.title}</p>
+                          {moment && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface text-accent border border-border">
+                              {moment}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-fg-muted mt-0.5">{song.artist}</p>
                       </div>
                       {alreadyIn || justAdded ? (
@@ -1675,7 +1992,7 @@ function AISuggestionModal({
   )
 }
 
-// ─── ADMIN SCREEN ─────────────────────────────────────────────────────────────
+// ─── ADMIN SCREEN (CON CRUD COMPLETO DE MÚSICOS Y SERVICIOS) ───────────────────
 
 type AdminTab = 'usuarios' | 'programación' | 'setlist'
 
@@ -1687,6 +2004,11 @@ function AdminScreen({
   adminSetlist,
   setAdminSetlist,
   onAddMusician,
+  onEditMusician,
+  onDeleteMusician,
+  onAddService,
+  onEditService,
+  onDeleteService,
   onAddNewSong,
   theme,
   onToggleTheme,
@@ -1697,19 +2019,122 @@ function AdminScreen({
   onDaySelect: (date: string) => void
   adminSetlist: string[]
   setAdminSetlist: (sl: string[]) => void
-  onAddMusician: (name: string, instrument: Instrument) => void
+  onAddMusician: (m: { name: string; instrument: Instrument; email: string; phone?: string; role?: Role }) => void
+  onEditMusician: (id: string, updates: Partial<Musician>) => void
+  onDeleteMusician: (id: string) => void
+  onAddService: (ev: ServiceEvent) => void
+  onEditService: (date: string, updates: Partial<ServiceEvent>) => void
+  onDeleteService: (date: string) => void
   onAddNewSong: () => void
   theme: Theme
   onToggleTheme: () => void
 }) {
   const [tab, setTab] = useState<AdminTab>('usuarios')
-  const [editingMusician, setEditingMusician] = useState<string | null>(null)
   const [selectedAdminDate, setSelectedAdminDate] = useState('2026-08-16')
-  const [newMusicianName, setNewMusicianName] = useState('')
-  const [newMusicianInst, setNewMusicianInst] = useState<Instrument>('guitarra')
   const [aiModalOpen, setAiModalOpen] = useState(false)
 
+  // Estado para gestión de músicos
+  const [musicianModal, setMusicianModal] = useState<{ mode: 'create' | 'edit'; musician?: Musician } | null>(null)
+  const [musicianName, setMusicianName] = useState('')
+  const [musicianInst, setMusicianInst] = useState<Instrument>('guitarra')
+  const [musicianEmail, setMusicianEmail] = useState('')
+  const [musicianPhone, setMusicianPhone] = useState('')
+  const [musicianRole, setMusicianRole] = useState<Role>('musician')
+
+  // Estado para gestión de servicios
+  const [serviceModal, setServiceModal] = useState<{ mode: 'create' | 'edit'; event?: ServiceEvent } | null>(null)
+  const [serviceDate, setServiceDate] = useState('')
+  const [serviceType, setServiceType] = useState<'domingo' | 'midweek'>('domingo')
+  const [serviceLabel, setServiceLabel] = useState('')
+  const [serviceRosterMids, setServiceRosterMids] = useState<string[]>([])
+
   const event = events.find(e => e.date === selectedAdminDate)
+
+  function openCreateMusician() {
+    setMusicianName('')
+    setMusicianInst('guitarra')
+    setMusicianEmail('')
+    setMusicianPhone('')
+    setMusicianRole('musician')
+    setMusicianModal({ mode: 'create' })
+  }
+
+  function openEditMusician(m: Musician) {
+    setMusicianName(m.name)
+    setMusicianInst(m.instrument)
+    setMusicianEmail(m.email)
+    setMusicianPhone(m.phone || '')
+    setMusicianRole(m.role || 'musician')
+    setMusicianModal({ mode: 'edit', musician: m })
+  }
+
+  function handleSaveMusician(e: React.FormEvent) {
+    e.preventDefault()
+    if (!musicianName.trim()) return
+
+    if (musicianModal?.mode === 'create') {
+      onAddMusician({
+        name: musicianName.trim(),
+        instrument: musicianInst,
+        email: musicianEmail.trim() || `${musicianName.toLowerCase().replace(/\s+/g, '.')}@ibami.org`,
+        phone: musicianPhone.trim(),
+        role: musicianRole,
+      })
+    } else if (musicianModal?.mode === 'edit' && musicianModal.musician) {
+      onEditMusician(musicianModal.musician.id, {
+        name: musicianName.trim(),
+        instrument: musicianInst,
+        email: musicianEmail.trim(),
+        phone: musicianPhone.trim(),
+        role: musicianRole,
+      })
+    }
+    setMusicianModal(null)
+  }
+
+  function openCreateService() {
+    setServiceDate(new Date().toISOString().split('T')[0])
+    setServiceType('domingo')
+    setServiceLabel('Servicio Dominical')
+    setServiceRosterMids(musicians.slice(0, 4).map(m => m.id))
+    setServiceModal({ mode: 'create' })
+  }
+
+  function openEditService(ev: ServiceEvent) {
+    setServiceDate(ev.date)
+    setServiceType(ev.type)
+    setServiceLabel(ev.label)
+    setServiceRosterMids(ev.roster.map(r => r.mid))
+    setServiceModal({ mode: 'edit', event: ev })
+  }
+
+  function handleSaveService(e: React.FormEvent) {
+    e.preventDefault()
+    if (!serviceDate || !serviceLabel.trim()) return
+
+    const roster: RosterEntry[] = serviceRosterMids.map(mid => ({
+      mid,
+      status: 'pendiente',
+    }))
+
+    if (serviceModal?.mode === 'create') {
+      onAddService({
+        date: serviceDate,
+        type: serviceType,
+        label: serviceLabel.trim(),
+        setlist: [],
+        roster,
+      })
+    } else if (serviceModal?.mode === 'edit' && serviceModal.event) {
+      onEditService(serviceModal.event.date, {
+        date: serviceDate,
+        type: serviceType,
+        label: serviceLabel.trim(),
+        roster,
+      })
+    }
+    setServiceModal(null)
+  }
 
   function moveUp(idx: number) {
     if (idx === 0) return
@@ -1730,14 +2155,6 @@ function AdminScreen({
     if (!adminSetlist.includes(id)) setAdminSetlist([...adminSetlist, id])
   }
 
-  function handleSaveNewMusician() {
-    if (newMusicianName.trim()) {
-      onAddMusician(newMusicianName.trim(), newMusicianInst)
-      setNewMusicianName('')
-      setEditingMusician(null)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-bg text-fg pb-12">
       {aiModalOpen && (
@@ -1747,6 +2164,185 @@ function AdminScreen({
           currentSetlist={adminSetlist}
           songs={songs}
         />
+      )}
+
+      {/* Modal Crear / Editar Músico */}
+      {musicianModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setMusicianModal(null)} />
+          <div className="relative w-full max-w-md rounded-3xl bg-surface border border-border p-6 shadow-2xl">
+            <h3 className="font-display text-xl text-fg tracking-wide mb-4">
+              {musicianModal.mode === 'create' ? 'REGISTRAR MÚSICO' : 'EDITAR MÚSICO'}
+            </h3>
+            <form onSubmit={handleSaveMusician} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-fg-muted uppercase">Nombre Completo *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: Daniel Gómez"
+                  value={musicianName}
+                  onChange={e => setMusicianName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Instrumento</label>
+                  <select
+                    value={musicianInst}
+                    onChange={e => setMusicianInst(e.target.value as Instrument)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
+                  >
+                    {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(i => (
+                      <option key={i} value={i}>{i}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Rol</label>
+                  <select
+                    value={musicianRole}
+                    onChange={e => setMusicianRole(e.target.value as Role)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent capitalize cursor-pointer"
+                  >
+                    <option value="musician">Músico</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-fg-muted uppercase">Correo Electrónico</label>
+                <input
+                  type="email"
+                  placeholder="ejemplo@ibami.org"
+                  value={musicianEmail}
+                  onChange={e => setMusicianEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-fg-muted uppercase">Teléfono / Celular</label>
+                <input
+                  type="text"
+                  placeholder="+57 300 000 0000"
+                  value={musicianPhone}
+                  onChange={e => setMusicianPhone(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setMusicianModal(null)}
+                  className="flex-1 py-3 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover text-sm font-semibold shadow-xs cursor-pointer"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Crear / Editar Servicio */}
+      {serviceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setServiceModal(null)} />
+          <div className="relative w-full max-w-lg rounded-3xl bg-surface border border-border p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="font-display text-xl text-fg tracking-wide mb-4">
+              {serviceModal.mode === 'create' ? 'PROGRAMAR SERVICIO' : 'EDITAR SERVICIO'}
+            </h3>
+            <form onSubmit={handleSaveService} className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Fecha *</label>
+                  <input
+                    type="date"
+                    required
+                    value={serviceDate}
+                    onChange={e => setServiceDate(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Tipo de Servicio</label>
+                  <select
+                    value={serviceType}
+                    onChange={e => setServiceType(e.target.value as 'domingo' | 'midweek')}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer"
+                  >
+                    <option value="domingo">Domingo</option>
+                    <option value="midweek">Entre semana</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-fg-muted uppercase">Nombre o Etiqueta *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: Servicio Dominical - Comunión"
+                  value={serviceLabel}
+                  onChange={e => setServiceLabel(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-fg-muted uppercase">Músicos Asignados</label>
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-surface-2 border border-border rounded-xl">
+                  {musicians.map(m => {
+                    const isSelected = serviceRosterMids.includes(m.id)
+                    return (
+                      <button
+                        type="button"
+                        key={m.id}
+                        onClick={() => {
+                          setServiceRosterMids(prev =>
+                            isSelected ? prev.filter(id => id !== m.id) : [...prev, m.id]
+                          )
+                        }}
+                        className={`p-2 rounded-lg text-left text-xs font-medium border flex items-center justify-between transition cursor-pointer ${
+                          isSelected
+                            ? 'bg-surface text-fg border-accent font-semibold shadow-xs'
+                            : 'bg-surface-3 text-fg-muted border-transparent hover:text-fg'
+                        }`}
+                      >
+                        <span className="truncate">{m.name}</span>
+                        <span className="text-[10px] text-fg-subtle capitalize">({m.instrument})</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setServiceModal(null)}
+                  className="flex-1 py-3 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover text-sm font-semibold shadow-xs cursor-pointer"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       <div className="max-w-6xl mx-auto px-4 lg:px-8 pt-6">
@@ -1793,7 +2389,7 @@ function AdminScreen({
             <div className="flex items-center justify-between">
               <h2 className="font-display text-xl text-fg tracking-wide">EQUIPO DE MÚSICOS</h2>
               <button
-                onClick={() => setEditingMusician('new')}
+                onClick={openCreateMusician}
                 className="text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-4 py-2 rounded-xl flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer shadow-xs"
               >
                 <IconPlus size={13} />
@@ -1801,53 +2397,38 @@ function AdminScreen({
               </button>
             </div>
 
-            {editingMusician === 'new' && (
-              <div className="rounded-3xl p-6 bg-surface border border-border shadow-xs">
-                <p className="text-sm font-semibold text-fg mb-4">Registrar nuevo músico</p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <input
-                    placeholder="Nombre completo"
-                    value={newMusicianName}
-                    onChange={e => setNewMusicianName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent placeholder:text-fg-subtle"
-                  />
-                  <select
-                    value={newMusicianInst}
-                    onChange={e => setNewMusicianInst(e.target.value as Instrument)}
-                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-sm focus:outline-none focus:border-accent cursor-pointer"
-                  >
-                    {['guitarra', 'piano', 'bajo', 'voz', 'batería'].map(i => (
-                      <option key={i} value={i}>{i}</option>
-                    ))}
-                  </select>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setEditingMusician(null)}
-                      className="flex-1 py-3 rounded-xl text-fg-muted border border-border text-sm font-medium hover:text-fg cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={handleSaveNewMusician}
-                      className="flex-1 py-3 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover text-sm font-semibold cursor-pointer shadow-xs"
-                    >
-                      Guardar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {musicians.map(m => (
-                <div key={m.id} className="rounded-3xl p-5 flex items-center gap-4 bg-surface border border-border shadow-xs">
-                  <Avatar initials={m.initials} size="md" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-fg text-sm">{m.name}</p>
-                    <p className="text-xs text-fg-muted truncate">{m.email}</p>
-                    <div className="mt-2">
-                      <InstrumentChip instrument={m.instrument} />
+                <div key={m.id} className="rounded-3xl p-5 flex items-start justify-between bg-surface border border-border shadow-xs">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <Avatar initials={m.initials} size="md" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-fg text-sm truncate">{m.name}</p>
+                      <p className="text-xs text-fg-muted truncate">{m.email}</p>
+                      <div className="mt-2 flex items-center gap-1.5">
+                        <InstrumentChip instrument={m.instrument} />
+                        {m.role === 'admin' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface-2 text-accent border border-border">Admin</span>
+                        )}
+                      </div>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEditMusician(m)}
+                      className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
+                      title="Editar Músico"
+                    >
+                      <IconEdit size={14} />
+                    </button>
+                    <button
+                      onClick={() => onDeleteMusician(m.id)}
+                      className="w-8 h-8 rounded-lg text-fg-muted hover:text-accent bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
+                      title="Eliminar Músico"
+                    >
+                      <IconTrash size={13} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1857,30 +2438,56 @@ function AdminScreen({
 
         {tab === 'programación' && (
           <div className="flex flex-col gap-4">
-            <h2 className="font-display text-xl text-fg tracking-wide">CALENDARIO DE SERVICIOS</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-xl text-fg tracking-wide">CALENDARIO DE SERVICIOS</h2>
+              <button
+                onClick={openCreateService}
+                className="text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-4 py-2 rounded-xl flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer shadow-xs"
+              >
+                <IconPlus size={13} />
+                Nuevo Servicio
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {events.map(ev => {
                 const date = new Date(ev.date + 'T12:00:00')
                 const confirmed = ev.roster.filter(r => r.status === 'confirmado').length
                 const pending = ev.roster.filter(r => r.status === 'pendiente').length
                 return (
-                  <button
+                  <div
                     key={ev.date}
-                    onClick={() => onDaySelect(ev.date)}
-                    className="rounded-3xl p-5 text-left active:scale-[0.99] transition-all bg-surface border border-border hover:border-border-hover shadow-xs cursor-pointer"
+                    className="rounded-3xl p-5 bg-surface border border-border shadow-xs flex flex-col justify-between"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div>
+                      <button onClick={() => onDaySelect(ev.date)} className="text-left cursor-pointer flex-1">
                         <p className="font-semibold text-fg text-base">
                           {date.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })}
                         </p>
                         <p className="text-xs text-fg-muted mt-0.5">{ev.label}</p>
+                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-semibold px-3 py-1 rounded-xl flex-shrink-0 bg-surface-2 text-fg border border-border">
+                          {ev.type === 'domingo' ? 'Domingo' : 'Entre semana'}
+                        </span>
+                        <button
+                          onClick={() => openEditService(ev)}
+                          className="w-8 h-8 rounded-lg text-fg-muted hover:text-fg bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
+                          title="Editar Servicio"
+                        >
+                          <IconEdit size={14} />
+                        </button>
+                        <button
+                          onClick={() => onDeleteService(ev.date)}
+                          className="w-8 h-8 rounded-lg text-fg-muted hover:text-accent bg-surface-2 border border-border flex items-center justify-center transition cursor-pointer"
+                          title="Eliminar Servicio"
+                        >
+                          <IconTrash size={13} />
+                        </button>
                       </div>
-                      <span className="text-xs font-semibold px-3 py-1 rounded-xl flex-shrink-0 bg-surface-2 text-fg border border-border">
-                        {ev.type === 'domingo' ? 'Domingo' : 'Entre semana'}
-                      </span>
                     </div>
-                    <div className="flex items-center gap-3 mt-4">
+
+                    <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border">
                       <div className="flex -space-x-2">
                         {ev.roster.slice(0, 4).map(r => {
                           const m = musicians.find(x => x.id === r.mid)
@@ -1894,7 +2501,7 @@ function AdminScreen({
                       <span className="text-xs text-fg font-medium">{confirmed} confirmados</span>
                       {pending > 0 && <span className="text-xs text-fg-muted font-medium">· {pending} pendientes</span>}
                     </div>
-                  </button>
+                  </div>
                 )
               })}
             </div>
@@ -2022,7 +2629,7 @@ export default function App() {
   const [addSongModalOpen, setAddSongModalOpen] = useState(false)
   const [editingSong, setEditingSong] = useState<Song | null>(null)
 
-  // Database State (Solo el catálogo de Notion por defecto)
+  // Database State
   const [songs, setSongs] = useState<Song[]>(INITIAL_SONGS)
   const [events, setEvents] = useState<ServiceEvent[]>(INITIAL_EVENTS)
   const [musicians, setMusicians] = useState<Musician[]>(INITIAL_MUSICIANS)
@@ -2076,9 +2683,7 @@ export default function App() {
     setTheme(t => (t === 'dark' ? 'light' : 'dark'))
   }
 
-  const currentUser = role === 'admin'
-    ? { name: 'Pastor Marcos', initials: 'PM' }
-    : { name: 'Carlos Mejía', initials: 'CM' }
+  const currentMusician = musicians.find(m => role === 'admin' ? m.role === 'admin' : m.id === 'm1') || musicians[0]
 
   function nav(to: Screen, from?: Screen) {
     if (from) setPrevScreen(from)
@@ -2097,18 +2702,34 @@ export default function App() {
     await updateAttendanceStatus(selectedDate, mid, status)
   }
 
-  function handleAddMusician(name: string, instrument: Instrument) {
-    const newId = `m${musicians.length + 1}`
-    const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-    const newMusician: Musician = {
-      id: newId,
-      name,
-      instrument,
-      initials,
-      email: `${name.toLowerCase().replace(/\s+/g, '.')}@ibami.org`,
-      role: 'musician',
-    }
-    setMusicians(prev => [...prev, newMusician])
+  async function handleAddMusician(m: { name: string; instrument: Instrument; email: string; phone?: string; role?: Role }) {
+    const created = await createMusician(m)
+    setMusicians(prev => [...prev, created])
+  }
+
+  async function handleEditMusician(id: string, updates: Partial<Musician>) {
+    const updated = await updateMusician(id, updates)
+    setMusicians(prev => prev.map(m => m.id === id ? updated : m))
+  }
+
+  async function handleDeleteMusician(id: string) {
+    await deleteMusician(id)
+    setMusicians(prev => prev.filter(m => m.id !== id))
+  }
+
+  async function handleAddService(ev: ServiceEvent) {
+    const created = await createServiceEvent(ev)
+    setEvents(prev => [...prev, created].sort((a, b) => a.date.localeCompare(b.date)))
+  }
+
+  async function handleEditService(date: string, updates: Partial<ServiceEvent>) {
+    await updateServiceEvent(date, updates)
+    setEvents(prev => prev.map(e => e.date === date ? { ...e, ...updates } : e))
+  }
+
+  async function handleDeleteService(date: string) {
+    await deleteServiceEvent(date)
+    setEvents(prev => prev.filter(e => e.date !== date))
   }
 
   async function handleAddSong(newSongData: Omit<Song, 'id'>) {
@@ -2161,7 +2782,7 @@ export default function App() {
         role={role}
         theme={theme}
         onToggleTheme={toggleTheme}
-        currentUser={currentUser}
+        currentUser={currentMusician}
       />
 
       <main className="pb-20 md:pb-8">
@@ -2170,7 +2791,7 @@ export default function App() {
             events={events}
             musicians={musicians}
             onDaySelect={date => { setSelectedDate(date); nav('day-detail', 'calendar') }}
-            currentUser={currentUser}
+            currentUser={currentMusician}
             theme={theme}
             onToggleTheme={toggleTheme}
           />
@@ -2185,7 +2806,7 @@ export default function App() {
             onBack={() => nav('calendar')}
             onSongSelect={id => { setSelectedSongId(id); nav('song', 'day-detail') }}
             onAttendance={handleAttendance}
-            currentUserId={role === 'musician' ? 'm1' : undefined}
+            currentUserId={role === 'musician' ? currentMusician.id : undefined}
             theme={theme}
             onToggleTheme={toggleTheme}
           />
@@ -2217,7 +2838,26 @@ export default function App() {
             adminSetlist={adminSetlist}
             setAdminSetlist={setAdminSetlist}
             onAddMusician={handleAddMusician}
+            onEditMusician={handleEditMusician}
+            onDeleteMusician={handleDeleteMusician}
+            onAddService={handleAddService}
+            onEditService={handleEditService}
+            onDeleteService={handleDeleteService}
             onAddNewSong={() => setAddSongModalOpen(true)}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        )}
+        {screen === 'profile' && (
+          <ProfileScreen
+            musician={currentMusician}
+            role={role}
+            setRole={setRole}
+            onUpdateMusician={updates => handleEditMusician(currentMusician.id, updates)}
+            onLogout={() => nav('login')}
+            events={events}
+            songs={songs}
+            onSelectEvent={date => { setSelectedDate(date); nav('day-detail', 'profile') }}
             theme={theme}
             onToggleTheme={toggleTheme}
           />

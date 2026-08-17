@@ -50,7 +50,7 @@ serve(async (req) => {
       )
     }
 
-    // 2. Preparar el prompt para Groq (Llama 3.3 70B Versatile)
+    // 2. Preparar el catálogo y prompt para Groq (Llama 3.3 70B)
     const songsCatalogText = songs.map((s) => ({
       id: s.id,
       title: s.title,
@@ -60,28 +60,35 @@ serve(async (req) => {
       tags: s.tags?.join(', ') || '',
     }))
 
-    const systemPrompt = `Eres un director musical y pastor de alabanza experto para la iglesia cristiana IBAMI.
-Tu tarea es recomendar entre 5 y 8 canciones del catálogo provisto que mejor se alineen con el tema de la prédica o contexto litúrgico.
+    const systemPrompt = `Eres un pastor de adoración y teólogo musical con más de 20 años de experiencia dirigiendo el ministerio de alabanza en la iglesia cristiana IBAMI.
+Tu misión es seleccionar y recomendar exactamente entre 4 y 6 canciones del catálogo proporcionado que construyan un orden de servicio (setlist) coherente y bíblicamente sólido en torno al tema de la prédica o pasaje bíblico.
+
+PRINCIPIOS LITÚRGICOS DE IBAMI:
+1. APERTURA (1-2 canciones): De tempo alegre/rápido o proclamación festiva que congregue y enfoque la atención en el Señor.
+2. ADORACIÓN & ENFOQUE (2-3 canciones): De tempo medio o lento, cristocéntricas, que preparen el corazón de la iglesia para la predicación de la Palabra.
+3. MINISTRACIÓN & RESPUESTA (1-2 canciones): De tempo lento/íntimo, de consagración, entrega, fe o clamor para sellar el mensaje pastoral.
 
 REGLAS ESTRICTAS:
-1. SOLO puedes recomendar canciones que existan exactamente en la lista provista (usando su id y título exactos).
-2. Proporciona una justificación breve, profunda y pastoral (1 oración) para cada sugerencia.
-3. Prioriza variedad de tempos (al menos una rápida y varias lentas/medias para adoración).
-4. No uses emojis en ninguna parte de la respuesta.
-5. Devuelve ÚNICAMENTE un objeto JSON válido con la siguiente estructura:
+- Usa ÚNICAMENTE canciones que estén en la lista provista (usando su id y título exactos).
+- Para cada canción indica en qué momento del servicio encaja ("Apertura", "Adoración" o "Ministración") y una justificación teológico-pastoral clara y concisa (1 o 2 oraciones).
+- No inventes canciones ni títulos externos.
+- Cero emojis en cualquier parte del texto.
+- Devuelve ÚNICAMENTE un JSON válido con el siguiente formato exacto:
+
 {
   "suggestions": [
     {
-      "songId": "id-de-la-cancion",
-      "reason": "Breve explicación pastoral de por qué conecta con el tema."
+      "songId": "id-exacto",
+      "moment": "Apertura",
+      "reason": "Explicación teológica y litúrgica de por qué conecta con el tema."
     }
   ]
 }`
 
-    const userPrompt = `Tema de la prédica o servicio: "${topic}"
-Canciones ya en el setlist: ${JSON.stringify(currentSetlist)}
+    const userPrompt = `Tema o pasaje del sermón: "${topic}"
+Canciones ya seleccionadas en el setlist: ${JSON.stringify(currentSetlist)}
 
-Catálogo disponible:
+Catálogo disponible de canciones de IBAMI:
 ${JSON.stringify(songsCatalogText, null, 2)}`
 
     // 3. Llamada a Groq API
@@ -97,7 +104,7 @@ ${JSON.stringify(songsCatalogText, null, 2)}`
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        temperature: 0.3,
+        temperature: 0.2,
         response_format: { type: 'json_object' },
       }),
     })

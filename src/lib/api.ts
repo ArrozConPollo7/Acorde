@@ -11,6 +11,7 @@ export interface Musician {
   instrument: Instrument
   initials: string
   email: string
+  phone?: string
   role?: Role
 }
 
@@ -52,6 +53,7 @@ export interface ServiceEvent {
 export interface AISuggestion {
   songId: string
   reason: string
+  moment?: 'Apertura' | 'Adoración' | 'Ministración'
 }
 
 // ─── PARSER DE CHORDPRO / TEXTO PARA NUEVAS CANCIONES ─────────────────────────
@@ -125,12 +127,13 @@ export function formatLyricsToChordPro(lyrics: LyricLine[]): string {
 export const INITIAL_SONGS: Song[] = NOTION_SONGS
 
 export const INITIAL_MUSICIANS: Musician[] = [
-  { id: 'm1', name: 'Carlos Mejía', instrument: 'guitarra', initials: 'CM', email: 'carlos@ibami.org', role: 'musician' },
-  { id: 'm2', name: 'Sofía Rodríguez', instrument: 'voz', initials: 'SR', email: 'sofia@ibami.org', role: 'musician' },
-  { id: 'm3', name: 'Andrés Peña', instrument: 'piano', initials: 'AP', email: 'andres@ibami.org', role: 'musician' },
-  { id: 'm4', name: 'Juliana Torres', instrument: 'batería', initials: 'JT', email: 'juliana@ibami.org', role: 'musician' },
-  { id: 'm5', name: 'Miguel Lozano', instrument: 'bajo', initials: 'ML', email: 'miguel@ibami.org', role: 'musician' },
-  { id: 'm6', name: 'Valentina Suárez', instrument: 'voz', initials: 'VS', email: 'vale@ibami.org', role: 'musician' },
+  { id: 'm1', name: 'Carlos Mejía', instrument: 'guitarra', initials: 'CM', email: 'carlos.mejia@ibami.org', phone: '+57 310 123 4567', role: 'musician' },
+  { id: 'm2', name: 'Sofía Rodríguez', instrument: 'voz', initials: 'SR', email: 'sofia.rodriguez@ibami.org', phone: '+57 311 234 5678', role: 'musician' },
+  { id: 'm3', name: 'Andrés Peña', instrument: 'piano', initials: 'AP', email: 'andres.pena@ibami.org', phone: '+57 312 345 6789', role: 'musician' },
+  { id: 'm4', name: 'Juliana Torres', instrument: 'batería', initials: 'JT', email: 'juliana.torres@ibami.org', phone: '+57 313 456 7890', role: 'musician' },
+  { id: 'm5', name: 'Miguel Lozano', instrument: 'bajo', initials: 'ML', email: 'miguel.lozano@ibami.org', phone: '+57 314 567 8901', role: 'musician' },
+  { id: 'm6', name: 'Valentina Suárez', instrument: 'voz', initials: 'VS', email: 'valentina.suarez@ibami.org', phone: '+57 315 678 9012', role: 'musician' },
+  { id: 'm-admin', name: 'Pastor Marcos', instrument: 'piano', initials: 'PM', email: 'pastor@ibami.org', phone: '+57 300 000 0000', role: 'admin' },
 ]
 
 export const INITIAL_EVENTS: ServiceEvent[] = [
@@ -145,15 +148,7 @@ export const INITIAL_EVENTS: ServiceEvent[] = [
   { date: '2026-08-30', type: 'domingo', label: 'Servicio Dominical', setlist: ['notion-5', 'notion-3', 'notion-4', 'notion-1'], roster: [{ mid: 'm1', status: 'pendiente' }, { mid: 'm2', status: 'pendiente' }, { mid: 'm3', status: 'pendiente' }, { mid: 'm4', status: 'pendiente' }, { mid: 'm5', status: 'pendiente' }] },
 ]
 
-export const FALLBACK_AI_SUGGESTIONS: AISuggestion[] = [
-  { songId: 'notion-1', reason: 'La temática del amor incondicional y la gloria de Dios conecta directamente con el mensaje.' },
-  { songId: 'notion-2', reason: 'Invita a la congregación a entrar en quietud y apertura para recibir la Palabra.' },
-  { songId: 'notion-3', reason: 'Declara la soberanía y bondad de Dios en todo tiempo.' },
-  { songId: 'notion-4', reason: 'Refuerza la confianza y dirección del Señor en nuestras vidas.' },
-  { songId: 'notion-5', reason: 'Ideal para sellar el servicio con una declaración de alabanza y gratitud.' },
-]
-
-// ─── API SERVICES ─────────────────────────────────────────────────────────────
+// ─── CANCIONES API ────────────────────────────────────────────────────────────
 
 export async function fetchSongs(): Promise<Song[]> {
   if (!isSupabaseConfigured || !supabase) {
@@ -223,7 +218,6 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
     }
   }
 
-  // Fallback local
   return {
     id: `custom-${Date.now()}`,
     ...newSong,
@@ -270,7 +264,6 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
     }
   }
 
-  // Fallback local
   return {
     id,
     title: updates.title || '',
@@ -283,6 +276,18 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
     is_classic: updates.is_classic,
   }
 }
+
+export async function deleteSong(id: string): Promise<void> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('songs').delete().eq('id', id)
+    } catch (err) {
+      console.error('Error eliminando canción en Supabase:', err)
+    }
+  }
+}
+
+// ─── SERVICIOS / EVENTOS API ──────────────────────────────────────────────────
 
 export async function fetchEvents(): Promise<ServiceEvent[]> {
   if (!isSupabaseConfigured || !supabase) {
@@ -324,6 +329,114 @@ export async function fetchEvents(): Promise<ServiceEvent[]> {
   }
 }
 
+export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEvent> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data: eventRow, error: evErr } = await supabase
+        .from('service_events')
+        .insert({
+          date: event.date,
+          type: event.type,
+          label: event.label,
+        })
+        .select()
+        .single()
+
+      if (!evErr && eventRow) {
+        // Insert setlist
+        if (event.setlist.length > 0) {
+          await supabase.from('service_setlists').insert(
+            event.setlist.map((song_id, position) => ({
+              event_id: eventRow.id,
+              song_id,
+              position: position + 1,
+            }))
+          )
+        }
+        // Insert roster
+        if (event.roster.length > 0) {
+          await supabase.from('service_roster').insert(
+            event.roster.map(r => ({
+              event_id: eventRow.id,
+              user_id: r.mid,
+              status: r.status,
+            }))
+          )
+        }
+      }
+    } catch (err) {
+      console.error('Error creando servicio en Supabase:', err)
+    }
+  }
+
+  return event
+}
+
+export async function updateServiceEvent(date: string, updates: Partial<ServiceEvent>): Promise<void> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data: existing } = await supabase
+        .from('service_events')
+        .select('id')
+        .eq('date', date)
+        .single()
+
+      if (existing) {
+        if (updates.type || updates.label || updates.date) {
+          await supabase
+            .from('service_events')
+            .update({
+              ...(updates.type ? { type: updates.type } : {}),
+              ...(updates.label ? { label: updates.label } : {}),
+              ...(updates.date ? { date: updates.date } : {}),
+            })
+            .eq('id', existing.id)
+        }
+
+        if (updates.setlist) {
+          await supabase.from('service_setlists').delete().eq('event_id', existing.id)
+          if (updates.setlist.length > 0) {
+            await supabase.from('service_setlists').insert(
+              updates.setlist.map((song_id, position) => ({
+                event_id: existing.id,
+                song_id,
+                position: position + 1,
+              }))
+            )
+          }
+        }
+
+        if (updates.roster) {
+          await supabase.from('service_roster').delete().eq('event_id', existing.id)
+          if (updates.roster.length > 0) {
+            await supabase.from('service_roster').insert(
+              updates.roster.map(r => ({
+                event_id: existing.id,
+                user_id: r.mid,
+                status: r.status,
+              }))
+            )
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error actualizando servicio en Supabase:', err)
+    }
+  }
+}
+
+export async function deleteServiceEvent(date: string): Promise<void> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('service_events').delete().eq('date', date)
+    } catch (err) {
+      console.error('Error eliminando servicio en Supabase:', err)
+    }
+  }
+}
+
+// ─── MÚSICOS & PERFILES API ───────────────────────────────────────────────────
+
 export async function fetchMusicians(): Promise<Musician[]> {
   if (!isSupabaseConfigured || !supabase) {
     return INITIAL_MUSICIANS
@@ -343,13 +456,116 @@ export async function fetchMusicians(): Promise<Musician[]> {
       id: item.id,
       name: item.name,
       instrument: item.instrument,
-      initials: item.initials || 'IB',
+      initials: item.initials || item.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
       email: item.email || '',
+      phone: item.phone || '',
       role: item.role,
     }))
   } catch (err) {
     console.error('Error al obtener músicos de Supabase:', err)
     return INITIAL_MUSICIANS
+  }
+}
+
+export async function createMusician(musician: { name: string; instrument: Instrument; email: string; phone?: string; role?: Role }): Promise<Musician> {
+  const initials = musician.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          name: musician.name,
+          instrument: musician.instrument,
+          initials,
+          email: musician.email,
+          phone: musician.phone || '',
+          role: musician.role || 'musician',
+        })
+        .select()
+        .single()
+
+      if (!error && data) {
+        return {
+          id: data.id,
+          name: data.name,
+          instrument: data.instrument,
+          initials: data.initials || initials,
+          email: data.email,
+          phone: data.phone,
+          role: data.role,
+        }
+      }
+    } catch (err) {
+      console.error('Error creando músico en Supabase:', err)
+    }
+  }
+
+  return {
+    id: `m-${Date.now()}`,
+    name: musician.name,
+    instrument: musician.instrument,
+    initials,
+    email: musician.email,
+    phone: musician.phone,
+    role: musician.role || 'musician',
+  }
+}
+
+export async function updateMusician(id: string, updates: Partial<Musician>): Promise<Musician> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const payload: any = { updated_at: new Date().toISOString() }
+      if (updates.name !== undefined) {
+        payload.name = updates.name
+        payload.initials = updates.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+      }
+      if (updates.instrument !== undefined) payload.instrument = updates.instrument
+      if (updates.email !== undefined) payload.email = updates.email
+      if (updates.phone !== undefined) payload.phone = updates.phone
+      if (updates.role !== undefined) payload.role = updates.role
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (!error && data) {
+        return {
+          id: data.id,
+          name: data.name,
+          instrument: data.instrument,
+          initials: data.initials,
+          email: data.email,
+          phone: data.phone,
+          role: data.role,
+        }
+      }
+    } catch (err) {
+      console.error('Error actualizando músico en Supabase:', err)
+    }
+  }
+
+  return {
+    id,
+    name: updates.name || '',
+    instrument: updates.instrument || 'guitarra',
+    initials: updates.name ? updates.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : 'IB',
+    email: updates.email || '',
+    phone: updates.phone,
+    role: updates.role || 'musician',
+  }
+}
+
+export async function deleteMusician(id: string): Promise<void> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase.from('profiles').delete().eq('id', id)
+    } catch (err) {
+      console.error('Error eliminando músico en Supabase:', err)
+    }
   }
 }
 
@@ -379,6 +595,47 @@ export async function updateAttendanceStatus(date: string, mid: string, status: 
   }
 }
 
+// ─── IA MINISTERIAL (GROQ & LOCAL SEMANTIC ENGINE) ────────────────────────────
+
+interface ThematicCategory {
+  keywords: string[]
+  moment: 'Apertura' | 'Adoración' | 'Ministración'
+  description: string
+}
+
+const THEMATIC_KNOWLEDGE_BASE: Record<string, ThematicCategory> = {
+  gracia: {
+    keywords: ['gracia', 'perdon', 'favor', 'cruz', 'calvario', 'justificacion', 'sangre', 'redencion', 'rescate', 'libertad', 'pecado'],
+    moment: 'Adoración',
+    description: 'Enfatiza el favor inmerecido y la obra redentora de Cristo en la cruz, preparando el corazón para el mensaje del evangelio.',
+  },
+  fidelidad: {
+    keywords: ['fidelidad', 'fiel', 'promesas', 'esperanza', 'confianza', 'roca', 'refugio', 'torre', 'seguridad', 'paz', 'tormenta', 'duda'],
+    moment: 'Adoración',
+    description: 'Afirma la certeza en las promesas y el carácter inmutable de Dios ante momentos de prueba o aflicción.',
+  },
+  santidad: {
+    keywords: ['santo', 'santidad', 'gloria', 'majestad', 'trono', 'exaltacion', 'rey', 'soberano', 'digno', 'honra', 'reyes', 'cordero'],
+    moment: 'Adoración',
+    description: 'Eleva una proclamación teocéntrica sobre la majestad y perfección absoluta de Dios en su trono celestial.',
+  },
+  gozo: {
+    keywords: ['gozo', 'alegria', 'fiesta', 'celebracion', 'victoria', 'vencio', 'danza', 'cantad', 'aleluya', 'cantar', 'gratitud', 'resurreccion', 'triunfo'],
+    moment: 'Apertura',
+    description: 'Ideal para la apertura del servicio: convoca a la congregación con celebración, victoria y alabanza viva.',
+  },
+  consagracion: {
+    keywords: ['entrega', 'consagracion', 'rendicion', 'manos', 'altar', 'fuego', 'espiritu', 'rendido', 'llamado', 'obediencia', 'corazon', 'todo'],
+    moment: 'Ministración',
+    description: 'Canción de respuesta e introspección ideal para el llamado o ministración tras escuchar la Palabra.',
+  },
+  sanidad: {
+    keywords: ['sanidad', 'sanador', 'milagro', 'restauracion', 'herida', 'dolor', 'poder', 'resurreccion', 'vida', 'vencedor'],
+    moment: 'Ministración',
+    description: 'Fomenta la fe activa y la intercesión por restauración física y espiritual en el pueblo de Dios.',
+  },
+}
+
 export async function suggestSongsWithGroq(topic: string, currentSetlist: string[], catalog: Song[]): Promise<AISuggestion[]> {
   if (isSupabaseConfigured && supabase) {
     try {
@@ -390,35 +647,69 @@ export async function suggestSongsWithGroq(topic: string, currentSetlist: string
         return data.suggestions
       }
     } catch (err) {
-      console.warn('Edge Function no disponible, usando recomendador inteligente local:', err)
+      console.warn('Edge Function no disponible, usando motor pastoral local:', err)
     }
   }
 
-  // Recomendador local inteligente
+  // Motor semántico litúrgico local de alta precisión
   const cleanTopic = topic.toLowerCase().trim()
-  const matching = catalog
-    .map(song => {
-      let score = 0
-      const combined = `${song.title} ${song.artist} ${song.tags.join(' ')} ${song.lyrics.map(l => l.segments.map(s => s.text).join(' ')).join(' ')}`.toLowerCase()
-      const words = cleanTopic.split(/\s+/)
+  const words = cleanTopic.split(/[\s,.-]+/).filter(w => w.length > 2)
 
-      words.forEach(w => {
-        if (w.length > 2 && combined.includes(w)) {
-          score += combined.includes(w) ? 2 : 1
-        }
-      })
-
-      return { song, score }
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-
-  if (matching.length > 0 && matching[0].score > 0) {
-    return matching.map(({ song }) => ({
-      songId: song.id,
-      reason: `Su mensaje y temática sobre "${song.tags.join(', ')}" conecta con la enseñanza pastoral.`,
-    }))
+  // Determinar temas teológicos dominantes
+  let matchedTheme: ThematicCategory | null = null
+  for (const [, themeData] of Object.entries(THEMATIC_KNOWLEDGE_BASE)) {
+    if (themeData.keywords.some(k => cleanTopic.includes(k))) {
+      matchedTheme = themeData
+      break
+    }
   }
 
-  return FALLBACK_AI_SUGGESTIONS
+  const scoredSongs = catalog.map(song => {
+    let score = 0
+    const songText = `${song.title} ${song.artist} ${song.tags.join(' ')} ${song.lyrics.map(l => l.segments.map(s => s.text).join(' ')).join(' ')}`.toLowerCase()
+
+    words.forEach(word => {
+      if (song.title.toLowerCase().includes(word)) score += 5
+      if (song.tags.some(t => t.toLowerCase().includes(word))) score += 4
+      if (songText.includes(word)) score += 2
+    })
+
+    if (matchedTheme) {
+      matchedTheme.keywords.forEach(kw => {
+        if (songText.includes(kw)) score += 3
+      })
+    }
+
+    if (song.is_classic) score += 1
+
+    return { song, score }
+  })
+
+  scoredSongs.sort((a, b) => b.score - a.score)
+  const topMatches = scoredSongs.slice(0, 6)
+
+  if (topMatches.length > 0 && topMatches[0].score > 0) {
+    return topMatches.map(({ song }, idx) => {
+      let moment: 'Apertura' | 'Adoración' | 'Ministración' = 'Adoración'
+      if (song.tempo === 'rápida' || idx === 0) moment = 'Apertura'
+      else if (song.tempo === 'lenta' || idx >= 3) moment = 'Ministración'
+
+      const themeDesc = matchedTheme
+        ? matchedTheme.description
+        : `Su mensaje de "${song.tags.join(', ') || 'Alabanza'}" conecta con la enseñanza bíblica sobre ${topic}.`
+
+      return {
+        songId: song.id,
+        moment,
+        reason: `[${moment}] ${themeDesc}`,
+      }
+    })
+  }
+
+  // Fallback con las primeras canciones estructuradas litúrgicamente
+  return catalog.slice(0, 5).map((song, i) => ({
+    songId: song.id,
+    moment: i === 0 ? 'Apertura' : i === 4 ? 'Ministración' : 'Adoración',
+    reason: `[${i === 0 ? 'Apertura' : i === 4 ? 'Ministración' : 'Adoración'}] Canción cristocéntrica del repertorio para enriquecer el tiempo de adoración en ${song.key}.`,
+  }))
 }
