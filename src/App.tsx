@@ -37,6 +37,7 @@ import {
   generateGroupServiceMessage,
   openWhatsAppChat,
 } from './lib/whatsapp'
+import logoIbami from './logo-ibami.png'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -1080,8 +1081,8 @@ function DesktopHeader({
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <button onClick={() => setScreen('calendar')} className="flex items-center gap-3 cursor-pointer">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-surface-2 border border-border text-accent">
-              <IconFlame size={20} />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-surface-2 border border-border p-1">
+              <img src={logoIbami} alt="IBAMI Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <span className="font-display text-lg tracking-wider text-fg leading-none block">IBAMI</span>
@@ -1233,8 +1234,8 @@ function LoginScreen({
         </div>
 
         <div className="flex flex-col items-center gap-3 text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-surface-2 border border-border text-accent shadow-sm">
-            <IconFlame size={36} />
+          <div className="w-20 h-20 rounded-3xl flex items-center justify-center overflow-hidden bg-surface-2 border border-border shadow-sm p-2">
+            <img src={logoIbami} alt="IBAMI Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="font-display text-4xl text-fg tracking-wider">IBAMI</h1>
@@ -1651,9 +1652,14 @@ function CalendarScreen({
       {/* Mobile Top bar */}
       <div className="md:hidden px-5 pt-10 pb-5 bg-surface-2 border-b border-border">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-fg-muted text-xs font-medium tracking-widest uppercase">IBAMI</p>
-            <h1 className="font-display text-2xl text-fg tracking-wide">MINISTERIO</h1>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden bg-surface border border-border p-1">
+              <img src={logoIbami} alt="IBAMI Logo" className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <p className="text-fg-muted text-[10px] font-semibold tracking-widest uppercase">IBAMI</p>
+              <h1 className="font-display text-2xl text-fg tracking-wide leading-none">MINISTERIO</h1>
+            </div>
           </div>
           <div className="flex items-center gap-2.5">
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
@@ -3740,8 +3746,8 @@ function AdminScreen({
       <div className="max-w-6xl mx-auto px-4 lg:px-8 pt-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-surface-2 border border-border text-accent">
-              <IconFlame size={24} />
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center overflow-hidden bg-surface-2 border border-border p-1">
+              <img src={logoIbami} alt="IBAMI Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="font-display text-2xl md:text-3xl text-fg tracking-wide">PANEL DE ADMINISTRACIÓN</h1>
