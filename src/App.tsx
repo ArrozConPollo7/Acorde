@@ -37,7 +37,6 @@ import {
   generateGroupServiceMessage,
   openWhatsAppChat,
 } from './lib/whatsapp'
-import logoIbami from './logo-ibami.png'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -100,21 +99,22 @@ function transposeChord(chord: string, n: number): string {
 
 // ─── ICONS ────────────────────────────────────────────────────────────────────
 
-function IconFlame({ size = 24, className = '' }: { size?: number; className?: string }) {
+function LogoIbami({ size = 28, className = '' }: { size?: number | string; className?: string }) {
+  const isNum = typeof size === 'number'
   return (
-    <svg width={size} height={size} viewBox="0 0 40 56" fill="none" className={className}>
-      <path
-        d="M20 2C20 2 32 16 32 28C32 35.2 27 40 20 40C13 40 8 35.2 8 28C8 22 11 17 14 12C14 12 13 22 18 25C17 19 18.5 10 20 2Z"
-        fill="currentColor"
-      />
-      <path
-        d="M20 40C22.5 40 25 42 25 45C25 49.5 22.5 52.5 20 54C17.5 52.5 15 49.5 15 45C15 42 17.5 40 20 40Z"
-        fill="currentColor"
-        opacity="0.6"
-      />
+    <svg
+      width={isNum ? size : undefined}
+      height={isNum ? size : undefined}
+      viewBox="307 645 438 598"
+      fill="currentColor"
+      className={`shrink-0 ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="m 516,1230.3094 c -18.63176,-3.2975 -43.50502,-13.378 -63.5,-25.7351 -9.60614,-5.9367 -9.85283,-6.4316 -2,-4.0122 29.85383,9.1977 69.13239,9.7026 94,1.2083 24.71477,-8.4421 39.60193,-22.4652 69.2922,-65.2704 16.34534,-23.5655 50.2078,-77.8032 50.2078,-80.4182 0,-2.0118 -11.55438,-5.3762 -20,-5.8235 -16.84324,-0.892 -24.81116,4.7548 -38.43924,27.2417 -20.13167,33.2181 -40.90649,61.9748 -54.98792,76.1147 -8.18431,8.2182 -11.479,10.7821 -17.57284,13.6749 -11.63659,5.5238 -17.77329,6.8407 -34.59024,7.4227 -14.19223,0.4912 -29.46267,-0.8357 -29.37675,-2.5527 0.0182,-0.3628 3.95566,-2.5294 8.75,-4.8147 16.21741,-7.7304 35.7099,-23.5275 49.52725,-40.138 7.95552,-9.5637 18.22106,-24.5752 32.02249,-46.8272 15.7755,-25.4348 29.04615,-41.7958 39.94568,-49.2479 23.45065,-16.0333 59.17017,-14.5877 98.65535,3.9927 5.73858,2.7003 10.63465,5.1106 10.88015,5.3561 1.00276,1.0028 -42.04424,79.4199 -54.57295,99.4135 -10.56415,16.8586 -29.09713,41.6029 -39.44387,52.6636 -11.6309,12.4335 -30.73004,26.2682 -44.77215,32.4313 -15.10538,6.6298 -35.35727,8.6242 -54.02496,5.3204 z m -102.5,-81.7583 c -9.29531,-1.6123 -11.97955,-2.4077 -19.59403,-5.8063 -26.22778,-11.7063 -51.62313,-41.6637 -64.21013,-75.7448 -11.502,-31.1433 -12.00939,-68.86727 -1.30864,-97.29655 9.15302,-24.31734 30.13719,-54.32039 55.8278,-79.82231 9.94588,-9.87282 20.785,-19.60487 20.785,-18.66209 0,0.22291 -0.88651,2.24016 -1.97003,4.48277 -5.83646,12.08009 -10.03925,30.82625 -10.01683,44.67917 0.046,28.44492 14.88277,55.0288 36.76334,65.87105 7.85472,3.89217 9.12544,4.21103 18.08591,4.53838 11.23214,0.41033 17.62164,-1.34974 26.64658,-7.34016 10.40091,-6.90373 24.32554,-24.80205 30.39856,-39.07344 5.02844,-11.81666 6.41794,-20.02659 5.80958,-34.3263 -0.82279,-19.33975 -5.3016,-35.44445 -21.69639,-78.01491 C 478.1092,803.70293 475.02243,791.52886 474.30566,774 c -0.42217,-10.32434 -0.15576,-15.61711 1.13255,-22.5 3.84163,-20.52425 13.75392,-42.98114 29.22767,-66.21702 9.72516,-14.60361 21.19654,-29.48605 22.23374,-28.84502 0.43734,0.27029 0.88175,3.76983 0.98758,7.77674 0.44342,16.78959 5.02196,38.01251 11.08579,51.38599 9.1895,20.26702 21.89269,32.84327 60.52701,59.92219 29.46996,20.65559 47.32258,35.42299 66.61845,55.1057 38.20079,38.96663 52.92115,62.22685 61.91322,97.83151 5.74508,22.748 7.50621,48.51928 4.55714,66.68633 -1.37517,8.47138 -4.35334,16.97198 -6.38629,18.22838 -0.56326,0.3482 -4.55176,-1.4597 -8.86332,-4.0175 -18.8002,-11.15283 -37.63504,-18.06654 -56.8392,-20.86398 -36.26004,-5.28193 -65.2103,4.3027 -91.0526,30.14498 -10.21264,10.2127 -21.50073,25.2098 -37.53003,49.8617 -23.21724,35.7064 -34.50388,50.0002 -48.17069,61.0048 -9.84315,7.9258 -25.22424,15.6726 -35.67607,17.9687 -10.41303,2.2875 -24.97777,2.7415 -34.57061,1.0776 z" />
     </svg>
   )
 }
+const IconFlame = LogoIbami
 
 function IconSun({ size = 18 }: { size?: number }) {
   return (
@@ -1080,9 +1080,9 @@ function DesktopHeader({
     <header className="hidden md:block sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-border transition-colors">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <button onClick={() => setScreen('calendar')} className="flex items-center gap-3 cursor-pointer">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-surface-2 border border-border p-1">
-              <img src={logoIbami} alt="IBAMI Logo" className="w-full h-full object-contain" />
+          <button onClick={() => setScreen('calendar')} className="flex items-center gap-3 cursor-pointer group">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-surface-2 border border-border text-accent p-1.5 transition-colors group-hover:border-accent/40 shadow-xs">
+              <LogoIbami className="w-full h-full" />
             </div>
             <div>
               <span className="font-display text-lg tracking-wider text-fg leading-none block">IBAMI</span>
@@ -1234,12 +1234,12 @@ function LoginScreen({
         </div>
 
         <div className="flex flex-col items-center gap-3 text-center mb-8">
-          <div className="w-20 h-20 rounded-3xl flex items-center justify-center overflow-hidden bg-surface-2 border border-border shadow-sm p-2">
-            <img src={logoIbami} alt="IBAMI Logo" className="w-full h-full object-contain" />
+          <div className="w-24 h-24 rounded-3xl flex items-center justify-center bg-surface-2 border border-border text-accent shadow-md p-3.5">
+            <LogoIbami className="w-full h-full" />
           </div>
           <div>
             <h1 className="font-display text-4xl text-fg tracking-wider">IBAMI</h1>
-            <p className="text-fg-muted text-xs uppercase tracking-widest font-medium mt-0.5">Ministerio de Alabanza</p>
+            <p className="text-fg-muted text-xs uppercase tracking-widest font-medium mt-1">Ministerio de Alabanza</p>
           </div>
         </div>
 
@@ -1653,8 +1653,8 @@ function CalendarScreen({
       <div className="md:hidden px-5 pt-10 pb-5 bg-surface-2 border-b border-border">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center overflow-hidden bg-surface border border-border p-1">
-              <img src={logoIbami} alt="IBAMI Logo" className="w-full h-full object-contain" />
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-surface border border-border text-accent p-1.5 shadow-xs">
+              <LogoIbami className="w-full h-full" />
             </div>
             <div>
               <p className="text-fg-muted text-[10px] font-semibold tracking-widest uppercase">IBAMI</p>
@@ -3746,8 +3746,8 @@ function AdminScreen({
       <div className="max-w-6xl mx-auto px-4 lg:px-8 pt-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center overflow-hidden bg-surface-2 border border-border p-1">
-              <img src={logoIbami} alt="IBAMI Logo" className="w-full h-full object-contain" />
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-surface-2 border border-border text-accent p-2 shadow-xs">
+              <LogoIbami className="w-full h-full" />
             </div>
             <div>
               <h1 className="font-display text-2xl md:text-3xl text-fg tracking-wide">PANEL DE ADMINISTRACIÓN</h1>
