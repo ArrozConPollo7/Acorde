@@ -1319,8 +1319,6 @@ function ProfileScreen({
   const [secondaries, setSecondaries] = useState<string[]>(musician.secondary_instruments || [])
   const [email, setEmail] = useState(musician.email)
   const [phone, setPhone] = useState(musician.phone || '')
-  const [isMusicianRole, setIsMusicianRole] = useState(hasRole(musician, 'musician'))
-  const [isAdminRole, setIsAdminRole] = useState(hasRole(musician, 'admin'))
 
   function toggleSecondary(instId: string) {
     if (instId === instrument) return
@@ -1331,14 +1329,12 @@ function ProfileScreen({
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    const computedRole: Role = isMusicianRole && isAdminRole ? 'both' : isAdminRole ? 'admin' : 'musician'
     onUpdateMusician({
       name: name.trim(),
       instrument,
       secondary_instruments: secondaries.filter(i => i !== instrument),
       email: email.trim(),
       phone: phone.trim(),
-      role: computedRole,
     })
     setIsEditing(false)
   }
@@ -1411,8 +1407,6 @@ function ProfileScreen({
                 setSecondaries(musician.secondary_instruments || [])
                 setEmail(musician.email)
                 setPhone(musician.phone || '')
-                setIsMusicianRole(hasRole(musician, 'musician'))
-                setIsAdminRole(hasRole(musician, 'admin'))
                 setIsEditing(true)
               }}
               className="w-full mt-6 py-3 rounded-xl text-fg bg-surface-2 hover:bg-surface-3 border border-border font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
@@ -1551,34 +1545,12 @@ function ProfileScreen({
                   />
                 </div>
 
-                {/* Roles Checkboxes */}
+                {/* Rol Asignado (Solo lectura) */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-fg-muted uppercase">Roles / Permisos</label>
-                  <div className="flex gap-2">
-                    <label className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-2 border border-border flex-1 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isMusicianRole}
-                        onChange={e => {
-                          if (!e.target.checked && !isAdminRole) return
-                          setIsMusicianRole(e.target.checked)
-                        }}
-                        className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
-                      />
-                      <span className="text-xs font-semibold text-fg">Músico</span>
-                    </label>
-                    <label className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-2 border border-border flex-1 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isAdminRole}
-                        onChange={e => {
-                          if (!e.target.checked && !isMusicianRole) return
-                          setIsAdminRole(e.target.checked)
-                        }}
-                        className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
-                      />
-                      <span className="text-xs font-semibold text-fg">Admin</span>
-                    </label>
+                  <label className="text-xs font-semibold text-fg-muted uppercase">Rol Asignado</label>
+                  <div className="p-3 rounded-xl bg-surface-2 border border-border flex items-center justify-between">
+                    <RoleBadges role={musician.role} />
+                    <span className="text-[11px] text-fg-subtle">Gestionado por el Director</span>
                   </div>
                 </div>
 
