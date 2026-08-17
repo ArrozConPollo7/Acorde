@@ -75,6 +75,10 @@ export interface Song {
   lyrics: LyricLine[]
   media_url?: string
   is_classic?: boolean
+  church_domain?: string // 'Nueva' | 'Conocida' | 'Dominada'
+  team_domain?: string // 'Por entrar' | 'Por practicar' | 'Ensamblada' | 'Montada'
+  musical_type?: string // 'Worship contemporáneo' | 'Balada congregacional' | 'Celebración Rítmica' | 'Himno Tradicional' | 'Coral' | 'Especial'
+  technical_complexity?: string // 'Básica' | 'Intermedia' | 'Avanzada'
 }
 
 export interface RosterEntry {
@@ -227,7 +231,11 @@ export async function fetchSongs(): Promise<Song[]> {
           tags: item.tags || [],
           lyrics: Array.isArray(item.lyrics) ? item.lyrics : [],
           media_url: item.media_url,
-          is_classic: item.is_classic,
+          is_classic: item.is_classic ?? false,
+          church_domain: item.church_domain || 'Conocida',
+          team_domain: item.team_domain || 'Por practicar',
+          musical_type: item.musical_type || 'Worship contemporáneo',
+          technical_complexity: item.technical_complexity || 'Básica',
         }))
         setStored(STORAGE_KEYS.SONGS, mapped)
         return mapped
@@ -246,6 +254,11 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
   let created: Song = {
     id: `custom-${Date.now()}`,
     ...newSong,
+    is_classic: newSong.is_classic ?? false,
+    church_domain: newSong.church_domain || 'Conocida',
+    team_domain: newSong.team_domain || 'Por practicar',
+    musical_type: newSong.musical_type || 'Worship contemporáneo',
+    technical_complexity: newSong.technical_complexity || 'Básica',
   }
 
   if (isSupabaseConfigured && supabase) {
@@ -261,6 +274,10 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
           lyrics: newSong.lyrics,
           media_url: newSong.media_url,
           is_classic: newSong.is_classic ?? false,
+          church_domain: newSong.church_domain || 'Conocida',
+          team_domain: newSong.team_domain || 'Por practicar',
+          musical_type: newSong.musical_type || 'Worship contemporáneo',
+          technical_complexity: newSong.technical_complexity || 'Básica',
         })
         .select()
         .single()
@@ -275,7 +292,11 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
           tags: data.tags || [],
           lyrics: Array.isArray(data.lyrics) ? data.lyrics : [],
           media_url: data.media_url,
-          is_classic: data.is_classic,
+          is_classic: data.is_classic ?? false,
+          church_domain: data.church_domain || 'Conocida',
+          team_domain: data.team_domain || 'Por practicar',
+          musical_type: data.musical_type || 'Worship contemporáneo',
+          technical_complexity: data.technical_complexity || 'Básica',
         }
       }
     } catch (err) {
@@ -299,6 +320,10 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
     lyrics: updates.lyrics || [],
     media_url: updates.media_url,
     is_classic: updates.is_classic,
+    church_domain: updates.church_domain,
+    team_domain: updates.team_domain,
+    musical_type: updates.musical_type,
+    technical_complexity: updates.technical_complexity,
   }
 
   if (isSupabaseConfigured && supabase) {
@@ -312,6 +337,10 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
       if (updates.lyrics !== undefined) payload.lyrics = updates.lyrics
       if (updates.media_url !== undefined) payload.media_url = updates.media_url
       if (updates.is_classic !== undefined) payload.is_classic = updates.is_classic
+      if (updates.church_domain !== undefined) payload.church_domain = updates.church_domain
+      if (updates.team_domain !== undefined) payload.team_domain = updates.team_domain
+      if (updates.musical_type !== undefined) payload.musical_type = updates.musical_type
+      if (updates.technical_complexity !== undefined) payload.technical_complexity = updates.technical_complexity
 
       const { data, error } = await supabase
         .from('songs')
@@ -330,7 +359,11 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
           tags: data.tags || [],
           lyrics: Array.isArray(data.lyrics) ? data.lyrics : [],
           media_url: data.media_url,
-          is_classic: data.is_classic,
+          is_classic: data.is_classic ?? false,
+          church_domain: data.church_domain || 'Conocida',
+          team_domain: data.team_domain || 'Por practicar',
+          musical_type: data.musical_type || 'Worship contemporáneo',
+          technical_complexity: data.technical_complexity || 'Básica',
         }
       }
     } catch (err) {

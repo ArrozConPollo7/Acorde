@@ -38,9 +38,20 @@ create table if not exists public.songs (
   media_url text,
   notion_id text,
   is_classic boolean default false,
+  church_domain text default 'Conocida',
+  team_domain text default 'Por practicar',
+  musical_type text default 'Worship contemporáneo',
+  technical_complexity text default 'Básica',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Asegurar columnas de canciones en tablas existentes
+alter table public.songs add column if not exists church_domain text default 'Conocida';
+alter table public.songs add column if not exists team_domain text default 'Por practicar';
+alter table public.songs add column if not exists musical_type text default 'Worship contemporáneo';
+alter table public.songs add column if not exists technical_complexity text default 'Básica';
+alter table public.songs add column if not exists is_classic boolean default false;
 
 -- 4. TABLA: service_events (Servicios y Programación)
 create table if not exists public.service_events (

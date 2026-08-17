@@ -60,6 +60,15 @@ export const AVAILABLE_INSTRUMENTS: InstrumentOption[] = [
   { id: 'otros', label: 'Otros Instrumentos', category: 'Instrumentos de Banda', short: 'Otros' },
 ]
 
+export const MUSICAL_TYPES = [
+  'Worship contemporáneo',
+  'Balada congregacional',
+  'Celebración Rítmica',
+  'Himno Tradicional',
+  'Coral',
+  'Especial',
+]
+
 // ─── CHORD TRANSPOSITION ─────────────────────────────────────────────────────
 
 const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -148,7 +157,7 @@ function IconSettings({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83-2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   )
 }
@@ -475,6 +484,45 @@ const TEMPO_STYLES: Record<string, string> = {
   lenta: 'bg-surface-2 text-fg-subtle border-border',
 }
 
+// Badges temáticos para dominio de iglesia y equipo
+function ChurchDomainBadge({ domain }: { domain?: string }) {
+  if (!domain) return null
+  const styles: Record<string, string> = {
+    Dominada: 'text-fg bg-surface-2 border-border font-semibold',
+    Conocida: 'text-fg-muted bg-surface-2 border-border',
+    Nueva: 'text-accent bg-surface-2 border-accent/40 font-bold',
+  }
+  return (
+    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${styles[domain] || 'text-fg-muted bg-surface-2 border-border'}`}>
+      ⛪ {domain}
+    </span>
+  )
+}
+
+function TeamDomainBadge({ domain }: { domain?: string }) {
+  if (!domain) return null
+  const styles: Record<string, string> = {
+    Montada: 'text-fg bg-surface-2 border-border font-semibold',
+    Ensamblada: 'text-fg-muted bg-surface-2 border-border',
+    'Por practicar': 'text-fg-muted bg-surface-2 border-border',
+    'Por entrar': 'text-accent bg-surface-2 border-accent/40 font-bold',
+  }
+  return (
+    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${styles[domain] || 'text-fg-muted bg-surface-2 border-border'}`}>
+      🎸 {domain}
+    </span>
+  )
+}
+
+function ClassicBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-accent text-accent-fg shadow-xs">
+      <IconCrown size={11} />
+      Clásico IBAMI
+    </span>
+  )
+}
+
 // ─── ADD SONG MODAL ───────────────────────────────────────────────────────────
 
 function AddSongModal({
@@ -491,6 +539,11 @@ function AddSongModal({
   const [tagsInput, setTagsInput] = useState('')
   const [mediaUrl, setMediaUrl] = useState('')
   const [lyricsRaw, setLyricsRaw] = useState('')
+  const [isClassic, setIsClassic] = useState(false)
+  const [churchDomain, setChurchDomain] = useState('Conocida')
+  const [teamDomain, setTeamDomain] = useState('Por practicar')
+  const [musicalType, setMusicalType] = useState('Worship contemporáneo')
+  const [technicalComplexity, setTechnicalComplexity] = useState('Básica')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -511,7 +564,11 @@ function AddSongModal({
       tags: tags.length > 0 ? tags : ['Alabanza'],
       lyrics: parsedLyrics,
       media_url: mediaUrl.trim() || undefined,
-      is_classic: false,
+      is_classic: isClassic,
+      church_domain: churchDomain,
+      team_domain: teamDomain,
+      musical_type: musicalType,
+      technical_complexity: technicalComplexity,
     })
 
     onClose()
@@ -524,7 +581,7 @@ function AddSongModal({
         <div className="px-6 pt-6 pb-4 flex-shrink-0 border-b border-border flex items-center justify-between">
           <div>
             <h3 className="font-display text-xl text-fg tracking-wide">AGREGAR NUEVA CANCIÓN</h3>
-            <p className="text-fg-muted text-xs">Registra una canción en el repertorio oficial</p>
+            <p className="text-fg-muted text-xs">Registra una canción en el repertorio oficial con todos sus datos</p>
           </div>
           <button onClick={onClose} className="text-fg-muted hover:text-fg transition-colors cursor-pointer">
             <IconX size={20} />
@@ -594,6 +651,82 @@ function AddSongModal({
             </div>
           </div>
 
+          {/* Ficha Ministerial / Notion Data */}
+          <div className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
+            <p className="text-xs font-bold text-fg uppercase tracking-wider flex items-center gap-1.5">
+              <span>📋</span> Datos Ministeriales (Notion)
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-fg-muted uppercase">Dominio Iglesia</label>
+                <select
+                  value={churchDomain}
+                  onChange={e => setChurchDomain(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+                >
+                  <option value="Nueva">Nueva</option>
+                  <option value="Conocida">Conocida</option>
+                  <option value="Dominada">Dominada</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-fg-muted uppercase">Dominio Equipo</label>
+                <select
+                  value={teamDomain}
+                  onChange={e => setTeamDomain(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+                >
+                  <option value="Por entrar">Por entrar</option>
+                  <option value="Por practicar">Por practicar</option>
+                  <option value="Ensamblada">Ensamblada</option>
+                  <option value="Montada">Montada</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-fg-muted uppercase">Tipo Musical</label>
+                <select
+                  value={musicalType}
+                  onChange={e => setMusicalType(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+                >
+                  {MUSICAL_TYPES.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-fg-muted uppercase">Complejidad</label>
+                <select
+                  value={technicalComplexity}
+                  onChange={e => setTechnicalComplexity(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+                >
+                  <option value="Básica">Básica</option>
+                  <option value="Intermedia">Intermedia</option>
+                  <option value="Avanzada">Avanzada</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Checkbox Clásicos IBAMI */}
+            <label className="flex items-center gap-2.5 pt-1 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={isClassic}
+                onChange={e => setIsClassic(e.target.checked)}
+                className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
+              />
+              <div className="flex items-center gap-1.5">
+                <IconCrown size={14} className="text-accent" />
+                <span className="text-xs font-bold text-fg">Marcar como Clásico IBAMI</span>
+                <span className="text-[10px] text-fg-muted">(Canción insignia del ministerio)</span>
+              </div>
+            </label>
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Enlace de Audio o Video (YouTube)</label>
             <input
@@ -658,6 +791,11 @@ function EditSongModal({
   const [tagsInput, setTagsInput] = useState(song.tags.join(', '))
   const [mediaUrl, setMediaUrl] = useState(song.media_url || '')
   const [lyricsRaw, setLyricsRaw] = useState(formatLyricsToChordPro(song.lyrics))
+  const [isClassic, setIsClassic] = useState(song.is_classic ?? false)
+  const [churchDomain, setChurchDomain] = useState(song.church_domain || 'Conocida')
+  const [teamDomain, setTeamDomain] = useState(song.team_domain || 'Por practicar')
+  const [musicalType, setMusicalType] = useState(song.musical_type || 'Worship contemporáneo')
+  const [technicalComplexity, setTechnicalComplexity] = useState(song.technical_complexity || 'Básica')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -678,6 +816,11 @@ function EditSongModal({
       tags: tags.length > 0 ? tags : ['Alabanza'],
       lyrics: parsedLyrics,
       media_url: mediaUrl.trim() || undefined,
+      is_classic: isClassic,
+      church_domain: churchDomain,
+      team_domain: teamDomain,
+      musical_type: musicalType,
+      technical_complexity: technicalComplexity,
     })
 
     onClose()
@@ -689,8 +832,8 @@ function EditSongModal({
       <div className="relative w-full max-w-2xl rounded-3xl flex flex-col max-h-[90vh] bg-surface border border-border shadow-2xl overflow-hidden">
         <div className="px-6 pt-6 pb-4 flex-shrink-0 border-b border-border flex items-center justify-between">
           <div>
-            <h3 className="font-display text-xl text-fg tracking-wide">EDITAR NOTAS Y ACORDES (CHORDPRO)</h3>
-            <p className="text-fg-muted text-xs">Actualiza la partitura, acordes o información de la canción</p>
+            <h3 className="font-display text-xl text-fg tracking-wide">EDITAR INFORMACIÓN Y NOTAS</h3>
+            <p className="text-fg-muted text-xs">Actualiza acordes, dominio de la iglesia, tipo musical y datos del repertorio</p>
           </div>
           <button onClick={onClose} className="text-fg-muted hover:text-fg transition-colors cursor-pointer">
             <IconX size={20} />
@@ -747,7 +890,7 @@ function EditSongModal({
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Tags</label>
+              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Tags / Categorías</label>
               <input
                 type="text"
                 value={tagsInput}
@@ -755,6 +898,82 @@ function EditSongModal({
                 className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
               />
             </div>
+          </div>
+
+          {/* Ficha Ministerial / Notion Data */}
+          <div className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
+            <p className="text-xs font-bold text-fg uppercase tracking-wider flex items-center gap-1.5">
+              <span>📋</span> Datos Ministeriales (Notion)
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-fg-muted uppercase">Dominio Iglesia</label>
+                <select
+                  value={churchDomain}
+                  onChange={e => setChurchDomain(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+                >
+                  <option value="Nueva">Nueva</option>
+                  <option value="Conocida">Conocida</option>
+                  <option value="Dominada">Dominada</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-fg-muted uppercase">Dominio Equipo</label>
+                <select
+                  value={teamDomain}
+                  onChange={e => setTeamDomain(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+                >
+                  <option value="Por entrar">Por entrar</option>
+                  <option value="Por practicar">Por practicar</option>
+                  <option value="Ensamblada">Ensamblada</option>
+                  <option value="Montada">Montada</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-fg-muted uppercase">Tipo Musical</label>
+                <select
+                  value={musicalType}
+                  onChange={e => setMusicalType(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+                >
+                  {MUSICAL_TYPES.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-fg-muted uppercase">Complejidad</label>
+                <select
+                  value={technicalComplexity}
+                  onChange={e => setTechnicalComplexity(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-medium text-fg bg-surface border border-border focus:outline-none focus:border-accent cursor-pointer"
+                >
+                  <option value="Básica">Básica</option>
+                  <option value="Intermedia">Intermedia</option>
+                  <option value="Avanzada">Avanzada</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Checkbox Clásicos IBAMI */}
+            <label className="flex items-center gap-2.5 pt-1 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={isClassic}
+                onChange={e => setIsClassic(e.target.checked)}
+                className="w-4 h-4 rounded text-accent accent-accent cursor-pointer"
+              />
+              <div className="flex items-center gap-1.5">
+                <IconCrown size={14} className="text-accent" />
+                <span className="text-xs font-bold text-fg">Marcar como Clásico IBAMI</span>
+                <span className="text-[10px] text-fg-muted">(Canción insignia del ministerio)</span>
+              </div>
+            </label>
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -1711,8 +1930,11 @@ function DayDetailScreen({
                         <span className="text-fg font-bold text-sm">{idx + 1}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-fg text-sm">{song.title}</p>
-                        <p className="text-xs text-fg-muted">{song.artist}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-semibold text-fg text-sm truncate">{song.title}</p>
+                          {song.is_classic && <span className="text-[10px] text-accent">👑</span>}
+                        </div>
+                        <p className="text-xs text-fg-muted truncate">{song.artist}</p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="text-xs font-bold text-fg bg-surface-2 px-2.5 py-0.5 rounded-md border border-border">{song.key}</span>
@@ -1768,7 +1990,7 @@ function DayDetailScreen({
   )
 }
 
-// ─── LIBRARY SCREEN WITH COMPACT DROPDOWNS ────────────────────────────────────
+// ─── LIBRARY SCREEN WITH COMPACT & ADVANCED NOTION FILTERS ────────────────────
 
 function LibraryScreen({
   songs,
@@ -1787,6 +2009,9 @@ function LibraryScreen({
   const [tempoFilter, setTempoFilter] = useState<string>('all')
   const [keyFilter, setKeyFilter] = useState<string>('all')
   const [tagFilter, setTagFilter] = useState<string>('all')
+  const [churchFilter, setChurchFilter] = useState<string>('all')
+  const [teamFilter, setTeamFilter] = useState<string>('all')
+  const [classicFilter, setClassicFilter] = useState<string>('all')
 
   const allTags = Array.from(new Set(songs.flatMap(s => s.tags)))
     .filter(t => !['rápida', 'media', 'lenta'].includes(t))
@@ -1800,16 +2025,30 @@ function LibraryScreen({
     if (tempoFilter !== 'all' && s.tempo !== tempoFilter) return false
     if (keyFilter !== 'all' && s.key !== keyFilter) return false
     if (tagFilter !== 'all' && !s.tags.includes(tagFilter)) return false
+    if (churchFilter !== 'all' && s.church_domain !== churchFilter) return false
+    if (teamFilter !== 'all' && s.team_domain !== teamFilter) return false
+    if (classicFilter === 'classic' && !s.is_classic) return false
+    if (classicFilter === 'non-classic' && s.is_classic) return false
     return true
-  }), [songs, query, tempoFilter, keyFilter, tagFilter])
+  }), [songs, query, tempoFilter, keyFilter, tagFilter, churchFilter, teamFilter, classicFilter])
 
-  const hasActiveFilters = tempoFilter !== 'all' || keyFilter !== 'all' || tagFilter !== 'all' || query.trim() !== ''
+  const hasActiveFilters =
+    tempoFilter !== 'all' ||
+    keyFilter !== 'all' ||
+    tagFilter !== 'all' ||
+    churchFilter !== 'all' ||
+    teamFilter !== 'all' ||
+    classicFilter !== 'all' ||
+    query.trim() !== ''
 
   function clearFilters() {
     setQuery('')
     setTempoFilter('all')
     setKeyFilter('all')
     setTagFilter('all')
+    setChurchFilter('all')
+    setTeamFilter('all')
+    setClassicFilter('all')
   }
 
   return (
@@ -1848,8 +2087,51 @@ function LibraryScreen({
           </div>
         </div>
 
+        {/* Barra de Filtros Desplegables / Notion Metadata */}
         <div className="bg-surface border border-border rounded-2xl p-4 mb-6 shadow-xs flex flex-wrap items-center gap-3">
-          <div className="flex-1 min-w-[140px]">
+          <div className="flex-1 min-w-[130px]">
+            <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Clásicos IBAMI</label>
+            <select
+              value={classicFilter}
+              onChange={e => setClassicFilter(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+            >
+              <option value="all">Todos (Clásicos y Nuevas)</option>
+              <option value="classic">👑 Solo Clásicos IBAMI</option>
+              <option value="non-classic">Repertorio General</option>
+            </select>
+          </div>
+
+          <div className="flex-1 min-w-[130px]">
+            <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Dominio Iglesia</label>
+            <select
+              value={churchFilter}
+              onChange={e => setChurchFilter(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+            >
+              <option value="all">Todo el dominio</option>
+              <option value="Nueva">Nueva</option>
+              <option value="Conocida">Conocida</option>
+              <option value="Dominada">Dominada</option>
+            </select>
+          </div>
+
+          <div className="flex-1 min-w-[130px]">
+            <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Dominio Equipo</label>
+            <select
+              value={teamFilter}
+              onChange={e => setTeamFilter(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-base md:text-xs font-medium text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+            >
+              <option value="all">Todo el estado</option>
+              <option value="Por entrar">Por entrar</option>
+              <option value="Por practicar">Por practicar</option>
+              <option value="Ensamblada">Ensamblada</option>
+              <option value="Montada">Montada</option>
+            </select>
+          </div>
+
+          <div className="flex-1 min-w-[120px]">
             <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Tempo</label>
             <select
               value={tempoFilter}
@@ -1863,7 +2145,7 @@ function LibraryScreen({
             </select>
           </div>
 
-          <div className="flex-1 min-w-[130px]">
+          <div className="flex-1 min-w-[110px]">
             <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Tono Original</label>
             <select
               value={keyFilter}
@@ -1877,7 +2159,7 @@ function LibraryScreen({
             </select>
           </div>
 
-          <div className="flex-1 min-w-[180px]">
+          <div className="flex-1 min-w-[140px]">
             <label className="text-[10px] font-bold text-fg-muted uppercase tracking-wider block mb-1">Categoría</label>
             <select
               value={tagFilter}
@@ -1907,7 +2189,7 @@ function LibraryScreen({
             <button
               key={song.id}
               onClick={() => onSongSelect(song.id)}
-              className="rounded-3xl p-5 flex items-center gap-4 text-left active:scale-[0.99] transition-all bg-surface border border-border hover:border-border-hover shadow-xs cursor-pointer group"
+              className="rounded-3xl p-5 flex items-start gap-4 text-left active:scale-[0.99] transition-all bg-surface border border-border hover:border-border-hover shadow-xs cursor-pointer group"
             >
               <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-border flex flex-col items-center justify-center flex-shrink-0 group-hover:border-accent transition-colors shadow-xs">
                 <span className="font-display text-fg font-bold text-base tracking-wide leading-none">{song.key}</span>
@@ -1915,13 +2197,17 @@ function LibraryScreen({
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-fg text-base leading-tight truncate">{song.title}</p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="font-semibold text-fg text-base leading-tight truncate">{song.title}</p>
+                  {song.is_classic && <ClassicBadge />}
+                </div>
                 <p className="text-xs text-fg-muted mt-0.5 truncate">{song.artist}</p>
-                <div className="flex gap-1.5 mt-2 flex-wrap">
-                  <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium border ${TEMPO_STYLES[song.tempo]}`}>{song.tempo}</span>
-                  {song.tags.slice(0, 2).map(t => (
-                    <span key={t} className="text-[10px] px-2.5 py-0.5 rounded-full text-fg-muted bg-surface-2 border border-border capitalize truncate max-w-[120px]">{t}</span>
-                  ))}
+
+                {/* Insignias de dominio y género */}
+                <div className="flex gap-1 mt-2 flex-wrap items-center">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${TEMPO_STYLES[song.tempo]}`}>{song.tempo}</span>
+                  {song.church_domain && <ChurchDomainBadge domain={song.church_domain} />}
+                  {song.team_domain && <TeamDomainBadge domain={song.team_domain} />}
                 </div>
               </div>
             </button>
@@ -1984,15 +2270,39 @@ function SongViewScreen({
           </div>
         </div>
 
+        {/* Tarjeta de Encabezado */}
         <div className="bg-surface border border-border rounded-3xl p-6 md:p-8 mb-6 shadow-xs">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 pb-6 border-b border-border">
             <div className="flex-1 min-w-0">
-              <h1 className="font-display text-3xl md:text-4xl text-fg leading-tight tracking-wide">{song.title.toUpperCase()}</h1>
-              <p className="text-fg-muted text-base mt-1">{song.artist}</p>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h1 className="font-display text-3xl md:text-4xl text-fg leading-tight tracking-wide">{song.title.toUpperCase()}</h1>
+                {song.is_classic && <ClassicBadge />}
+              </div>
+              <p className="text-fg-muted text-base mt-0.5">{song.artist}</p>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-sm font-bold px-4 py-1.5 rounded-xl text-accent-fg bg-accent shadow-xs">Tono {displayKey}</span>
               <span className={`text-xs font-medium px-3 py-1 rounded-full border ${TEMPO_STYLES[song.tempo]}`}>{song.tempo}</span>
+            </div>
+          </div>
+
+          {/* Ficha Técnica Ministerial (Notion) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-surface-2 border border-border mb-6">
+            <div>
+              <p className="text-[10px] text-fg-muted uppercase tracking-wider font-bold">Dominio Iglesia</p>
+              <p className="text-xs font-semibold text-fg mt-0.5">{song.church_domain || 'Conocida'}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-fg-muted uppercase tracking-wider font-bold">Dominio Equipo</p>
+              <p className="text-xs font-semibold text-fg mt-0.5">{song.team_domain || 'Por practicar'}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-fg-muted uppercase tracking-wider font-bold">Tipo Musical</p>
+              <p className="text-xs font-semibold text-fg mt-0.5 truncate">{song.musical_type || 'Worship contemporáneo'}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-fg-muted uppercase tracking-wider font-bold">Complejidad</p>
+              <p className="text-xs font-semibold text-fg mt-0.5">{song.technical_complexity || 'Básica'}</p>
             </div>
           </div>
 
@@ -2037,6 +2347,7 @@ function SongViewScreen({
           </div>
         </div>
 
+        {/* Partitura y Letra */}
         <div className="rounded-3xl p-6 md:p-10 font-mono text-sm md:text-base bg-surface border border-border shadow-xs leading-relaxed">
           {transposedLyrics.map((line, li) => (
             <div key={li} className={li > 0 ? 'mt-6' : ''}>
@@ -2063,7 +2374,7 @@ function SongViewScreen({
             className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer shadow-xs"
           >
             <IconEdit size={16} />
-            Editar Acordes (ChordPro)
+            Editar Canción & Datos
           </button>
           <button
             onClick={handleExportPDF}
@@ -2250,6 +2561,7 @@ function AISuggestionModal({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-fg text-sm leading-tight truncate">{song.title}</p>
+                          {song.is_classic && <span className="text-xs text-accent">👑</span>}
                           {sMoment && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface text-accent border border-border flex-shrink-0">
                               {sMoment}
@@ -2405,7 +2717,10 @@ function SetlistSongPicker({
                 <span className="font-display text-fg font-bold text-sm">{song.key}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-fg truncate">{song.title}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-fg truncate">{song.title}</p>
+                  {song.is_classic && <span className="text-xs text-accent">👑</span>}
+                </div>
                 <p className="text-xs text-fg-muted truncate">{song.artist} · <span className="capitalize">{song.tempo}</span></p>
               </div>
               {isAdded ? (
@@ -3135,8 +3450,11 @@ function AdminScreen({
                           <div key={sid} className="rounded-2xl p-4 flex items-center gap-3 bg-surface border border-border shadow-xs">
                             <span className="font-display text-fg-muted font-bold text-sm w-6 text-center">{idx + 1}</span>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-fg truncate">{song.title}</p>
-                              <p className="text-xs text-fg-muted">{song.key} · {song.tempo}</p>
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-sm font-medium text-fg truncate">{song.title}</p>
+                                {song.is_classic && <span className="text-xs text-accent">👑</span>}
+                              </div>
+                              <p className="text-xs text-fg-muted">{song.key} · {song.tempo} · {song.church_domain || 'Conocida'}</p>
                             </div>
                             <div className="flex gap-1.5">
                               <button onClick={() => moveUp(idx)} className="w-8 h-8 rounded-xl text-fg-muted flex items-center justify-center bg-surface-2 border border-border hover:text-fg transition-colors cursor-pointer" title="Subir orden">
@@ -3378,7 +3696,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-bg font-body text-fg transition-colors duration-200">
-      {/* Modal para agregar canciones */}
+      {/* Modal para agregar canciones con metadatos completos */}
       {addSongModalOpen && (
         <AddSongModal
           onClose={() => setAddSongModalOpen(false)}
@@ -3386,7 +3704,7 @@ export default function App() {
         />
       )}
 
-      {/* Modal para editar canciones y notas ChordPro */}
+      {/* Modal para editar canciones y notas ChordPro con metadatos completos */}
       {editingSong && (
         <EditSongModal
           song={editingSong}

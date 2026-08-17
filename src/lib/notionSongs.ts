@@ -21,7 +21,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=tPBaTvqJjE4&si=8CmxZRHA4ux2qhcS",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Avanzada"
   },
   {
     "id": "notion-2",
@@ -43,7 +47,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=3hTY7lYDfpc&si=trkaeCFfY29fQn6_",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-3",
@@ -66,7 +74,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=VWMJnlB4VlM&si=Sly50PSGgWBhRfdC",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Avanzada"
   },
   {
     "id": "notion-4",
@@ -88,7 +100,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=xBS2MbcCACw&si=xeMdl4z7-Gx1e_pG",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-5",
@@ -111,7 +127,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=cjVdJ9GJqSU&si=Y_XqAqndzebOarfH",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-6",
@@ -135,7 +155,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=kBofocE1woA&si=aTP4lPWpm-Asp6DZ",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-7",
@@ -159,7 +183,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://youtu.be/zxH2TZCZHHM?si=P90UwN2sCNs5wXPh",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-8",
@@ -182,7 +210,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=KKeVMEjx4cA&si=f28JDfFv_YrkwDIR",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Montada",
+    "musical_type": "Himno Tradicional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-9",
@@ -205,7 +237,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=jE9osSKd6Hw&si=Ok7i15o-4rZHcOUg",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-10",
@@ -228,7 +264,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=k_TwdkVxYE0&si=ravcYYVCrZSQvvd6",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-11",
@@ -251,7 +291,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=UqjA4zKS1zA&si=iyUaQReauyUSQOyy",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-12",
@@ -277,7 +321,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=wLXKLy_g8Vs&si=yQYxbGzNHrLQk_Qi",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-13",
@@ -299,7 +347,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=kI_bor25wcM&si=nm96bOL5JJ-iXfY6",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-14",
@@ -323,7 +375,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=ob9MNqrew70&si=LbYw3pSneUcozPMY",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por practicar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-15",
@@ -345,7 +401,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=3I0ovvz_l2Y&si=Hw4leFoJX3kHsYOl",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-16",
@@ -368,7 +428,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=kfdGXTzXFRQ&si=PKvPZZpl9nzVrReK",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-17",
@@ -389,7 +453,11 @@ export const NOTION_SONGS: Song[] = [
         ]
       }
     ],
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-18",
@@ -413,7 +481,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=amfvFqXeIng&si=LFet7u4JM6Zhw-Nu",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-19",
@@ -437,7 +509,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=xGoAEakok-g&si=JOu5yX72OlWwTAbt",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-20",
@@ -459,7 +535,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=JwytTaHToBM&si=QuCurXMHnaGqKQPS",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-21",
@@ -482,7 +562,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=CVSKDxA2ZV0&si=ybmqMkC-0bl4VP3E",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Himno Tradicional, Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-22",
@@ -507,7 +591,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=S2VJbU1mIoM&si=_MGOIQTEM7N03n11",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-23",
@@ -528,7 +616,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=eQ-c1GfY73w&si=SJAv3JmTOJmDr3RF",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-24",
@@ -551,7 +643,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=50MZCY1Legg&si=JlVVo3zWczJ2NF-f",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-25",
@@ -575,7 +671,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=w2hBiVFJfRI&si=ToCYUjPYzgrA0o-x",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-26",
@@ -598,7 +698,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=z3-v_pAmua0&si=FCnRwHrzqSxQ9CWw",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-27",
@@ -622,7 +726,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=qpRdkq2mQv4&si=sPBjw1j_D5-ug4f0",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-28",
@@ -645,7 +753,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=apK4KaOs1X4&si=lXE5KJi7FvNDtEra",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-29",
@@ -667,7 +779,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=FucclshEnMQ&si=Op9Yogf2wGQl2-Dh",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-30",
@@ -690,7 +806,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=MDn-_A2zfkM&si=QSgM8Q8bHfykk__m",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-31",
@@ -714,7 +834,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=ZLHVGxR-gAo&si=f-j0Eo2PGN-93fZ4",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-32",
@@ -738,7 +862,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=8G4Gr9gKTTg&si=o8CicVCSDVZkdI3r",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-33",
@@ -762,7 +890,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=Uhcs42IFh4Q&si=NU2sbLzzIKLygCxG",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica, Especial",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-34",
@@ -784,7 +916,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=qAKn-1q1qiY&si=UbErw75CAl_B_zZq",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-35",
@@ -809,7 +945,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=EN_c6I_lV9o&si=kKZFqxM2LJweFpU2",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional, Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-36",
@@ -1083,7 +1223,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=jWXm1oZIgYo&si=NsoyJvtf1IpmA7gd",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-37",
@@ -1210,7 +1354,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=xjc4tBCTlvM&si=Ea2kd9CWiIJjDdtb",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-38",
@@ -1231,7 +1379,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=ZhWynMPlqxo&list=PLgtaTwebsGeWRnL8UR1pZg_ThtYg6OkPM",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-39",
@@ -1253,7 +1405,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=_3RahEjgSII&si=fKfuRaYYk5V0ArFK",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Por practicar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-40",
@@ -1436,7 +1592,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=8_gOnivRUsw&si=YvJFcaxCPlgm0s18",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-41",
@@ -1460,7 +1620,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=I50l_0ODoB4&si=KiIiDAvgp0ZTbJiO",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-42",
@@ -1482,7 +1646,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=4iUEq3VOHos&si=pBzrILCqNajz0HhV",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-43",
@@ -1506,7 +1674,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=IpBtQtngg9w&si=OpwY88m0tram5IZe",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-44",
@@ -1529,7 +1701,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=N1NDNmoAh-U&si=4mI6p9RCE2_PFfyR",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-45",
@@ -1555,7 +1731,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=M6Sclb7y1Pc&si=e-8p9PrG-fpC507c",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-46",
@@ -1578,7 +1758,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=u546A0J0XVc&si=YBBr2MtRnTDnYu4o",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-47",
@@ -1600,7 +1784,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=I8jEw8UeA0c&si=cvFt_r9i6VSRy5kN",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-48",
@@ -1623,7 +1811,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=7-cff0k6Cq0&si=yBZEJzAzZVkpBLGD",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-49",
@@ -1646,7 +1838,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=CwYn6xXKOD4&si=qp3yhartTDjxo1mm",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-50",
@@ -1697,7 +1893,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=6E2-ULnQJ2s&si=Z2Ws7qft48OHIoaY",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-51",
@@ -1721,7 +1921,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=MgNQC4zoAJ4&si=1YWEyMauE-n3OzKr",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-52",
@@ -1744,7 +1948,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=Jy08K4twCp4&si=ddZZeWrjR4ZKC1R1",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-53",
@@ -1842,7 +2050,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=SDq5aA0GCYM&si=Sp2RgE7x8Ir9YWX4",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-54",
@@ -1867,7 +2079,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=jBQ4nUirULc&si=c6uIwkX1Uv3roF0b",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-55",
@@ -1891,7 +2107,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=qAKn-1q1qiY&si=V59D971CwkQAtSU8",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-56",
@@ -1914,7 +2134,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=nWCLenPD3ZQ&si=LHuCYe-cdHzti-bl",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Celebración Rítmica, Especial",
+    "technical_complexity": "Avanzada"
   },
   {
     "id": "notion-57",
@@ -2167,7 +2391,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=rs7T8Dy5meE&si=lciwXqp0tyB96a3r",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-58",
@@ -2310,7 +2538,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=qfvxtY7h8Bw&si=tkI7KS9EG6CJvzhf",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-59",
@@ -2375,7 +2607,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=DIe0Fi9ysgA&si=gfKKCaUmuRnImimZ",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-60",
@@ -2400,7 +2636,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=ZbMahKoBt8o&si=ZNG1MP8I2by_2GQ0",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-61",
@@ -2422,7 +2662,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=k_TwdkVxYE0&si=u63aiRE2i6ugRJyw",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-62",
@@ -2446,7 +2690,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=BV6490Ts3EQ&si=ePoyHiulTr3duHf2",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-63",
@@ -2560,7 +2808,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=fvXHMoR1O9Y&si=O7LKPvoInmaPE14Y",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-64",
@@ -2640,7 +2892,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=2LwBFKH2cUI&si=FeLl5405N2K3A9cT",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-65",
@@ -2661,7 +2917,11 @@ export const NOTION_SONGS: Song[] = [
         ]
       }
     ],
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-66",
@@ -2686,7 +2946,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://youtu.be/4fFDEQCPi88?si=mfcyYsKuKZA4Upbq",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Avanzada"
   },
   {
     "id": "notion-67",
@@ -2709,7 +2973,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=SdRdqJgmb5U&si=HbwUep47eEGTLWSt",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Celebración Rítmica, Worship contemporáneo",
+    "technical_complexity": "Avanzada"
   },
   {
     "id": "notion-68",
@@ -2733,7 +3001,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=kE7PCX7wdGM&si=YhEXzjOApHArErPt",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-69",
@@ -2756,7 +3028,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=A0BXNl8uozI&si=G1S240CjHpJMiJ6M",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-70",
@@ -2778,7 +3054,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=vle5H40SGEU&si=JqrPkMKuL4TIAnu2",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-71",
@@ -2801,7 +3081,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=WotExLBLsS4&si=BuMVxfrAN3Rz-lS_",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-72",
@@ -2824,7 +3108,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=wNQO8B4vbVE&si=GLLRXZ75QdlK32mx",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional, Coral, Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-73",
@@ -2847,7 +3135,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=wNQO8B4vbVE&si=GLLRXZ75QdlK32mx",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional, Coral, Especial",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-74",
@@ -2871,7 +3163,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=7BVNNPHftbo&si=V_1sTGL3XBzTW_cA",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional, Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-75",
@@ -2895,7 +3191,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=PcxOm1SMsNo&si=gwtxUa1YDD_KsS-u",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-76",
@@ -2919,7 +3219,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=yLNXFrzFqnI&si=7bpYYhSrn0-1wq0_",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica, Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-77",
@@ -2941,7 +3245,11 @@ export const NOTION_SONGS: Song[] = [
         ]
       }
     ],
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-78",
@@ -2963,7 +3271,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=Qy833_8I8Jw&si=jjEVRciAUnfFRt8_",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-79",
@@ -2987,7 +3299,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=nz4u5HKSAoE&si=GQzHvhm0mNkcnl37",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-80",
@@ -3013,7 +3329,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=MclX3YvhBMM&si=kdXn6LTV2ApF0Wv_",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-81",
@@ -3035,7 +3355,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=cWkDXlAE5Xs&si=0hUWR89hqRmudm_b",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-82",
@@ -3059,7 +3383,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=dsgj-gJRcgU&si=SMM5cdoVE88AY4Rc",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-83",
@@ -3084,7 +3412,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=NKS35QMgFtE&si=taKfrud4n6HgySrf",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-84",
@@ -3106,7 +3438,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=kVivVyrCPV8&si=VeaMo2--ISX1Jsc-",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Especial, Himno Tradicional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-85",
@@ -3130,7 +3466,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=4zdTcNRf7WE&si=ivskUNrYcCnvj2SS",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-86",
@@ -3153,7 +3493,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=UOKQpHOkzTQ&si=StFwLbsp0jn1NzVg",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-87",
@@ -3174,7 +3518,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=XJOkVUyZQZQ&si=gKu2iLlP7MHaDSGz",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-88",
@@ -3199,7 +3547,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=ilFQrVEjmrU&si=0VRRTQFAGt5x7uvy",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-89",
@@ -3221,7 +3573,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=NfoQer54JSU&si=q0FByxA3lenj1q4_",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-90",
@@ -3245,7 +3601,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=8Okof73vyoQ&si=yh-fNW1C77ulV4ix",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional, Especial",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-91",
@@ -3267,7 +3627,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=mVkWoznNTOk&si=rvVRqjEThFQw7e9M",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-92",
@@ -3289,7 +3653,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=dtIHnbIyffo&si=acE5DYty0pZkhPWC",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-93",
@@ -3312,7 +3680,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=Arei0roTsDM&si=qdodWMwZbpDH5O2G",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-94",
@@ -3334,7 +3706,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=41KmGg93i3I&si=ByGhIm6x-OWURNPL",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-95",
@@ -3359,7 +3735,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=expXvbefIVY&si=p4RzoWEKOe0SG9fH",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-96",
@@ -3385,7 +3765,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=w2hBiVFJfRI&si=7gQlmrpGxN2nTf6L",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-97",
@@ -3407,7 +3791,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=e28v65rt89w&si=asiLVf9M6A0Ru4OP",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-98",
@@ -3432,7 +3820,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=PgUI_eJqxwo&si=jKHeF4L13ioVKgzM",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-99",
@@ -3456,7 +3848,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=8uPgS22sWaQ&si=HOPAv9HA_pbE4NnS",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-100",
@@ -3477,7 +3873,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=vMiPG3vWO-A&si=hcPbjk50T4aNIhl6",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-101",
@@ -3500,7 +3900,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=NtWGdvxBpHI&si=lGMeyKTxYtPATsCN",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-102",
@@ -3524,7 +3928,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=N1KoaapgBu0&si=FbrnbT24REI9nA0B",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-103",
@@ -3546,7 +3954,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=rU8MVy-JsAI&si=LqtExLgw2rniifPU",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-104",
@@ -3570,7 +3982,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=tNu-TQQ7NbQ&si=_N8OXicGs56dR5zF",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional, Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-105",
@@ -3592,7 +4008,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=xJ_ZZkM5fGY&si=J1m4w3nYcLvL4E_6",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-106",
@@ -3616,7 +4036,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=mPoDsQ1BR1g&si=ODd8piEUKi6QpE1D",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Nueva",
+    "team_domain": "Por practicar",
+    "musical_type": "Especial, Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-107",
@@ -3638,7 +4062,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=mPoDsQ1BR1g&si=ODd8piEUKi6QpE1D",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-108",
@@ -3660,7 +4088,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=-CAFAc5OYqc&si=aOnZeEaoQo3ZAcSQ",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-109",
@@ -3684,7 +4116,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=_0Hz-yLVH-M&si=dE56CE83yAjLiU_W",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Avanzada"
   },
   {
     "id": "notion-110",
@@ -3704,7 +4140,11 @@ export const NOTION_SONGS: Song[] = [
         ]
       }
     ],
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-111",
@@ -3728,7 +4168,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=4XgnqizZ1AA&si=Vt_D7PwfivTTmTh9",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-112",
@@ -3752,7 +4196,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=-6iyurBfo6A&si=tX6a73tpyWE-w9r5",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-113",
@@ -3776,7 +4224,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=60Ncc55pvNU&si=-GLi47YRTbU30O7R",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Nueva",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-114",
@@ -3798,7 +4250,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=3c6SYKG2MYg&si=ol5GssLivxjQbRfJ",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-115",
@@ -3820,7 +4276,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=IDaNNHAWjQA&si=4gOhy_Ncz9fkKhu_",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-116",
@@ -3843,7 +4303,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=IDaNNHAWjQA&si=4pRssxyrTXbhnKuO",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-117",
@@ -3865,7 +4329,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=TFEGDi4OAyg&si=U0U98XIfbTD7CEWt",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Montada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-118",
@@ -3978,7 +4446,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=xpQS7QkvmGU&si=Y77hkdWGhBjD5wSv",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-119",
@@ -4000,7 +4472,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=K2f0u6LGHIE&si=70Pqff-V4xP_y0SG",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-120",
@@ -4024,7 +4500,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://youtu.be/0pOVNIsyIXM?si=dLXo1iziFTify652",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-121",
@@ -4048,7 +4528,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://youtu.be/YOFJJquEK2k?si=IwgBrg4qmWjphK1j",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Avanzada"
   },
   {
     "id": "notion-122",
@@ -4072,7 +4556,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://youtu.be/3kXfjfT6ewU?si=bvW1q1uKftKaYYKU",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Avanzada"
   },
   {
     "id": "notion-123",
@@ -4094,7 +4582,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=gKPjGrhVLNg&si=nWH2F7KMah9CnQ7c",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-124",
@@ -4120,7 +4612,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=LXMLHk1al4k&si=xI-Oe9VTLDb9yzhn",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-125",
@@ -4144,7 +4640,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=n7UQxs49DGU&si=DT0EZVMt2l8Z_sSW",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-126",
@@ -4166,7 +4666,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=2TGRgpyy_bU&si=amAkNFSCLIDmJ-ld",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional, Especial",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-127",
@@ -4191,7 +4695,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=XavMcEtGRE8&si=2Xon1vnMz80cpyvv",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-128",
@@ -4214,7 +4722,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=bXh0rfByyuU&si=4ZpQ_avjea1wHU9C",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-129",
@@ -4237,7 +4749,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=2SOMVaUavl4&si=CdwAByAbqIVdFSWA",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-130",
@@ -4260,7 +4776,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=XvSrcunrIFs&si=_hy2gfS65s6AzTwP",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-131",
@@ -4281,7 +4801,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=PWD2TlW10k0&si=zDItBOi-Nux3iuIU",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-132",
@@ -4304,7 +4828,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=LZlyuElmhOs&si=xx00cAFKta0HPZ2O",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional, Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-133",
@@ -4328,7 +4856,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=bWmOXIg7j24&si=jrFmJJpVjOAVXZgC",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-134",
@@ -4352,7 +4884,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=p35EDzSIi8w&si=EKTFdL9nPDKXequF",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Por practicar",
+    "musical_type": "Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-135",
@@ -4373,7 +4909,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=GzpGyLQ3ETg&si=lfdjgk5svazUwMe5",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional, Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-136",
@@ -4397,7 +4937,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=4LJApZZwkkw&si=AANkYfcSaJFRseTK",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Por practicar",
+    "musical_type": "Especial",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-137",
@@ -4419,7 +4963,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=40U8jhITFNE&si=I7ypWMH4Ke_M_Dc_",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-138",
@@ -4441,7 +4989,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=lSn9Y8zNcjg&si=i0n5gNpAIqrlGe-p",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-139",
@@ -4462,7 +5014,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=9rQOQotNnpc&si=esxRAexTkkixFax4",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-140",
@@ -4485,7 +5041,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=Yu_erTjtyj8&si=r4toVCwGwZHChlnC",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-141",
@@ -4507,7 +5067,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=gXKhpujngHU&si=KnvI9JIORN9f1rqG",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-142",
@@ -4531,7 +5095,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=LO8QXLMTdxo&si=M5zgOtb4d6dP8nP1",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-143",
@@ -4554,7 +5122,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=NMb7zQudh5w&si=sMbV1i2MUTDvDUbl",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Ensamblada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-144",
@@ -4577,7 +5149,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=LFPErWrYZCU&si=jLehLMgnDijmQbSA",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-145",
@@ -4597,7 +5173,11 @@ export const NOTION_SONGS: Song[] = [
         ]
       }
     ],
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-146",
@@ -4619,7 +5199,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=8FNTUOSi-YE&si=XSH3dLg5_6GI9ZSE",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-147",
@@ -4642,7 +5226,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=Bdtlo2luEPo&si=T3kH0dUWli0_sJZ5",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-148",
@@ -4665,7 +5253,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=Bdtlo2luEPo&si=T3kH0dUWli0_sJZ5",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-149",
@@ -4687,7 +5279,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=I50l_0ODoB4&si=KRYT3sfVDE2FG_yx",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Por practicar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-150",
@@ -4710,7 +5306,11 @@ export const NOTION_SONGS: Song[] = [
         ]
       }
     ],
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Dominada",
+    "team_domain": "Montada",
+    "musical_type": "Balada congregacional",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-151",
@@ -4733,7 +5333,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=oIQyarLXb8g&si=QzXCSUWONvk-Gi_w",
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Celebración Rítmica",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-152",
@@ -4755,7 +5359,11 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=bDLPPrQSSyk&si=UocUbXzxqf2TAD_X",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Nueva",
+    "team_domain": "Por entrar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Intermedia"
   },
   {
     "id": "notion-153",
@@ -4775,7 +5383,11 @@ export const NOTION_SONGS: Song[] = [
         ]
       }
     ],
-    "is_classic": false
+    "is_classic": false,
+    "church_domain": "Conocida",
+    "team_domain": "Por practicar",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   },
   {
     "id": "notion-154",
@@ -4796,6 +5408,10 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "media_url": "https://music.youtube.com/watch?v=pgkPf0gWLFc&si=yG-nwuroQohZXPlU",
-    "is_classic": true
+    "is_classic": true,
+    "church_domain": "Conocida",
+    "team_domain": "Ensamblada",
+    "musical_type": "Worship contemporáneo",
+    "technical_complexity": "Básica"
   }
 ]
