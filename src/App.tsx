@@ -97,6 +97,14 @@ function transposeChord(chord: string, n: number): string {
   return chord
 }
 
+function getTodayDateString(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // ─── ICONS ────────────────────────────────────────────────────────────────────
 
 function LogoIbami({ size = 28, className = '' }: { size?: number | string; className?: string }) {
@@ -1632,8 +1640,9 @@ function CalendarScreen({
   theme: Theme
   onToggleTheme: () => void
 }) {
-  const [year, setYear] = useState(2026)
-  const [month, setMonth] = useState(7)
+  const now = new Date()
+  const [year, setYear] = useState(() => now.getFullYear())
+  const [month, setMonth] = useState(() => now.getMonth())
 
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -1644,7 +1653,7 @@ function CalendarScreen({
   ]
   while (cells.length % 7 !== 0) cells.push(null)
 
-  const today = '2026-08-16'
+  const today = getTodayDateString()
 
   function dateStr(day: number) {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
@@ -3225,7 +3234,7 @@ function AdminScreen({
   onToggleTheme: () => void
 }) {
   const [tab, setTab] = useState<AdminTab>('usuarios')
-  const [selectedAdminDate, setSelectedAdminDate] = useState(() => events[0]?.date || '2026-08-16')
+  const [selectedAdminDate, setSelectedAdminDate] = useState(() => events[0]?.date || getTodayDateString())
   const [aiModalOpen, setAiModalOpen] = useState(false)
 
   // Sincronizar fecha de administración con los eventos existentes
@@ -4152,7 +4161,7 @@ function getInitialTheme(): Theme {
 export default function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [screen, setScreen] = useState<Screen>('login')
-  const [selectedDate, setSelectedDate] = useState('2026-08-16')
+  const [selectedDate, setSelectedDate] = useState(getTodayDateString)
   const [selectedSongId, setSelectedSongId] = useState('notion-1')
   const [prevScreen, setPrevScreen] = useState<Screen>('calendar')
   const [attendance, setAttendance] = useState<Record<string, Status>>({})
