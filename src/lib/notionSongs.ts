@@ -2,7 +2,6 @@ import type { Song } from './api'
 
 export const NOTION_SONGS: Song[] = [
   {
-    "id": "notion-1",
     "title": "Tu Gloria",
     "artist": "Jonathan & Sarah Jerez",
     "key": "G",
@@ -22,13 +21,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=tPBaTvqJjE4&si=8CmxZRHA4ux2qhcS",
     "is_classic": true,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Avanzada"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Tu Gloria\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-2",
     "title": "Desde mi interior",
     "artist": "Hillsong",
     "key": "G",
@@ -48,13 +43,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=3hTY7lYDfpc&si=trkaeCFfY29fQn6_",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Desde mi interior\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-3",
     "title": "Todo lo haces bien",
     "artist": "Gateway Worship",
     "key": "G",
@@ -75,13 +66,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=VWMJnlB4VlM&si=Sly50PSGgWBhRfdC",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Avanzada"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Todo lo haces bien\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo media). Palabras clave: declaración doctrinal, gozo, celebración, doctrina, soberanía."
   },
   {
-    "id": "notion-4",
     "title": "Jesús, eres mi buen pastor",
     "artist": "Coalo Zamorano",
     "key": "G",
@@ -101,13 +88,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=xBS2MbcCACw&si=xeMdl4z7-Gx1e_pG",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Jesús, eres mi buen pastor\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-5",
     "title": "Al sea la gloria",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -128,13 +111,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=cjVdJ9GJqSU&si=Y_XqAqndzebOarfH",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Al sea la gloria\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-6",
     "title": "Portador de tu gloria",
     "artist": "Alejandro del Bosque",
     "key": "G",
@@ -156,13 +135,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=kBofocE1woA&si=aTP4lPWpm-Asp6DZ",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Proclamación del evangelio de salvación, el sacrificio de la cruz y el llamado a las naciones a través de \"Portador de tu gloria\". Tono espiritual: Convicción misionera, pasión evangelística (Worship contemporáneo, tempo rápida). Palabras clave: evangelización, misión, gozo, celebración, evangelio."
   },
   {
-    "id": "notion-7",
     "title": "Te pertenezco",
     "artist": "Abel Zabala",
     "key": "G",
@@ -184,13 +159,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://youtu.be/zxH2TZCZHHM?si=P90UwN2sCNs5wXPh",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Te pertenezco\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, exaltación, gloria, rendición."
   },
   {
-    "id": "notion-8",
     "title": "Día en día - Himno 364",
     "artist": "Himnario Bautista",
     "key": "G",
@@ -211,13 +182,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=KKeVMEjx4cA&si=f28JDfFv_YrkwDIR",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Montada",
-    "musical_type": "Himno Tradicional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Día en día - Himno 364\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-9",
     "title": "Contempla a Dios",
     "artist": "IBI",
     "key": "G",
@@ -238,13 +205,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=jE9osSKd6Hw&si=Ok7i15o-4rZHcOUg",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Contempla a Dios\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo media). Palabras clave: declaración doctrinal, evangelización, misión, doctrina, soberanía."
   },
   {
-    "id": "notion-10",
     "title": "Jesucristo Basta",
     "artist": "Un Corazón",
     "key": "G",
@@ -265,13 +228,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=k_TwdkVxYE0&si=ravcYYVCrZSQvvd6",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Jesucristo Basta\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo media). Palabras clave: declaración doctrinal, evangelización, misión, doctrina, soberanía."
   },
   {
-    "id": "notion-11",
     "title": "Jesús Salva",
     "artist": "Un Corazón",
     "key": "G",
@@ -292,13 +251,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=UqjA4zKS1zA&si=iyUaQReauyUSQOyy",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Jesús Salva\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo media). Palabras clave: declaración doctrinal, evangelización, misión, doctrina, soberanía."
   },
   {
-    "id": "notion-12",
     "title": "Jesús, has mi carácter",
     "artist": "Daniel Calvetti",
     "key": "G",
@@ -322,13 +277,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=wLXKLy_g8Vs&si=yQYxbGzNHrLQk_Qi",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Jesús, has mi carácter\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, consagración, entrega, evangelización."
   },
   {
-    "id": "notion-13",
     "title": "Al estar ante tí",
     "artist": "Vive La Palabra",
     "key": "G",
@@ -348,13 +299,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=kI_bor25wcM&si=nm96bOL5JJ-iXfY6",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Al estar ante tí\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo lenta). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-14",
     "title": "Queremos Ver",
     "artist": "De hombre a hombre",
     "key": "G",
@@ -376,13 +323,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=ob9MNqrew70&si=LbYw3pSneUcozPMY",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por practicar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Proclamación del evangelio de salvación, el sacrificio de la cruz y el llamado a las naciones a través de \"Queremos Ver\". Tono espiritual: Convicción misionera, pasión evangelística (Worship contemporáneo, tempo rápida). Palabras clave: evangelización, misión, gozo, celebración, evangelio."
   },
   {
-    "id": "notion-15",
     "title": "Él es El Rey",
     "artist": "Danilo Montero",
     "key": "G",
@@ -402,13 +345,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=3I0ovvz_l2Y&si=Hw4leFoJX3kHsYOl",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Él es El Rey\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-16",
     "title": "Alégrense",
     "artist": "Marcos Witt",
     "key": "G",
@@ -429,13 +368,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=kfdGXTzXFRQ&si=PKvPZZpl9nzVrReK",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Alégrense\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, gozo, celebración, doctrina, soberanía."
   },
   {
-    "id": "notion-17",
     "title": "Dios de pactos",
     "artist": "Marcos Witt",
     "key": "G",
@@ -454,13 +389,9 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Dios de pactos\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-18",
     "title": "Preciosa Sangre",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -482,13 +413,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=amfvFqXeIng&si=LFet7u4JM6Zhw-Nu",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"Preciosa Sangre\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo media). Palabras clave: confesión, arrepentimiento, consagración, entrega, perdón."
   },
   {
-    "id": "notion-19",
     "title": "A tí",
     "artist": "Marcos Witt",
     "key": "G",
@@ -510,13 +437,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=xGoAEakok-g&si=JOu5yX72OlWwTAbt",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"A tí\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo lenta). Palabras clave: confesión, arrepentimiento, consagración, entrega, perdón."
   },
   {
-    "id": "notion-20",
     "title": "A tí la gloria",
     "artist": "IBI",
     "key": "G",
@@ -536,13 +459,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=JwytTaHToBM&si=QuCurXMHnaGqKQPS",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"A tí la gloria\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo media). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-21",
     "title": "No soy yo sino Cristo en mí",
     "artist": "Doulos",
     "key": "G",
@@ -563,13 +482,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=CVSKDxA2ZV0&si=ybmqMkC-0bl4VP3E",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Himno Tradicional, Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"No soy yo sino Cristo en mí\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-22",
     "title": "Dios me ama",
     "artist": "Danilo Montero",
     "key": "G",
@@ -592,13 +507,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=S2VJbU1mIoM&si=_MGOIQTEM7N03n11",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Dios me ama\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Palabras clave: declaración doctrinal, evangelización, misión, exaltación, gloria."
   },
   {
-    "id": "notion-23",
     "title": "Gracias",
     "artist": "Marcos Witt",
     "key": "G",
@@ -617,13 +528,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=eQ-c1GfY73w&si=SJAv3JmTOJmDr3RF",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Gracias\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, gratitud, fidelidad, bondad, provisión."
   },
   {
-    "id": "notion-24",
     "title": "Quien sino tú",
     "artist": "Santiago Benavides",
     "key": "G",
@@ -644,13 +551,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=50MZCY1Legg&si=JlVVo3zWczJ2NF-f",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Quien sino tú\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, consagración, entrega, gratitud, fidelidad."
   },
   {
-    "id": "notion-25",
     "title": "Solo a tí",
     "artist": "Jaime Murrell",
     "key": "G",
@@ -672,13 +575,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=w2hBiVFJfRI&si=ToCYUjPYzgrA0o-x",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Solo a tí\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, exaltación, gloria, misericordia."
   },
   {
-    "id": "notion-26",
     "title": "Señor te adoramos",
     "artist": "Santiago Benavides",
     "key": "G",
@@ -699,13 +598,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=z3-v_pAmua0&si=FCnRwHrzqSxQ9CWw",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Señor te adoramos\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, exaltación, gloria, gratitud, fidelidad."
   },
   {
-    "id": "notion-27",
     "title": "¿Él es digno?",
     "artist": "IBI",
     "key": "G",
@@ -727,13 +622,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=qpRdkq2mQv4&si=sPBjw1j_D5-ug4f0",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"¿Él es digno?\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo media). Palabras clave: clamor, intercesión, exaltación, gloria, misericordia."
   },
   {
-    "id": "notion-28",
     "title": "Cuanto amo tu ley",
     "artist": "Danilo Montero",
     "key": "G",
@@ -754,13 +645,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=apK4KaOs1X4&si=lXE5KJi7FvNDtEra",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Cuanto amo tu ley\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, exaltación, gloria, doctrina, soberanía."
   },
   {
-    "id": "notion-29",
     "title": "Fiel",
     "artist": "Majo y Dan",
     "key": "G",
@@ -780,13 +667,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=FucclshEnMQ&si=Op9Yogf2wGQl2-Dh",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Fiel\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-30",
     "title": "Dulce refugio",
     "artist": "Danilo Montero",
     "key": "G",
@@ -807,13 +690,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=MDn-_A2zfkM&si=QSgM8Q8bHfykk__m",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Dulce refugio\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Palabras clave: declaración doctrinal, evangelización, misión, doctrina, soberanía."
   },
   {
-    "id": "notion-31",
     "title": "Te exaltamos",
     "artist": "Marcos Witt",
     "key": "G",
@@ -835,13 +714,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=ZLHVGxR-gAo&si=f-j0Eo2PGN-93fZ4",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Te exaltamos\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-32",
     "title": "Hay momentos",
     "artist": "Danilo Montero",
     "key": "G",
@@ -863,13 +738,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=8G4Gr9gKTTg&si=o8CicVCSDVZkdI3r",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Hay momentos\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, consagración, entrega, misericordia."
   },
   {
-    "id": "notion-33",
     "title": "Eres mi amigo fiel",
     "artist": "Coalo Zamorano",
     "key": "G",
@@ -891,13 +762,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=Uhcs42IFh4Q&si=NU2sbLzzIKLygCxG",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica, Especial",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Eres mi amigo fiel\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-34",
     "title": "Ven es hora de adorarle",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -917,13 +784,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=qAKn-1q1qiY&si=UbErw75CAl_B_zZq",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Ven es hora de adorarle\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-35",
     "title": "Yo te busco",
     "artist": "Marcos Witt",
     "key": "G",
@@ -946,13 +809,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=EN_c6I_lV9o&si=kKZFqxM2LJweFpU2",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional, Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Yo te busco\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, declaración doctrinal, exaltación, gloria."
   },
   {
-    "id": "notion-36",
     "title": "Mi Universo",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -1224,13 +1083,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=jWXm1oZIgYo&si=NsoyJvtf1IpmA7gd",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Mi Universo\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Énfasis lírico: \"Que seas mi universo No quiero darte solo un rato de mi tiempo No quiero separarte un día solamente Que seas mi universo...\". Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-37",
     "title": "Con Mis Manos Levantadas",
     "artist": "Danilo Montero",
     "key": "G",
@@ -1355,13 +1210,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=xjc4tBCTlvM&si=Ea2kd9CWiIJjDdtb",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Con Mis Manos Levantadas\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Énfasis lírico: \"//Con mis manos levantadas hacia el cielo Me presento ante ti hoy mi Señor Para recibir de ti la fuerza y el poder Para vivir junto a ti//...\". Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-38",
     "title": "Tu Fidelidad",
     "artist": "Marcos Witt",
     "key": "G",
@@ -1380,13 +1231,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=ZhWynMPlqxo&list=PLgtaTwebsGeWRnL8UR1pZg_ThtYg6OkPM",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Tu Fidelidad\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, gratitud, fidelidad, bondad, provisión."
   },
   {
-    "id": "notion-39",
     "title": "Venció",
     "artist": "Marcos Witt",
     "key": "G",
@@ -1406,13 +1253,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=_3RahEjgSII&si=fKfuRaYYk5V0ArFK",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Por practicar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Fiesta espiritual y júbilo congregacional por la salvación y la victoria en Jesús a través de \"Venció\". Tono espiritual: Festivo, rítmico y lleno de energía de alabanza (Worship contemporáneo, tempo rápida). Palabras clave: gozo, celebración, victoria, alegría, triunfo."
   },
   {
-    "id": "notion-40",
     "title": "No Hay Argumento",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -1593,13 +1436,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=8_gOnivRUsw&si=YvJFcaxCPlgm0s18",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"No Hay Argumento\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo rápida). Énfasis lírico: \"No hay argumento Ni juicio contra mí Él con su sangre Me vino a redimir...\". Palabras clave: confesión, arrepentimiento, perdón, purificación, sangre de Cristo."
   },
   {
-    "id": "notion-41",
     "title": "De gloria en gloria",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -1621,13 +1460,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=I50l_0ODoB4&si=KiIiDAvgp0ZTbJiO",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"De gloria en gloria\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-42",
     "title": "De Gloria en Gloria",
     "artist": "Marcos Witt",
     "key": "G",
@@ -1647,13 +1482,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=4iUEq3VOHos&si=pBzrILCqNajz0HhV",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"De Gloria en Gloria\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-43",
     "title": "Así Es Tu Amor",
     "artist": "Jaime Murrell",
     "key": "G",
@@ -1675,13 +1506,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=IpBtQtngg9w&si=OpwY88m0tram5IZe",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Así Es Tu Amor\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo lenta). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-44",
     "title": "Él Volverá",
     "artist": "Marcos Witt",
     "key": "G",
@@ -1702,13 +1529,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=N1NDNmoAh-U&si=4mI6p9RCE2_PFfyR",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Él Volverá\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, gozo, celebración, doctrina, soberanía."
   },
   {
-    "id": "notion-45",
     "title": "Jesús, eres mi buen pastor",
     "artist": "Marcos Witt",
     "key": "G",
@@ -1732,13 +1555,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=M6Sclb7y1Pc&si=e-8p9PrG-fpC507c",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Jesús, eres mi buen pastor\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, confesión, arrepentimiento, consagración."
   },
   {
-    "id": "notion-46",
     "title": "Tu dulce amor",
     "artist": "Danilo Montero",
     "key": "G",
@@ -1759,13 +1578,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=u546A0J0XVc&si=YBBr2MtRnTDnYu4o",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Tu dulce amor\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, consagración, entrega, gratitud, fidelidad."
   },
   {
-    "id": "notion-47",
     "title": "Cantaré de tu amor",
     "artist": "Danilo Montero",
     "key": "G",
@@ -1785,13 +1600,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=I8jEw8UeA0c&si=cvFt_r9i6VSRy5kN",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Cantaré de tu amor\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-48",
     "title": "Los que esperan en el señor",
     "artist": "Danilo Montero",
     "key": "G",
@@ -1812,13 +1623,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=7-cff0k6Cq0&si=yBZEJzAzZVkpBLGD",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Los que esperan en el señor\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, exaltación, gloria, doctrina, soberanía."
   },
   {
-    "id": "notion-49",
     "title": "Palabras de vida eterna",
     "artist": "Marcos Witt",
     "key": "G",
@@ -1839,13 +1646,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=CwYn6xXKOD4&si=qp3yhartTDjxo1mm",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Palabras de vida eterna\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, gozo, celebración, doctrina, soberanía."
   },
   {
-    "id": "notion-50",
     "title": "Tu Palabra",
     "artist": "Marcela Gándara",
     "key": "G",
@@ -1894,13 +1697,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=6E2-ULnQJ2s&si=Z2Ws7qft48OHIoaY",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Tu Palabra\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Énfasis lírico: \"Tu palabraEs como aceite sobre mis heridasEs el agua en el desiertoY el calor en el inviernoTu palabraEs la voz que me habla en la mañanaEs ...\". Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-51",
     "title": "Jesús Mi Fiel Amigo",
     "artist": "Abel Zabala",
     "key": "G",
@@ -1922,13 +1721,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=MgNQC4zoAJ4&si=1YWEyMauE-n3OzKr",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Jesús Mi Fiel Amigo\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, consagración, entrega, misericordia."
   },
   {
-    "id": "notion-52",
     "title": "La Bondad de Dios",
     "artist": "IBI",
     "key": "G",
@@ -1949,13 +1744,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=Jy08K4twCp4&si=ddZZeWrjR4ZKC1R1",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"La Bondad de Dios\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo media). Palabras clave: acción de gracias, exaltación, gloria, gratitud, fidelidad."
   },
   {
-    "id": "notion-53",
     "title": "El Señor Es Mi Pastor",
     "artist": "Danilo Montero",
     "key": "G",
@@ -2051,13 +1842,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=SDq5aA0GCYM&si=Sp2RgE7x8Ir9YWX4",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"El Señor Es Mi Pastor\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Énfasis lírico: \"El Señor es mi pastor Nada me faltará El Señor es mi pastor En pastos delicados...\". Palabras clave: declaración doctrinal, doctrina, soberanía, fe bíblica, verdades del evangelio."
   },
   {
-    "id": "notion-54",
     "title": "Hay Libertad",
     "artist": "IBI",
     "key": "G",
@@ -2080,13 +1867,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=jBQ4nUirULc&si=c6uIwkX1Uv3roF0b",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Hay Libertad\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, evangelización, misión, gozo, celebración."
   },
   {
-    "id": "notion-55",
     "title": "Al Que Me Ciñe de Poder",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -2108,13 +1891,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=qAKn-1q1qiY&si=V59D971CwkQAtSU8",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Al Que Me Ciñe de Poder\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-56",
     "title": "Tú Harás",
     "artist": "Marcos Witt",
     "key": "G",
@@ -2135,13 +1914,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=nWCLenPD3ZQ&si=LHuCYe-cdHzti-bl",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Celebración Rítmica, Especial",
-    "technical_complexity": "Avanzada"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Tú Harás\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, exaltación, gloria, doctrina, soberanía."
   },
   {
-    "id": "notion-57",
     "title": "¿A Quién Tengo Yo?",
     "artist": "Jesus Legacy",
     "key": "G",
@@ -2392,13 +2167,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=rs7T8Dy5meE&si=lciwXqp0tyB96a3r",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"¿A Quién Tengo Yo?\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Énfasis lírico: \"Eres la fuerza en mi corazón. Mi refugio, mi esperanza, eres mi protección. Me conduces con tu gracia y me mostrarás tu gloria. Eres mi roca...\". Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-58",
     "title": "¿Quién como el Señor?",
     "artist": "René González",
     "key": "G",
@@ -2539,13 +2310,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=qfvxtY7h8Bw&si=tkI7KS9EG6CJvzhf",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"¿Quién como el Señor?\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Énfasis lírico: \"¿Quién como el Señor? No hay nadie ¿Quién como el Señor? Poderoso y fuerte...\". Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-59",
     "title": "Siervo Para Tu Gloria",
     "artist": "IBI",
     "key": "G",
@@ -2608,13 +2375,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=DIe0Fi9ysgA&si=gfKKCaUmuRnImimZ",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Siervo Para Tu Gloria\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo rápida). Énfasis lírico: \"Siendo en forma de Dios, Rey de toda la creaciónDe siervo se vistióHasta lo sumo se humilló, sufrió la muerte en sumisiónHorrenda muerte en ...\". Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-60",
     "title": "Yo Sé",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -2637,13 +2400,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=ZbMahKoBt8o&si=ZNG1MP8I2by_2GQ0",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Yo Sé\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, exaltación, gloria, gozo, celebración."
   },
   {
-    "id": "notion-61",
     "title": "Jesucristo Basta",
     "artist": "Un Corazón",
     "key": "G",
@@ -2663,13 +2422,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=k_TwdkVxYE0&si=u63aiRE2i6ugRJyw",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Jesucristo Basta\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo media). Palabras clave: acción de gracias, declaración doctrinal, gratitud, fidelidad, bondad."
   },
   {
-    "id": "notion-62",
     "title": "Música del Cielo",
     "artist": "Miel San Marcos",
     "key": "G",
@@ -2691,13 +2446,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=BV6490Ts3EQ&si=ePoyHiulTr3duHf2",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Música del Cielo\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-63",
     "title": "Nueva Criatura",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -2809,13 +2560,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=fvXHMoR1O9Y&si=O7LKPvoInmaPE14Y",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Nueva Criatura\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Énfasis lírico: \"Soy nueva criatura lo declara la escritura Él me ha perdonado, con su sangre me ha lavado Todos mis pecados con su sangre son borrados Libre...\". Palabras clave: declaración doctrinal, gozo, celebración, doctrina, soberanía."
   },
   {
-    "id": "notion-64",
     "title": "Con Manos Vacías",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -2893,13 +2640,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=2LwBFKH2cUI&si=FeLl5405N2K3A9cT",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"Con Manos Vacías\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo lenta). Énfasis lírico: \"Con manos vacías vengo a ti No tengo nada que darteNo hay nada de valor en míNo puedo impresionarte Te puedo entregar mi corazónPero está qu...\". Palabras clave: confesión, arrepentimiento, consagración, entrega, perdón."
   },
   {
-    "id": "notion-65",
     "title": "Mas Que Nunca",
     "artist": "Un Corazón",
     "key": "G",
@@ -2918,13 +2661,9 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Mas Que Nunca\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-66",
     "title": "Vamos a Cantar",
     "artist": "Luis Enrique Espinosa",
     "key": "G",
@@ -2947,13 +2686,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://youtu.be/4fFDEQCPi88?si=mfcyYsKuKZA4Upbq",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Avanzada"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Vamos a Cantar\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo rápida). Palabras clave: acción de gracias, exaltación, gloria, gozo, celebración."
   },
   {
-    "id": "notion-67",
     "title": "Toda lengua y toda nación",
     "artist": "Tomatulugar",
     "key": "G",
@@ -2974,13 +2709,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=SdRdqJgmb5U&si=HbwUep47eEGTLWSt",
     "is_classic": true,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Celebración Rítmica, Worship contemporáneo",
-    "technical_complexity": "Avanzada"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Toda lengua y toda nación\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, gozo, celebración, doctrina, soberanía."
   },
   {
-    "id": "notion-68",
     "title": "Supe que me amabas",
     "artist": "Marcela Gándara",
     "key": "G",
@@ -3002,13 +2733,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=kE7PCX7wdGM&si=YhEXzjOApHArErPt",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"Supe que me amabas\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo lenta). Palabras clave: confesión, arrepentimiento, consagración, entrega, perdón."
   },
   {
-    "id": "notion-69",
     "title": "A Dios sea la Gloria",
     "artist": "Danny Berrios",
     "key": "G",
@@ -3029,13 +2756,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=A0BXNl8uozI&si=G1S240CjHpJMiJ6M",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"A Dios sea la Gloria\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, consagración, entrega, gratitud, fidelidad."
   },
   {
-    "id": "notion-70",
     "title": "Tu Mirada (25 aniversario)",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3055,13 +2778,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=vle5H40SGEU&si=JqrPkMKuL4TIAnu2",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Tu Mirada (25 aniversario)\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-71",
     "title": "Hermoso Eres (25 aniversario)",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3082,13 +2801,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=WotExLBLsS4&si=BuMVxfrAN3Rz-lS_",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Hermoso Eres (25 aniversario)\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, consagración, entrega, gratitud, fidelidad."
   },
   {
-    "id": "notion-72",
     "title": "Canta Al Señor",
     "artist": "Ingrid Rosario",
     "key": "G",
@@ -3109,13 +2824,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=wNQO8B4vbVE&si=GLLRXZ75QdlK32mx",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional, Coral, Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Canta Al Señor\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Palabras clave: declaración doctrinal, exaltación, gloria, doctrina, soberanía."
   },
   {
-    "id": "notion-73",
     "title": "El Poder de Tu Amor",
     "artist": "Ingrid Rosario",
     "key": "G",
@@ -3136,13 +2847,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=wNQO8B4vbVE&si=GLLRXZ75QdlK32mx",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional, Coral, Especial",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"El Poder de Tu Amor\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Palabras clave: declaración doctrinal, exaltación, gloria, doctrina, soberanía."
   },
   {
-    "id": "notion-74",
     "title": "Digno es el señor",
     "artist": "Vino Nuevo",
     "key": "G",
@@ -3164,13 +2871,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=7BVNNPHftbo&si=V_1sTGL3XBzTW_cA",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional, Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Digno es el señor\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, declaración doctrinal, exaltación, gloria, gratitud."
   },
   {
-    "id": "notion-75",
     "title": "Enamórame",
     "artist": "Abel Zabala",
     "key": "G",
@@ -3192,13 +2895,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=PcxOm1SMsNo&si=gwtxUa1YDD_KsS-u",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Enamórame\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, evangelización, misión, rendición."
   },
   {
-    "id": "notion-76",
     "title": "Eres Fiel",
     "artist": "Coalo Zamorano",
     "key": "G",
@@ -3220,13 +2919,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=yLNXFrzFqnI&si=7bpYYhSrn0-1wq0_",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica, Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Eres Fiel\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-77",
     "title": "Al estar aquí",
     "artist": "Danilo Montero",
     "key": "G",
@@ -3246,13 +2941,9 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Al estar aquí\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-78",
     "title": "Alabdle!",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3272,13 +2963,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=Qy833_8I8Jw&si=jjEVRciAUnfFRt8_",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Alabdle!\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-79",
     "title": "Cerca de tí",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -3300,13 +2987,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=nz4u5HKSAoE&si=GQzHvhm0mNkcnl37",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Cerca de tí\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, confesión, arrepentimiento, misericordia."
   },
   {
-    "id": "notion-80",
     "title": "Al que está sentado en el trono",
     "artist": "Tomatulugar",
     "key": "G",
@@ -3330,13 +3013,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=MclX3YvhBMM&si=kdXn6LTV2ApF0Wv_",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Al que está sentado en el trono\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo media). Palabras clave: clamor, intercesión, consagración, entrega, exaltación."
   },
   {
-    "id": "notion-81",
     "title": "Mas El Dios de toda Gracia",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3356,13 +3035,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=cWkDXlAE5Xs&si=0hUWR89hqRmudm_b",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Mas El Dios de toda Gracia\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo lenta). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-82",
     "title": "Grandes son Tus maravillas",
     "artist": "Jaime Murrell",
     "key": "G",
@@ -3384,13 +3059,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=dsgj-gJRcgU&si=SMM5cdoVE88AY4Rc",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Grandes son Tus maravillas\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-83",
     "title": "Venimos ante Tí",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -3413,13 +3084,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=NKS35QMgFtE&si=taKfrud4n6HgySrf",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Venimos ante Tí\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, declaración doctrinal, exaltación, gloria."
   },
   {
-    "id": "notion-84",
     "title": "Yo me rindo a ÉL",
     "artist": "Su presencia",
     "key": "G",
@@ -3439,13 +3106,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=kVivVyrCPV8&si=VeaMo2--ISX1Jsc-",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Especial, Himno Tradicional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Yo me rindo a ÉL\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-85",
     "title": "Al que es digno",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3467,13 +3130,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=4zdTcNRf7WE&si=ivskUNrYcCnvj2SS",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Al que es digno\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-86",
     "title": "Damos honor a tí",
     "artist": "Coalo Zamorano",
     "key": "G",
@@ -3494,13 +3153,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=UOKQpHOkzTQ&si=StFwLbsp0jn1NzVg",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Damos honor a tí\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, consagración, entrega, gratitud, fidelidad."
   },
   {
-    "id": "notion-87",
     "title": "Tu Amor por Mí",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3519,13 +3174,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=XJOkVUyZQZQ&si=gKu2iLlP7MHaDSGz",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Tu Amor por Mí\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, gratitud, fidelidad, bondad, provisión."
   },
   {
-    "id": "notion-88",
     "title": "Amante de Tí",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3548,13 +3199,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=ilFQrVEjmrU&si=0VRRTQFAGt5x7uvy",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Amante de Tí\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, confesión, arrepentimiento, consagración, entrega."
   },
   {
-    "id": "notion-89",
     "title": "Tu nombre oh Dios",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3574,13 +3221,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=NfoQer54JSU&si=q0FByxA3lenj1q4_",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Tu nombre oh Dios\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-90",
     "title": "Usa mi vida",
     "artist": "Danilo Montero",
     "key": "G",
@@ -3602,13 +3245,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=8Okof73vyoQ&si=yh-fNW1C77ulV4ix",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional, Especial",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Usa mi vida\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, confesión, arrepentimiento, misericordia."
   },
   {
-    "id": "notion-91",
     "title": "Perfume a tus pies",
     "artist": "En Espíritu y en Verdad",
     "key": "G",
@@ -3628,13 +3267,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=mVkWoznNTOk&si=rvVRqjEThFQw7e9M",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Perfume a tus pies\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-92",
     "title": "Luz de mi Vida",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3654,13 +3289,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=dtIHnbIyffo&si=acE5DYty0pZkhPWC",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Luz de mi Vida\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-93",
     "title": "Has aumentado",
     "artist": "Danilo Montero",
     "key": "G",
@@ -3681,13 +3312,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=Arei0roTsDM&si=qdodWMwZbpDH5O2G",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Has aumentado\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo rápida). Palabras clave: acción de gracias, gozo, celebración, gratitud, fidelidad."
   },
   {
-    "id": "notion-94",
     "title": "Aquel que la buena obraa empezó",
     "artist": "Steve Green",
     "key": "G",
@@ -3707,13 +3334,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=41KmGg93i3I&si=ByGhIm6x-OWURNPL",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Aquel que la buena obraa empezó\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, misericordia, gracia, humillación."
   },
   {
-    "id": "notion-95",
     "title": "El padre que siempre soñé",
     "artist": "Abel Zabala",
     "key": "G",
@@ -3736,13 +3359,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=expXvbefIVY&si=p4RzoWEKOe0SG9fH",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"El padre que siempre soñé\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, clamor, intercesión, evangelización, misión."
   },
   {
-    "id": "notion-96",
     "title": "Renuévame",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3766,13 +3385,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=w2hBiVFJfRI&si=7gQlmrpGxN2nTf6L",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Renuévame\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, confesión, arrepentimiento, consagración."
   },
   {
-    "id": "notion-97",
     "title": "Todo lo que respire",
     "artist": "IBI",
     "key": "G",
@@ -3792,13 +3407,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=e28v65rt89w&si=asiLVf9M6A0Ru4OP",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Todo lo que respire\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-98",
     "title": "La casa de Dios",
     "artist": "Danilo Montero",
     "key": "G",
@@ -3821,13 +3432,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=PgUI_eJqxwo&si=jKHeF4L13ioVKgzM",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"La casa de Dios\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, evangelización, misión, gozo, celebración."
   },
   {
-    "id": "notion-99",
     "title": "Este es mi deseo",
     "artist": "Claudio Friedzon",
     "key": "G",
@@ -3849,13 +3456,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=8uPgS22sWaQ&si=HOPAv9HA_pbE4NnS",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"Este es mi deseo\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo lenta). Palabras clave: confesión, arrepentimiento, consagración, entrega, perdón."
   },
   {
-    "id": "notion-100",
     "title": "Te daré lo mejor",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -3874,13 +3477,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=vMiPG3vWO-A&si=hcPbjk50T4aNIhl6",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Te daré lo mejor\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, doctrina, soberanía, fe bíblica, verdades del evangelio."
   },
   {
-    "id": "notion-101",
     "title": "El amor de Cristo",
     "artist": "Hillsong",
     "key": "G",
@@ -3901,13 +3500,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=NtWGdvxBpHI&si=lGMeyKTxYtPATsCN",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"El amor de Cristo\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-102",
     "title": "Poderoso Dios",
     "artist": "Marcos Witt",
     "key": "G",
@@ -3929,13 +3524,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=N1KoaapgBu0&si=FbrnbT24REI9nA0B",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Poderoso Dios\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, exaltación, gloria, misericordia."
   },
   {
-    "id": "notion-103",
     "title": "Lo harás otra vez",
     "artist": "Elevation Worship",
     "key": "G",
@@ -3955,13 +3546,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=rU8MVy-JsAI&si=LqtExLgw2rniifPU",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Lo harás otra vez\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo media). Palabras clave: clamor, intercesión, misericordia, gracia, humillación."
   },
   {
-    "id": "notion-104",
     "title": "Junto a tus pies",
     "artist": "Danilo Montero",
     "key": "G",
@@ -3983,13 +3570,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=tNu-TQQ7NbQ&si=_N8OXicGs56dR5zF",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional, Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Junto a tus pies\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, consagración, entrega, misericordia."
   },
   {
-    "id": "notion-105",
     "title": "Creo en tí",
     "artist": "Julio Melgar",
     "key": "G",
@@ -4009,13 +3592,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=xJ_ZZkM5fGY&si=J1m4w3nYcLvL4E_6",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Creo en tí\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo lenta). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-106",
     "title": "Me asombra",
     "artist": "En Espíritu y en Verdad",
     "key": "G",
@@ -4037,13 +3616,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=mPoDsQ1BR1g&si=ODd8piEUKi6QpE1D",
     "is_classic": true,
-    "church_domain": "Nueva",
-    "team_domain": "Por practicar",
-    "musical_type": "Especial, Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Me asombra\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, evangelización, misión, rendición."
   },
   {
-    "id": "notion-107",
     "title": "Has cambiado mi lamento",
     "artist": "Marcos Witt",
     "key": "G",
@@ -4063,13 +3638,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=mPoDsQ1BR1g&si=ODd8piEUKi6QpE1D",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Fiesta espiritual y júbilo congregacional por la salvación y la victoria en Jesús a través de \"Has cambiado mi lamento\". Tono espiritual: Festivo, rítmico y lleno de energía de alabanza (Worship contemporáneo, tempo rápida). Palabras clave: gozo, celebración, victoria, alegría, triunfo."
   },
   {
-    "id": "notion-108",
     "title": "Santo por siempre",
     "artist": "IBI",
     "key": "G",
@@ -4089,13 +3660,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=-CAFAc5OYqc&si=aOnZeEaoQo3ZAcSQ",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Santo por siempre\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo media). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-109",
     "title": "Mi vida eres tú",
     "artist": "Coalo Zamorano",
     "key": "G",
@@ -4117,13 +3684,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=_0Hz-yLVH-M&si=dE56CE83yAjLiU_W",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Avanzada"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Mi vida eres tú\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-110",
     "title": "Al que me",
     "artist": "IBAMI",
     "key": "G",
@@ -4141,13 +3704,9 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Al que me\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: alabanza, al que me."
   },
   {
-    "id": "notion-111",
     "title": "Te vengo a bendecir",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4169,13 +3728,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=4XgnqizZ1AA&si=Vt_D7PwfivTTmTh9",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Te vengo a bendecir\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, consagración, entrega, misericordia."
   },
   {
-    "id": "notion-112",
     "title": "Abre los cielos",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4197,13 +3752,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=-6iyurBfo6A&si=tX6a73tpyWE-w9r5",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Abre los cielos\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, evangelización, misión, misericordia."
   },
   {
-    "id": "notion-113",
     "title": "Nuestro Salvador",
     "artist": "Coalo Zamorano",
     "key": "G",
@@ -4225,13 +3776,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=60Ncc55pvNU&si=-GLi47YRTbU30O7R",
     "is_classic": true,
-    "church_domain": "Nueva",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Nuestro Salvador\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, evangelización, misión, rendición."
   },
   {
-    "id": "notion-114",
     "title": "Quiero levantar mis manos",
     "artist": "Majo y Dan",
     "key": "G",
@@ -4251,13 +3798,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=3c6SYKG2MYg&si=ol5GssLivxjQbRfJ",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Quiero levantar mis manos\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-115",
     "title": "Quiero LLenar",
     "artist": "Fermín Garcia",
     "key": "G",
@@ -4277,13 +3820,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=IDaNNHAWjQA&si=4gOhy_Ncz9fkKhu_",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Quiero LLenar\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-116",
     "title": "Quiero llenar",
     "artist": "Fermín Garcia",
     "key": "G",
@@ -4304,13 +3843,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=IDaNNHAWjQA&si=4pRssxyrTXbhnKuO",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Quiero llenar\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, consagración, entrega, gratitud, fidelidad."
   },
   {
-    "id": "notion-117",
     "title": "Vivo para adorarte",
     "artist": "Coalo Zamorano",
     "key": "G",
@@ -4330,13 +3865,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=TFEGDi4OAyg&si=U0U98XIfbTD7CEWt",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Montada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Vivo para adorarte\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-118",
     "title": "Soy nueva criatura",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4447,13 +3978,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=xpQS7QkvmGU&si=Y77hkdWGhBjD5wSv",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Fiesta espiritual y júbilo congregacional por la salvación y la victoria en Jesús a través de \"Soy nueva criatura\". Tono espiritual: Festivo, rítmico y lleno de energía de alabanza (Worship contemporáneo, tempo rápida). Énfasis lírico: \"Soy nueva criatura lo declara la escritura Él me ha perdonado, con su sangre me ha lavado Todos mis pecados con su sangre son borrados Libre...\". Palabras clave: gozo, celebración, victoria, alegría, triunfo."
   },
   {
-    "id": "notion-119",
     "title": "Dios poderoso",
     "artist": "IBI",
     "key": "G",
@@ -4473,13 +4000,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=K2f0u6LGHIE&si=70Pqff-V4xP_y0SG",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Dios poderoso\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo media). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-120",
     "title": "Gracia Sublime es",
     "artist": "En Espíritu y en Verdad",
     "key": "G",
@@ -4501,13 +4024,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://youtu.be/0pOVNIsyIXM?si=dLXo1iziFTify652",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Proclamación del evangelio de salvación, el sacrificio de la cruz y el llamado a las naciones a través de \"Gracia Sublime es\". Tono espiritual: Convicción misionera, pasión evangelística (Worship contemporáneo, tempo media). Palabras clave: evangelización, misión, exaltación, gloria, evangelio."
   },
   {
-    "id": "notion-121",
     "title": "Grande y fuerte es nuestro Dios",
     "artist": "Miel San Marcos",
     "key": "G",
@@ -4529,13 +4048,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://youtu.be/YOFJJquEK2k?si=IwgBrg4qmWjphK1j",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Avanzada"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Grande y fuerte es nuestro Dios\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, gozo, celebración, santidad."
   },
   {
-    "id": "notion-122",
     "title": "Hosanna",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -4557,13 +4072,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://youtu.be/3kXfjfT6ewU?si=bvW1q1uKftKaYYKU",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Avanzada"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Hosanna\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo rápida). Palabras clave: clamor, intercesión, exaltación, gloria, misericordia."
   },
   {
-    "id": "notion-123",
     "title": "Lo unico que quiero",
     "artist": "Abel Zabala",
     "key": "G",
@@ -4583,13 +4094,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=gKPjGrhVLNg&si=nWH2F7KMah9CnQ7c",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Lo unico que quiero\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-124",
     "title": "No basta",
     "artist": "Juan Carlos Alvarado",
     "key": "G",
@@ -4613,13 +4120,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=LXMLHk1al4k&si=xI-Oe9VTLDb9yzhn",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"No basta\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo lenta). Palabras clave: confesión, arrepentimiento, consagración, entrega, evangelización."
   },
   {
-    "id": "notion-125",
     "title": "Esperar en tí",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4641,13 +4144,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=n7UQxs49DGU&si=DT0EZVMt2l8Z_sSW",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Esperar en tí\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, consagración, entrega, misericordia."
   },
   {
-    "id": "notion-126",
     "title": "A sus pies",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4667,13 +4166,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=2TGRgpyy_bU&si=amAkNFSCLIDmJ-ld",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional, Especial",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"A sus pies\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo lenta). Palabras clave: confesión, arrepentimiento, perdón, purificación, sangre de Cristo."
   },
   {
-    "id": "notion-127",
     "title": "Soberano",
     "artist": "Hillsong",
     "key": "G",
@@ -4696,13 +4191,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=XavMcEtGRE8&si=2Xon1vnMz80cpyvv",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Soberano\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo media). Palabras clave: acción de gracias, confesión, arrepentimiento, consagración, entrega."
   },
   {
-    "id": "notion-128",
     "title": "De tal manera me amo",
     "artist": "Abel Zabala",
     "key": "G",
@@ -4723,13 +4214,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=bXh0rfByyuU&si=4ZpQ_avjea1wHU9C",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"De tal manera me amo\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, consagración, entrega, gratitud, fidelidad."
   },
   {
-    "id": "notion-129",
     "title": "Sentado en su trono",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4750,13 +4237,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=2SOMVaUavl4&si=CdwAByAbqIVdFSWA",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Sentado en su trono\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Palabras clave: declaración doctrinal, exaltación, gloria, doctrina, soberanía."
   },
   {
-    "id": "notion-130",
     "title": "Bajo sus pies (Mas que vencedor)",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4777,13 +4260,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=XvSrcunrIFs&si=_hy2gfS65s6AzTwP",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Bajo sus pies (Mas que vencedor)\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo rápida). Palabras clave: declaración doctrinal, gozo, celebración, doctrina, soberanía."
   },
   {
-    "id": "notion-131",
     "title": "Jesús El Señor",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4802,13 +4281,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=PWD2TlW10k0&si=zDItBOi-Nux3iuIU",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Jesús El Señor\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Palabras clave: declaración doctrinal, doctrina, soberanía, fe bíblica, verdades del evangelio."
   },
   {
-    "id": "notion-132",
     "title": "No es cómo yo",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4829,13 +4304,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=LZlyuElmhOs&si=xx00cAFKta0HPZ2O",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional, Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"No es cómo yo\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Palabras clave: declaración doctrinal, exaltación, gloria, doctrina, soberanía."
   },
   {
-    "id": "notion-133",
     "title": "Tal como soy",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4857,13 +4328,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=bWmOXIg7j24&si=jrFmJJpVjOAVXZgC",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Tal como soy\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, consagración, entrega, misericordia."
   },
   {
-    "id": "notion-134",
     "title": "Es por tu gracia",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4885,13 +4352,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=p35EDzSIi8w&si=EKTFdL9nPDKXequF",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Por practicar",
-    "musical_type": "Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"Es por tu gracia\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo media). Palabras clave: confesión, arrepentimiento, consagración, entrega, perdón."
   },
   {
-    "id": "notion-135",
     "title": "Mi corazón te canta",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4910,13 +4373,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=GzpGyLQ3ETg&si=lfdjgk5svazUwMe5",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional, Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Mi corazón te canta\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, gratitud, fidelidad, bondad, provisión."
   },
   {
-    "id": "notion-136",
     "title": "Me dice que me ama",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4938,13 +4397,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=4LJApZZwkkw&si=AANkYfcSaJFRseTK",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Por practicar",
-    "musical_type": "Especial",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Me dice que me ama\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, evangelización, misión, rendición."
   },
   {
-    "id": "notion-137",
     "title": "Prefiero a Cristo",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4964,13 +4419,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=40U8jhITFNE&si=I7ypWMH4Ke_M_Dc_",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Prefiero a Cristo\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo lenta). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-138",
     "title": "Celebraré tu amor",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -4990,13 +4441,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=lSn9Y8zNcjg&si=i0n5gNpAIqrlGe-p",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Fiesta espiritual y júbilo congregacional por la salvación y la victoria en Jesús a través de \"Celebraré tu amor\". Tono espiritual: Festivo, rítmico y lleno de energía de alabanza (Worship contemporáneo, tempo rápida). Palabras clave: gozo, celebración, victoria, alegría, triunfo."
   },
   {
-    "id": "notion-139",
     "title": "Tú has sido fiel",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -5015,13 +4462,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=9rQOQotNnpc&si=esxRAexTkkixFax4",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Tú has sido fiel\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, gratitud, fidelidad, bondad, provisión."
   },
   {
-    "id": "notion-140",
     "title": "Es jesús",
     "artist": "Danilo Montero",
     "key": "G",
@@ -5042,13 +4485,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=Yu_erTjtyj8&si=r4toVCwGwZHChlnC",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Es jesús\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo rápida). Palabras clave: acción de gracias, exaltación, gloria, gratitud, fidelidad."
   },
   {
-    "id": "notion-141",
     "title": "Te deseo",
     "artist": "Majo y Dan",
     "key": "G",
@@ -5068,13 +4507,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=gXKhpujngHU&si=KnvI9JIORN9f1rqG",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Te deseo\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, rendición, obediencia, altar."
   },
   {
-    "id": "notion-142",
     "title": "Amor Inagotable",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -5096,13 +4531,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=LO8QXLMTdxo&si=M5zgOtb4d6dP8nP1",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Reconocimiento de la fragilidad humana, arrepentimiento genuino y necesidad de la sangre de Cristo a través de \"Amor Inagotable\". Tono espiritual: Contrito, humilde y purificador (Worship contemporáneo, tempo media). Palabras clave: confesión, arrepentimiento, consagración, entrega, perdón."
   },
   {
-    "id": "notion-143",
     "title": "A ti sea la gloria",
     "artist": "Marcela Gándara",
     "key": "G",
@@ -5123,13 +4554,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=NMb7zQudh5w&si=sMbV1i2MUTDvDUbl",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Ensamblada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"A ti sea la gloria\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo lenta). Palabras clave: acción de gracias, consagración, entrega, gratitud, fidelidad."
   },
   {
-    "id": "notion-144",
     "title": "Mi roca",
     "artist": "Hillsong",
     "key": "G",
@@ -5150,13 +4577,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=LFPErWrYZCU&si=jLehLMgnDijmQbSA",
     "is_classic": true,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Mi roca\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-145",
     "title": "Glorioso",
     "artist": "IBAMI",
     "key": "G",
@@ -5174,13 +4597,9 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Glorioso\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: alabanza, glorioso."
   },
   {
-    "id": "notion-146",
     "title": "Bienvenido Espíritu Santo",
     "artist": "Miel San Marcos",
     "key": "G",
@@ -5200,13 +4619,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=8FNTUOSi-YE&si=XSH3dLg5_6GI9ZSE",
     "is_classic": true,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Magnificación de la santidad, majestad y gloria del Dios Trino en su trono a través de \"Bienvenido Espíritu Santo\". Tono espiritual: Majestuoso, reverente y de asombro santo (Worship contemporáneo, tempo rápida). Palabras clave: exaltación, gloria, santidad, majestad, trono."
   },
   {
-    "id": "notion-147",
     "title": "Pan de vida",
     "artist": "Jesús A. Romero",
     "key": "G",
@@ -5227,13 +4642,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=Bdtlo2luEPo&si=T3kH0dUWli0_sJZ5",
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"Pan de vida\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo lenta). Palabras clave: declaración doctrinal, evangelización, misión, doctrina, soberanía."
   },
   {
-    "id": "notion-148",
     "title": "Salmo 23",
     "artist": "Un Corazón",
     "key": "G",
@@ -5254,13 +4665,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=Bdtlo2luEPo&si=T3kH0dUWli0_sJZ5",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"Salmo 23\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: consagración, entrega, declaración doctrinal, rendición, obediencia."
   },
   {
-    "id": "notion-149",
     "title": "De gloria de gloria",
     "artist": "Marco Barrientos",
     "key": "G",
@@ -5280,13 +4687,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=I50l_0ODoB4&si=KRYT3sfVDE2FG_yx",
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Por practicar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Fiesta espiritual y júbilo congregacional por la salvación y la victoria en Jesús a través de \"De gloria de gloria\". Tono espiritual: Festivo, rítmico y lleno de energía de alabanza (Worship contemporáneo, tempo rápida). Palabras clave: gozo, celebración, victoria, alegría, triunfo."
   },
   {
-    "id": "notion-150",
     "title": "Alaba a Dios",
     "artist": "Danny Berrios",
     "key": "G",
@@ -5307,13 +4710,9 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "is_classic": false,
-    "church_domain": "Dominada",
-    "team_domain": "Montada",
-    "musical_type": "Balada congregacional",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Ruego ferviente por la manifestación, perdón, sanidad y misericordia divina a través de \"Alaba a Dios\". Tono espiritual: Quebrantado, urgente y reflexivo (Worship contemporáneo, tempo lenta). Palabras clave: clamor, intercesión, exaltación, gloria, misericordia."
   },
   {
-    "id": "notion-151",
     "title": "Porque bueno es Dios",
     "artist": "Jaime Murrell",
     "key": "G",
@@ -5334,13 +4733,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=oIQyarLXb8g&si=QzXCSUWONvk-Gi_w",
     "is_classic": false,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Celebración Rítmica",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Gratitud profunda por las bondades, misericordias y bendiciones cotidianas del Creador a través de \"Porque bueno es Dios\". Tono espiritual: Agradecido, cálido y esperanzador (Worship contemporáneo, tempo rápida). Palabras clave: acción de gracias, exaltación, gloria, gratitud, fidelidad."
   },
   {
-    "id": "notion-152",
     "title": "Tu hijo soy",
     "artist": "Barak",
     "key": "G",
@@ -5360,13 +4755,9 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=bDLPPrQSSyk&si=UocUbXzxqf2TAD_X",
     "is_classic": true,
-    "church_domain": "Nueva",
-    "team_domain": "Por entrar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Intermedia"
+    "resumen_tematico": "Tema central: Fiesta espiritual y júbilo congregacional por la salvación y la victoria en Jesús a través de \"Tu hijo soy\". Tono espiritual: Festivo, rítmico y lleno de energía de alabanza (Worship contemporáneo, tempo media). Palabras clave: gozo, celebración, victoria, alegría, triunfo."
   },
   {
-    "id": "notion-153",
     "title": "En la cruz",
     "artist": "IBAMI",
     "key": "G",
@@ -5384,13 +4775,9 @@ export const NOTION_SONGS: Song[] = [
       }
     ],
     "is_classic": false,
-    "church_domain": "Conocida",
-    "team_domain": "Por practicar",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Rendición incondicional, obediencia y entrega de la vida al señorío de Cristo a través de \"En la cruz\". Tono espiritual: Devocional, íntimo y reverente (Worship contemporáneo, tempo media). Palabras clave: alabanza, en la cruz."
   },
   {
-    "id": "notion-154",
     "title": "En esto creo",
     "artist": "Hillsong",
     "key": "G",
@@ -5409,9 +4796,6 @@ export const NOTION_SONGS: Song[] = [
     ],
     "media_url": "https://music.youtube.com/watch?v=pgkPf0gWLFc&si=yG-nwuroQohZXPlU",
     "is_classic": true,
-    "church_domain": "Conocida",
-    "team_domain": "Ensamblada",
-    "musical_type": "Worship contemporáneo",
-    "technical_complexity": "Básica"
+    "resumen_tematico": "Tema central: Afirmación de los fundamentos de la fe, la soberanía divina y las verdades bíblicas a través de \"En esto creo\". Tono espiritual: Firme, solemne y edificante (Worship contemporáneo, tempo media). Palabras clave: declaración doctrinal, doctrina, soberanía, fe bíblica, verdades del evangelio."
   }
 ]

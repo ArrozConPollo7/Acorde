@@ -2955,21 +2955,29 @@ function AISuggestionModal({
                 const justAdded = added.includes(songId)
                 return (
                   <div key={songId} className="rounded-2xl p-4 bg-surface-2 border border-border shadow-xs">
-                    <div className="flex items-start gap-3.5">
-                      <div className="w-11 h-11 rounded-xl bg-surface border border-border text-fg flex items-center justify-center flex-shrink-0">
-                        <span className="font-display font-bold text-lg tracking-wide">{song.key}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-fg text-sm leading-tight truncate">{song.title}</p>
-                          {song.is_classic && <span title="Clásico IBAMI" className="text-warm inline-flex items-center"><IconCrown size={12} /></span>}
-                          {sMoment && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface text-accent border border-border flex-shrink-0">
-                              {sMoment}
-                            </span>
-                          )}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-surface border border-border text-fg flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="font-display font-bold text-base md:text-lg tracking-wide">{song.key}</span>
                         </div>
-                        <p className="text-xs text-fg-muted mt-0.5">{song.artist}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-fg text-sm md:text-base leading-snug break-words">{song.title}</p>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            <span className="text-xs text-fg-muted truncate">{song.artist}</span>
+                            <span className="text-[10px] text-fg-subtle">·</span>
+                            <span className="text-[10px] uppercase font-medium text-fg-muted">{song.tempo}</span>
+                            {song.is_classic && (
+                              <span title="Clásico IBAMI" className="text-warm inline-flex items-center gap-0.5 text-[10px] font-bold">
+                                <IconCrown size={11} /> Clásico
+                              </span>
+                            )}
+                            {sMoment && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-surface text-accent border border-border">
+                                {sMoment}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                       {alreadyIn || justAdded ? (
                         <span className="text-xs font-semibold text-fg-muted bg-surface px-3 py-1.5 rounded-lg border border-border flex-shrink-0">
@@ -2978,14 +2986,23 @@ function AISuggestionModal({
                       ) : (
                         <button
                           onClick={() => handleAdd(songId)}
-                          className="text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-3.5 py-1.5 rounded-lg flex items-center gap-1 flex-shrink-0 active:scale-95 transition-transform cursor-pointer"
+                          className="text-xs font-semibold text-accent-fg bg-accent hover:bg-accent-hover px-3 py-1.5 rounded-lg flex items-center gap-1 flex-shrink-0 active:scale-95 transition-transform cursor-pointer shadow-xs"
                         >
                           <IconPlus size={12} />
-                          Añadir
+                          <span>Añadir</span>
                         </button>
                       )}
                     </div>
-                    <p className="text-xs text-fg-muted mt-2.5 leading-relaxed pl-14">{reason}</p>
+
+                    <div className="mt-3 p-3 rounded-xl bg-surface border border-border/80 text-xs text-fg-muted leading-relaxed break-words">
+                      <p className="font-medium text-fg mb-1">Veredicto pastoral:</p>
+                      <p className="text-fg-muted">{reason}</p>
+                      {song.resumen_tematico && (
+                        <p className="text-[11px] text-fg-subtle mt-2 pt-2 border-t border-border/60">
+                          <strong className="text-fg-muted">Enfoque temático:</strong> {song.resumen_tematico}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )
               })}

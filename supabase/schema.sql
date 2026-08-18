@@ -63,6 +63,7 @@ alter table public.songs add column if not exists team_domain text default 'Por 
 alter table public.songs add column if not exists musical_type text default 'Worship contemporáneo';
 alter table public.songs add column if not exists technical_complexity text default 'Básica';
 alter table public.songs add column if not exists is_classic boolean default false;
+alter table public.songs add column if not exists resumen_tematico text;
 
 -- 5. TABLA: service_events (Servicios y Programación)
 create table if not exists public.service_events (

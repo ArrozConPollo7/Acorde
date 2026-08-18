@@ -79,6 +79,7 @@ export interface Song {
   team_domain?: string // 'Por entrar' | 'Por practicar' | 'Ensamblada' | 'Montada'
   musical_type?: string // 'Worship contemporáneo' | 'Balada congregacional' | 'Celebración Rítmica' | 'Himno Tradicional' | 'Coral' | 'Especial'
   technical_complexity?: string // 'Básica' | 'Intermedia' | 'Avanzada'
+  resumen_tematico?: string // Resumen temático denso generado una sola vez para búsqueda semántica con IA
 }
 
 export interface RosterEntry {
@@ -241,6 +242,7 @@ export async function fetchSongs(): Promise<Song[]> {
           team_domain: item.team_domain || 'Por practicar',
           musical_type: item.musical_type || 'Worship contemporáneo',
           technical_complexity: item.technical_complexity || 'Básica',
+          resumen_tematico: item.resumen_tematico || generateSongThematicSummary(item),
         }))
         setStored(STORAGE_KEYS.SONGS, mapped)
         return mapped
@@ -255,7 +257,56 @@ export async function fetchSongs(): Promise<Song[]> {
   return INITIAL_SONGS
 }
 
+export function generateSongThematicSummary(song: Partial<Song>): string {
+  const title = (song.title || '').trim()
+  const artist = (song.artist || '').trim()
+  const tags = song.tags || []
+  const musicalType = song.musical_type || 'Worship contemporáneo'
+  const tempo = song.tempo || 'media'
+
+  let lyricsSnippet = ''
+  if (Array.isArray(song.lyrics) && song.lyrics.length > 0) {
+    const textLines = song.lyrics
+      .map(l => (l.segments || []).map(s => s.text || '').join(' '))
+      .filter(t => t.trim().length > 0 && !t.includes('Letra de '))
+    if (textLines.length > 0) {
+      lyricsSnippet = textLines.slice(0, 3).join(' ').replace(/\s+/g, ' ').slice(0, 120)
+    }
+  }
+
+  let themeDesc = 'Proclama la grandeza de Dios y la comunión congregacional'
+  if (tags.some(t => t.toLowerCase().includes('consagr') || t.toLowerCase().includes('entreg'))) {
+    themeDesc = 'Rendición incondicional, obediencia y entrega total al señorío de Cristo'
+  } else if (tags.some(t => t.toLowerCase().includes('doctrin') || t.toLowerCase().includes('gracia'))) {
+    themeDesc = 'Afirmación de la suficiencia de la cruz, el perdón inmerecido y la soberanía de Dios'
+  } else if (tags.some(t => t.toLowerCase().includes('gozo') || t.toLowerCase().includes('celebr'))) {
+    themeDesc = 'Fiesta espiritual, gozo y júbilo congregacional por el triunfo en Cristo'
+  } else if (tags.some(t => t.toLowerCase().includes('exalt') || t.toLowerCase().includes('gloria') || t.toLowerCase().includes('santo'))) {
+    themeDesc = 'Exaltación sublime de la santidad, majestad y gloria del Señor en su trono'
+  } else if (tags.some(t => t.toLowerCase().includes('clamor') || t.toLowerCase().includes('interces'))) {
+    themeDesc = 'Clamor ferviente por misericordia, sanidad, consuelo y auxilio divino'
+  }
+
+  const tone = tempo === 'rápida'
+    ? 'Festivo, rítmico y de llamado al júbilo'
+    : tempo === 'lenta'
+    ? 'Íntimo, reverente y de profunda adoración'
+    : 'Devocional, solemne y edificante'
+
+  const keywords = Array.from(new Set([...tags, title, artist, tempo])).filter(Boolean).slice(0, 5)
+
+  let summary = `Tema central: ${themeDesc} a través de "${title}". `
+  summary += `Tono espiritual: ${tone} (${musicalType}). `
+  if (lyricsSnippet) {
+    summary += `Énfasis lírico: "${lyricsSnippet}...". `
+  }
+  summary += `Palabras clave: ${keywords.join(', ')}.`
+
+  return summary
+}
+
 export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
+  const resumen = newSong.resumen_tematico || generateSongThematicSummary(newSong)
   let created: Song = {
     id: `custom-${Date.now()}`,
     ...newSong,
@@ -264,6 +315,7 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
     team_domain: newSong.team_domain || 'Por practicar',
     musical_type: newSong.musical_type || 'Worship contemporáneo',
     technical_complexity: newSong.technical_complexity || 'Básica',
+    resumen_tematico: resumen,
   }
 
   if (isSupabaseConfigured && supabase) {
@@ -283,6 +335,7 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
           team_domain: newSong.team_domain || 'Por practicar',
           musical_type: newSong.musical_type || 'Worship contemporáneo',
           technical_complexity: newSong.technical_complexity || 'Básica',
+          resumen_tematico: resumen,
         })
         .select()
         .single()
@@ -302,6 +355,7 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
           team_domain: data.team_domain || 'Por practicar',
           musical_type: data.musical_type || 'Worship contemporáneo',
           technical_complexity: data.technical_complexity || 'Básica',
+          resumen_tematico: data.resumen_tematico || resumen,
         }
       }
     } catch (err) {
@@ -315,6 +369,7 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
 }
 
 export async function updateSong(id: string, updates: Partial<Song>): Promise<Song> {
+  const resumen = updates.resumen_tematico || generateSongThematicSummary(updates)
   let updated: Song = {
     id,
     title: updates.title || '',
@@ -329,6 +384,7 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
     team_domain: updates.team_domain,
     musical_type: updates.musical_type,
     technical_complexity: updates.technical_complexity,
+    resumen_tematico: resumen,
   }
 
   if (isSupabaseConfigured && supabase) {
@@ -346,6 +402,7 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
       if (updates.team_domain !== undefined) payload.team_domain = updates.team_domain
       if (updates.musical_type !== undefined) payload.musical_type = updates.musical_type
       if (updates.technical_complexity !== undefined) payload.technical_complexity = updates.technical_complexity
+      payload.resumen_tematico = resumen
 
       const { data, error } = await supabase
         .from('songs')
@@ -369,6 +426,7 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
           team_domain: data.team_domain || 'Por practicar',
           musical_type: data.musical_type || 'Worship contemporáneo',
           technical_complexity: data.technical_complexity || 'Básica',
+          resumen_tematico: data.resumen_tematico || resumen,
         }
       }
     } catch (err) {
@@ -809,62 +867,94 @@ export async function suggestSongsWithGroq(
   moment: 'todos' | 'Apertura' | 'Adoración' | 'Ministración' = 'todos',
   limit: number = 8
 ): Promise<AISuggestion[]> {
+  // Asegurar que todas las canciones tengan su resumen temático
+  const enrichedCatalog = catalog.map(s => ({
+    ...s,
+    resumen_tematico: s.resumen_tematico || generateSongThematicSummary(s),
+  }))
+
+  // Si Supabase Edge Function está disponible con Groq
   if (isSupabaseConfigured && supabase) {
     try {
+      const compactCatalog = enrichedCatalog.map(s => ({
+        id: s.id,
+        title: s.title,
+        artist: s.artist,
+        key: s.key,
+        tempo: s.tempo,
+        tags: s.tags,
+        resumen_tematico: s.resumen_tematico,
+      }))
+
       const { data, error } = await supabase.functions.invoke('suggest-songs', {
-        body: { topic, currentSetlist, moment, limit },
+        body: { topic, currentSetlist, moment, limit, songsCatalog: compactCatalog },
       })
 
       if (!error && data?.suggestions && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
         return data.suggestions
       }
     } catch (err) {
-      console.warn('Edge Function no disponible, usando motor pastoral local:', err)
+      console.warn('Edge Function no disponible, usando evaluador temático de dos pasos:', err)
     }
   }
 
-  // Motor semántico litúrgico local de alta precisión
+  // ─── EVALUADOR SEMÁNTICO EN DOS PASOS ──────────────────────────────────────────
+  // PASO 1: Identificar conceptos y dimensiones del tema o pasaje bíblico
   const cleanTopic = topic.toLowerCase().trim()
-  const words = cleanTopic.split(/[\s,.-]+/).filter(w => w.length > 2)
+  const words = cleanTopic.split(/[\s,.:;/-]+/).filter(w => w.length > 2)
 
-  // Encontrar categorías temáticas coincidentes
-  const matchedThemes: ThematicCategory[] = []
-  for (const [, themeData] of Object.entries(THEMATIC_KNOWLEDGE_BASE)) {
-    if (themeData.keywords.some(k => cleanTopic.includes(k))) {
-      matchedThemes.push(themeData)
+  const activeThemes: { key: string; theme: ThematicCategory; weight: number }[] = []
+  for (const [key, themeData] of Object.entries(THEMATIC_KNOWLEDGE_BASE)) {
+    const hits = themeData.keywords.filter(k => cleanTopic.includes(k) || words.some(w => k.includes(w)))
+    if (hits.length > 0) {
+      activeThemes.push({ key, theme: themeData, weight: hits.length })
     }
   }
+  activeThemes.sort((a, b) => b.weight - a.weight)
 
-  const scoredSongs = catalog.map(song => {
+  // PASO 2: Evaluar el catálogo completo contra el resumen temático de cada canción
+  const scoredSongs = enrichedCatalog.map(song => {
     let score = 0
-    const songText = `${song.title} ${song.artist} ${song.tags.join(' ')} ${song.lyrics.map(l => l.segments.map(s => s.text).join(' ')).join(' ')}`.toLowerCase()
+    const resumen = (song.resumen_tematico || '').toLowerCase()
+    const titleNorm = song.title.toLowerCase()
+    const tagsNorm = song.tags.map(t => t.toLowerCase()).join(' ')
+    const searchableText = `${titleNorm} ${tagsNorm} ${resumen}`
 
-    // 1. Coincidencia directa por palabras del tema
+    // 1. Coincidencia directa de palabras clave del usuario en el resumen temático
     words.forEach(word => {
-      if (song.title.toLowerCase().includes(word)) score += 8
-      if (song.tags.some(t => t.toLowerCase().includes(word))) score += 6
-      if (songText.includes(word)) score += 3
+      if (titleNorm.includes(word)) score += 10
+      if (resumen.includes(word)) score += 8
+      if (tagsNorm.includes(word)) score += 6
     })
 
-    // 2. Coincidencia con bases teológicas
-    matchedThemes.forEach(theme => {
+    // 2. Coincidencia teológica profunda
+    activeThemes.forEach(({ theme, weight }) => {
       theme.keywords.forEach(kw => {
-        if (song.title.toLowerCase().includes(kw)) score += 6
-        if (song.tags.some(t => t.toLowerCase().includes(kw))) score += 4
-        if (songText.includes(kw)) score += 2
+        if (titleNorm.includes(kw)) score += 6 * weight
+        if (resumen.includes(kw)) score += 4 * weight
+        if (tagsNorm.includes(kw)) score += 3 * weight
       })
     })
 
-    // 3. Filtro por momento litúrgico
-    if (moment === 'Apertura' && song.tempo === 'rápida') score += 5
-    if (moment === 'Adoración' && (song.tempo === 'media' || song.tempo === 'lenta')) score += 4
-    if (moment === 'Ministración' && song.tempo === 'lenta') score += 5
+    // 3. Adecuación litúrgica según momento solicitado
+    if (moment === 'Apertura') {
+      if (song.tempo === 'rápida') score += 7
+      if (song.tempo === 'media') score += 3
+      if (song.tempo === 'lenta') score -= 5
+    } else if (moment === 'Adoración') {
+      if (song.tempo === 'media' || song.tempo === 'lenta') score += 6
+      if (song.tempo === 'rápida') score -= 3
+    } else if (moment === 'Ministración') {
+      if (song.tempo === 'lenta') score += 8
+      if (song.tempo === 'media') score += 4
+      if (song.tempo === 'rápida') score -= 8
+    }
 
-    // 4. Bonificación para clásicos de la congregación
+    // 4. Bonificación para clásicos congregacionales
     if (song.is_classic) score += 2
 
     // 5. Descuento si ya está en el setlist
-    if (currentSetlist.includes(song.id)) score -= 15
+    if (currentSetlist.includes(song.id)) score -= 20
 
     return { song, score }
   })
@@ -872,22 +962,34 @@ export async function suggestSongsWithGroq(
   scoredSongs.sort((a, b) => b.score - a.score)
   const topMatches = scoredSongs.slice(0, Math.max(limit, 8))
 
+  // Generar veredicto individualizado y único para cada canción
   return topMatches.map(({ song }, idx) => {
     let songMoment: 'Apertura' | 'Adoración' | 'Ministración' = 'Adoración'
-    if (song.tempo === 'rápida' || idx === 0) songMoment = 'Apertura'
-    else if (song.tempo === 'lenta' || idx >= topMatches.length - 2) songMoment = 'Ministración'
+    if (song.tempo === 'rápida' || (moment === 'todos' && idx === 0)) {
+      songMoment = 'Apertura'
+    } else if (song.tempo === 'lenta' || (moment === 'todos' && idx >= topMatches.length - 2)) {
+      songMoment = 'Ministración'
+    }
 
     if (moment !== 'todos') songMoment = moment
 
-    const primaryTheme = matchedThemes[0]
-    const themeDesc = primaryTheme
-      ? primaryTheme.description
-      : `Su mensaje y tags de "${song.tags.join(', ') || 'Alabanza'}" conectan con el sermón sobre "${topic}".`
+    // Construir razón individual basada en el resumen temático de ESTA canción específica
+    const resumen = song.resumen_tematico || ''
+    const matchTag = song.tags[0] || 'Alabanza'
+
+    let reason = ''
+    if (songMoment === 'Apertura') {
+      reason = `[Apertura] Proclama con júbilo congregacional el mensaje de "${song.title}". Su dinámica ${song.tempo} y enfoque en ${matchTag} preparan la alabanza para el tema de "${topic}".`
+    } else if (songMoment === 'Ministración') {
+      reason = `[Ministración] Facilita una respuesta devocional profunda. Su mensaje en ${song.tempo} enfocado en ${matchTag} permite reflexionar e intimar con Dios tras escuchar sobre "${topic}".`
+    } else {
+      reason = `[Adoración] Profundiza en el corazón del sermón mediante "${song.title}". Conecta con "${topic}" reforzando la fe de la iglesia en un ambiente de reverencia.`
+    }
 
     return {
       songId: song.id,
       moment: songMoment,
-      reason: `[${songMoment}] ${themeDesc}`,
+      reason,
     }
   })
 }

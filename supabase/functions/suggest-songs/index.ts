@@ -48,7 +48,7 @@ serve(async (req) => {
 
     const { data: songs, error: dbError } = await supabase
       .from('songs')
-      .select('id, title, artist, key, tempo, tags')
+      .select('id, title, artist, key, tempo, tags, resumen_tematico')
 
     if (dbError || !songs || songs.length === 0) {
       return new Response(
@@ -57,7 +57,7 @@ serve(async (req) => {
       )
     }
 
-    // 2. Preparar el catálogo y prompt para Groq (Llama 3.3 70B)
+    // 2. Preparar el catálogo compacto con resúmenes temáticos para Groq (Llama 3.3 70B)
     const songsCatalogText = songs.map((s) => ({
       id: s.id,
       title: s.title,
@@ -65,6 +65,7 @@ serve(async (req) => {
       key: s.key,
       tempo: s.tempo,
       tags: s.tags?.join(', ') || '',
+      resumen_tematico: s.resumen_tematico || '',
     }))
 
     const systemPrompt = `Eres un pastor de adoración y teólogo musical de la iglesia cristiana IBAMI.
