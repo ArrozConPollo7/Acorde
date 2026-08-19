@@ -1,4 +1,3 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -11,9 +10,10 @@ interface RequestBody {
   currentSetlist?: string[]
   moment?: 'todos' | 'Apertura' | 'Adoración' | 'Ministración'
   limit?: number
+  songsCatalog?: any[]
 }
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -24,6 +24,7 @@ serve(async (req) => {
       currentSetlist = [],
       moment = 'todos',
       limit = 8,
+      songsCatalog = [],
     }: RequestBody = await req.json()
 
     if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
@@ -36,35 +37,43 @@ serve(async (req) => {
     const groqApiKey = Deno.env.get('GROQ_API_KEY')
     if (!groqApiKey) {
       return new Response(
-        JSON.stringify({ error: 'GROQ_API_KEY no configurada en las variables de entorno' }),
+        JSON.stringify({ error: 'GROQ_API_KEY no configurada en las variables de entorno de Supabase' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // 1. Obtener canciones disponibles de Supabase
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY') || ''
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    // 1. Obtener canciones disponibles (del catálogo enviado o desde la base de datos)
+    let finalSongs = Array.isArray(songsCatalog) && songsCatalog.length > 0 ? songsCatalog : []
 
-    const { data: songs, error: dbError } = await supabase
-      .from('songs')
-      .select('id, title, artist, key, tempo, tags, resumen_tematico')
+    if (finalSongs.length === 0) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY') || ''
+      if (supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey)
+        const { data } = await supabase
+          .from('songs')
+          .select('id, title, artist, key, tempo, tags, resumen_tematico')
+        if (data && data.length > 0) {
+          finalSongs = data
+        }
+      }
+    }
 
-    if (dbError || !songs || songs.length === 0) {
+    if (finalSongs.length === 0) {
       return new Response(
         JSON.stringify({ error: 'No se pudieron recuperar canciones del catálogo' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // 2. Preparar el catálogo compacto con resúmenes temáticos para Groq (Llama 3.3 70B)
-    const songsCatalogText = songs.map((s) => ({
+    // 2. Preparar el catálogo compacto con resúmenes temáticos para Groq
+    const songsCatalogText = finalSongs.map((s) => ({
       id: s.id,
       title: s.title,
       artist: s.artist,
       key: s.key,
       tempo: s.tempo,
-      tags: s.tags?.join(', ') || '',
+      tags: Array.isArray(s.tags) ? s.tags.join(', ') : (s.tags || ''),
       resumen_tematico: s.resumen_tematico || '',
     }))
 

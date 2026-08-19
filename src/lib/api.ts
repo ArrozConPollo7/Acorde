@@ -937,6 +937,97 @@ const THEMATIC_KNOWLEDGE_BASE: Record<string, ThematicCategory> = {
   },
 }
 
+async function queryGroqDirectly(
+  apiKey: string,
+  topic: string,
+  currentSetlist: string[],
+  compactCatalog: any[],
+  moment: string,
+  limit: number
+): Promise<AISuggestion[] | null> {
+  const CANDIDATE_MODELS = [
+    'openai/gpt-oss-20b',
+    'qwen/qwen3.6-27b',
+    'groq/compound-mini',
+    'groq/compound',
+    'openai/gpt-oss-120b',
+  ]
+
+  const systemPrompt = `Eres un pastor de adoración y teólogo musical de la iglesia cristiana IBAMI.
+Tu tarea es seleccionar exactamente ${limit} canciones del catálogo oficial de IBAMI que mejor se conecten con el tema bíblico o sermón provisto.
+
+REGLAS LITÚRGICAS DE IBAMI:
+1. "Apertura": Canciones festivas, rítmicas o de llamado a la alabanza que convocan a la congregación (tempos rápidos o medios).
+2. "Adoración": Canciones profundas, cristocéntricas y reverentes que preparan el corazón antes de la predicación (tempos medios o lentos).
+3. "Ministración": Canciones de entrega, consagración, fe, sanidad o llamado tras escuchar la Palabra (tempos lentos o íntimos).
+
+${moment !== 'todos' ? `ENFOQUE SOLICITADO: Recomienda únicamente canciones para el momento de "${moment}".` : 'DISTRIBUCIÓN: Proporciona una mezcla equilibrada de Apertura, Adoración y Ministración.'}
+
+REGLAS ESTRICTAS:
+- Usa ÚNICAMENTE canciones que existan en el catálogo provisto (utilizando su id exacto).
+- No inventes canciones ni cambies los IDs.
+- Cero emojis en cualquier parte del texto.
+- Justificación: Explica en 1 o 2 oraciones profundas y claras por qué la letra o temática conecta con el mensaje bíblico.
+- Devuelve ÚNICAMENTE un JSON con esta estructura exacta:
+{
+  "suggestions": [
+    {
+      "songId": "id-de-la-cancion",
+      "moment": "Apertura",
+      "reason": "Justificación pastoral fundamentada."
+    }
+  ]
+}`
+
+  const userPrompt = `Tema o pasaje del sermón: "${topic}"
+Canciones que ya están en el setlist: ${JSON.stringify(currentSetlist)}
+
+Catálogo oficial de canciones de IBAMI:
+${JSON.stringify(compactCatalog, null, 2)}`
+
+  for (const model of CANDIDATE_MODELS) {
+    try {
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: 0.3,
+        }),
+      })
+
+      if (resp.ok) {
+        const data = await resp.json()
+        const rawContent = data.choices?.[0]?.message?.content || ''
+        let parsedResult: any = { suggestions: [] }
+        try {
+          const clean = rawContent.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim()
+          parsedResult = JSON.parse(clean)
+        } catch {
+          const f = rawContent.indexOf('{')
+          const l = rawContent.lastIndexOf('}')
+          if (f !== -1 && l !== -1) {
+            parsedResult = JSON.parse(rawContent.substring(f, l + 1))
+          }
+        }
+        if (Array.isArray(parsedResult?.suggestions) && parsedResult.suggestions.length > 0) {
+          return parsedResult.suggestions
+        }
+      }
+    } catch (e) {
+      console.warn(`Error llamando a Groq directo con ${model}:`, e)
+    }
+  }
+  return null
+}
+
 export async function suggestSongsWithGroq(
   topic: string,
   currentSetlist: string[],
@@ -950,19 +1041,39 @@ export async function suggestSongsWithGroq(
     resumen_tematico: s.resumen_tematico || generateSongThematicSummary(s),
   }))
 
-  // Si Supabase Edge Function está disponible con Groq
+  const compactCatalog = enrichedCatalog.map(s => ({
+    id: s.id,
+    title: s.title,
+    artist: s.artist,
+    key: s.key,
+    tempo: s.tempo,
+    tags: s.tags,
+    resumen_tematico: s.resumen_tematico,
+  }))
+
+  // 1. Intentar llamar a Groq directamente si existe VITE_GROQ_API_KEY en Vercel/.env
+  const directKey = (import.meta as any).env?.VITE_GROQ_API_KEY || getStored<string>('acorde_groq_api_key')
+  if (directKey) {
+    try {
+      const directSuggestions = await queryGroqDirectly(
+        directKey,
+        topic,
+        currentSetlist,
+        compactCatalog,
+        moment,
+        limit
+      )
+      if (directSuggestions && directSuggestions.length > 0) {
+        return directSuggestions
+      }
+    } catch (err) {
+      console.warn('Fallo llamada directa a Groq:', err)
+    }
+  }
+
+  // 2. Intentar llamar a la Edge Function de Supabase
   if (isSupabaseConfigured && supabase) {
     try {
-      const compactCatalog = enrichedCatalog.map(s => ({
-        id: s.id,
-        title: s.title,
-        artist: s.artist,
-        key: s.key,
-        tempo: s.tempo,
-        tags: s.tags,
-        resumen_tematico: s.resumen_tematico,
-      }))
-
       const { data, error } = await supabase.functions.invoke('suggest-songs', {
         body: { topic, currentSetlist, moment, limit, songsCatalog: compactCatalog },
       })
@@ -971,7 +1082,7 @@ export async function suggestSongsWithGroq(
         return data.suggestions
       }
     } catch (err) {
-      console.warn('Edge Function no disponible, usando evaluador temático de dos pasos:', err)
+      console.warn('Edge Function no disponible, usando evaluador temático local:', err)
     }
   }
 
