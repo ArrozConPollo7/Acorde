@@ -101,18 +101,14 @@ Catálogo oficial de canciones de IBAMI:
 ${JSON.stringify(songsCatalogText, null, 2)}`
 
     // 3. Llamada a Groq API con cascada de modelos compatibles
-    // 3. Llamada a Groq API con los modelos activos de tu cuenta
+    // 3. Llamada a Groq API con modelos optimizados por velocidad y eficiencia
     const CANDIDATE_MODELS = [
-      'openai/gpt-oss-120b',
-      'openai/gpt-oss-20b',
-      'qwen/qwen3.6-27b',
+      'openai/gpt-oss-20b',     // Modelo ideal: rápido, ligero y eficiente
+      'qwen/qwen3.6-27b',       // Excelente balance de razonamiento y velocidad
+      'groq/compound-mini',     // Mini router ultra rápido
       'groq/compound',
-      'groq/compound-mini',
+      'openai/gpt-oss-120b',    // Modelo pesado como respaldo
       'allam-2-7b',
-      'llama-3.3-70b-versatile',
-      'llama-3.1-8b-instant',
-      'llama-3.1-70b-versatile',
-      'llama3-70b-8192',
     ]
 
     let groqData = null
