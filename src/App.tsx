@@ -580,20 +580,178 @@ function ClassicBadge() {
   )
 }
 
+function stripAccents(str: string): string {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
+// ─── COMPONENTE DE SELECCIÓN Y AUTOCOMPLETADO DE CATEGORÍAS ──────────────────
+
+function TagInputWithSuggestions({
+  tags,
+  onChange,
+  allSongs = [],
+}: {
+  tags: string[]
+  onChange: (tags: string[]) => void
+  allSongs?: Song[]
+}) {
+  const [inputVal, setInputVal] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+
+  // Recopilar categorías existentes canónicas (con acentos y mayúsculas correctas)
+  const canonicalCategories = useMemo(() => {
+    const set = new Set<string>([
+      'Alabanza',
+      'Adoración',
+      'Celebración',
+      'Consagración',
+      'Entrega',
+      'Cruz',
+      'Gracia',
+      'Gratitud',
+      'Comunión',
+      'Fe',
+      'Esperanza',
+      'Espíritu Santo',
+      'Victoria',
+      'Amor',
+      'Salvación',
+      'Sanidad',
+      'Evangelio',
+      'Júbilo',
+      'Resurrección',
+      'Majestad',
+      'Rendición',
+      'Perdón',
+    ])
+    allSongs.forEach(s => {
+      s.tags?.forEach(t => {
+        if (t && !['rápida', 'media', 'lenta'].includes(t.toLowerCase())) {
+          set.add(t.trim())
+        }
+      })
+    })
+    return Array.from(set).sort()
+  }, [allSongs])
+
+  function normalizeTag(raw: string): string {
+    const trimmed = raw.trim()
+    if (!trimmed) return ''
+    const normalizedInput = stripAccents(trimmed)
+    const match = canonicalCategories.find(c => stripAccents(c) === normalizedInput)
+    if (match) return match
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
+  }
+
+  function addTag(tagToAdd: string) {
+    const normalized = normalizeTag(tagToAdd)
+    if (!normalized) return
+    const exists = tags.some(t => stripAccents(t) === stripAccents(normalized))
+    if (!exists) {
+      onChange([...tags, normalized])
+    }
+    setInputVal('')
+  }
+
+  function removeTag(tagToRemove: string) {
+    onChange(tags.filter(t => stripAccents(t) !== stripAccents(tagToRemove)))
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      if (inputVal.trim()) {
+        addTag(inputVal)
+      }
+    } else if (e.key === 'Backspace' && !inputVal && tags.length > 0) {
+      removeTag(tags[tags.length - 1])
+    }
+  }
+
+  const suggestions = useMemo(() => {
+    const q = stripAccents(inputVal.trim())
+    const unselected = canonicalCategories.filter(
+      cat => !tags.some(t => stripAccents(t) === stripAccents(cat))
+    )
+    if (!q) return unselected.slice(0, 8)
+    return unselected.filter(cat => stripAccents(cat).includes(q))
+  }, [canonicalCategories, tags, inputVal])
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">
+        Categorías / Tags ({tags.length})
+      </label>
+
+      {/* Chips de categorías seleccionadas */}
+      <div className="flex flex-wrap items-center gap-1.5 p-2.5 rounded-xl bg-surface-2 border border-border min-h-[46px]">
+        {tags.map(t => (
+          <span
+            key={t}
+            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-accent/15 text-accent border border-accent/40 flex items-center gap-1.5 shadow-xs"
+          >
+            <span>{t}</span>
+            <button
+              type="button"
+              onClick={() => removeTag(t)}
+              className="hover:opacity-75 cursor-pointer"
+            >
+              <IconX size={12} />
+            </button>
+          </span>
+        ))}
+        <input
+          type="text"
+          placeholder={tags.length === 0 ? "Escribe o selecciona categorías (Ej: Celebración)..." : "Agregar categoría..."}
+          value={inputVal}
+          onChange={e => setInputVal(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onKeyDown={handleKeyDown}
+          className="flex-1 min-w-[140px] px-2 py-1 text-xs text-fg bg-transparent focus:outline-none placeholder:text-fg-subtle"
+        />
+      </div>
+
+      {/* Sugerencias en tiempo real */}
+      {(isFocused || inputVal.trim().length > 0) && suggestions.length > 0 && (
+        <div className="flex flex-col gap-1 p-2 rounded-xl bg-surface border border-border/80 shadow-md">
+          <span className="text-[10px] font-bold text-fg-subtle uppercase tracking-wider px-1">
+            {inputVal.trim() ? `Sugerencias para "${inputVal}":` : 'Categorías sugeridas (toca para agregar):'}
+          </span>
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {suggestions.map(sug => (
+              <button
+                key={sug}
+                type="button"
+                onClick={() => addTag(sug)}
+                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-2 text-fg hover:text-accent hover:border-accent border border-border flex items-center gap-1 transition cursor-pointer active:scale-95 shadow-xs"
+              >
+                <IconPlus size={11} className="text-accent" />
+                <span>{sug}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── ADD SONG MODAL ───────────────────────────────────────────────────────────
 
 function AddSongModal({
   onClose,
   onSave,
+  allSongs = [],
 }: {
   onClose: () => void
   onSave: (song: Omit<Song, 'id'>) => void
+  allSongs?: Song[]
 }) {
   const [title, setTitle] = useState('')
   const [artist, setArtist] = useState('')
   const [key, setKey] = useState('G')
   const [tempo, setTempo] = useState<'rápida' | 'media' | 'lenta'>('media')
-  const [tagsInput, setTagsInput] = useState('')
+  const [tags, setTags] = useState<string[]>(['Alabanza'])
   const [mediaUrl, setMediaUrl] = useState('')
   const [lyricsRaw, setLyricsRaw] = useState('')
   const [isClassic, setIsClassic] = useState(false)
@@ -605,11 +763,6 @@ function AddSongModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim() || !artist.trim()) return
-
-    const tags = tagsInput
-      .split(/[,/]/)
-      .map(t => t.trim())
-      .filter(Boolean)
 
     const parsedLyrics = parseChordProText(lyricsRaw)
 
@@ -671,7 +824,7 @@ function AddSongModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Tono Original *</label>
               <select
@@ -696,17 +849,10 @@ function AddSongModal({
                 <option value="rápida">Rápida (Alabanza)</option>
               </select>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Categorías / Tags</label>
-              <input
-                type="text"
-                placeholder="Ej: Consagración, Gracia"
-                value={tagsInput}
-                onChange={e => setTagsInput(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
-              />
-            </div>
           </div>
+
+          {/* Selector interactivo de Categorías con sugerencias y normalización */}
+          <TagInputWithSuggestions tags={tags} onChange={setTags} allSongs={allSongs} />
 
           {/* Ficha Ministerial / Notion Data */}
           <div className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
@@ -837,16 +983,18 @@ function EditSongModal({
   song,
   onClose,
   onSave,
+  allSongs = [],
 }: {
   song: Song
   onClose: () => void
   onSave: (updates: Partial<Song>) => void
+  allSongs?: Song[]
 }) {
   const [title, setTitle] = useState(song.title)
   const [artist, setArtist] = useState(song.artist)
   const [key, setKey] = useState(song.key)
   const [tempo, setTempo] = useState<'rápida' | 'media' | 'lenta'>(song.tempo)
-  const [tagsInput, setTagsInput] = useState(song.tags.join(', '))
+  const [tags, setTags] = useState<string[]>(song.tags && song.tags.length > 0 ? song.tags : ['Alabanza'])
   const [mediaUrl, setMediaUrl] = useState(song.media_url || '')
   const [lyricsRaw, setLyricsRaw] = useState(formatLyricsToChordPro(song.lyrics))
   const [isClassic, setIsClassic] = useState(song.is_classic ?? false)
@@ -858,11 +1006,6 @@ function EditSongModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim() || !artist.trim()) return
-
-    const tags = tagsInput
-      .split(/[,/]/)
-      .map(t => t.trim())
-      .filter(Boolean)
 
     const parsedLyrics = parseChordProText(lyricsRaw)
 
@@ -922,7 +1065,7 @@ function EditSongModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Tono Original</label>
               <select
@@ -947,16 +1090,10 @@ function EditSongModal({
                 <option value="rápida">Rápida</option>
               </select>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Tags / Categorías</label>
-              <input
-                type="text"
-                value={tagsInput}
-                onChange={e => setTagsInput(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
-              />
-            </div>
           </div>
+
+          {/* Selector interactivo de Categorías con sugerencias y normalización */}
+          <TagInputWithSuggestions tags={tags} onChange={setTags} allSongs={allSongs} />
 
           {/* Ficha Ministerial / Notion Data */}
           <div className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
@@ -3002,6 +3139,15 @@ function SongViewScreen({
   const [instTab, setInstTab] = useState<typeof INSTRUMENTS_TABS[number]>('guitarra')
   const [isFocusMode, setIsFocusMode] = useState(false)
 
+  // Actualizar el título del documento para Safari Reader View y marcadores
+  useEffect(() => {
+    const originalTitle = document.title
+    document.title = `${song.title} - ${song.artist} | Acorde IBAMI`
+    return () => {
+      document.title = originalTitle
+    }
+  }, [song.title, song.artist])
+
   const displayKey = transposeChord(song.key, transpose)
   const transposedLyrics = song.lyrics.map(line => ({
     ...line,
@@ -3024,7 +3170,7 @@ function SongViewScreen({
   // Vista de solo letra y acordes (Modo Lectura / Enfoque)
   if (isFocusMode) {
     return (
-      <div className="fixed inset-0 z-50 bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8">
+      <div className="fixed inset-0 z-[70] bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8 pb-44">
         <div className="max-w-xl mx-auto w-full overflow-x-hidden">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
             <button
@@ -3042,19 +3188,29 @@ function SongViewScreen({
             </div>
           </div>
 
-          <article className="w-full max-w-full overflow-x-hidden break-words">
+          <article
+            className="w-full max-w-full overflow-x-hidden break-words"
+            itemScope
+            itemType="https://schema.org/MusicComposition"
+          >
             <header className="mb-6 border-b border-border pb-4">
-              <h1 className="font-display text-3xl md:text-4xl text-fg tracking-wide mb-1 leading-tight uppercase">
+              <h1
+                className="font-display text-3xl md:text-4xl text-fg tracking-wide mb-1 leading-tight uppercase"
+                itemProp="name"
+              >
                 {song.title}
               </h1>
-              <p className="text-fg-muted text-sm font-medium">
+              <p className="text-fg-muted text-sm font-medium" itemProp="composer">
                 {song.artist} {song.tempo ? `· ${song.tempo}` : ''}
               </p>
             </header>
 
-            <main className="flex flex-col gap-6 font-mono text-base md:text-lg text-fg leading-relaxed max-w-full overflow-x-hidden break-words">
+            <main
+              className="flex flex-col gap-6 font-mono text-base md:text-lg text-fg leading-relaxed max-w-full overflow-x-hidden break-words pb-24"
+              itemProp="lyrics"
+            >
               {transposedLyrics.map((line, li) => (
-                <div key={li} className="max-w-full overflow-x-hidden break-words">
+                <section key={li} className="max-w-full overflow-x-hidden break-words">
                   {line.label && (
                     <p className="font-body text-xs font-bold text-accent uppercase tracking-widest mb-2">
                       {line.label}
@@ -3072,7 +3228,7 @@ function SongViewScreen({
                       </span>
                     ))}
                   </div>
-                </div>
+                </section>
               ))}
             </main>
           </article>
@@ -3082,7 +3238,7 @@ function SongViewScreen({
   }
 
   return (
-    <div className="min-h-screen bg-bg text-fg pb-12">
+    <div className="min-h-screen bg-bg text-fg pb-40 md:pb-16">
       <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6">
         <div className="flex items-center justify-between mb-6">
           <button onClick={onBack} className="flex items-center gap-1.5 text-fg-muted text-sm hover:text-fg transition-colors cursor-pointer">
@@ -4873,6 +5029,7 @@ export default function App() {
         <AddSongModal
           onClose={() => setAddSongModalOpen(false)}
           onSave={handleAddSong}
+          allSongs={songs}
         />
       )}
 
@@ -4882,6 +5039,7 @@ export default function App() {
           song={editingSong}
           onClose={() => setEditingSong(null)}
           onSave={handleUpdateSong}
+          allSongs={songs}
         />
       )}
 
