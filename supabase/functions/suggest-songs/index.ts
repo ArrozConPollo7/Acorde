@@ -101,12 +101,18 @@ Catálogo oficial de canciones de IBAMI:
 ${JSON.stringify(songsCatalogText, null, 2)}`
 
     // 3. Llamada a Groq API con cascada de modelos compatibles
+    // 3. Llamada a Groq API con los modelos activos de tu cuenta
     const CANDIDATE_MODELS = [
-      'llama-3.1-8b-instant',
+      'openai/gpt-oss-120b',
+      'openai/gpt-oss-20b',
+      'qwen/qwen3.6-27b',
+      'groq/compound',
+      'groq/compound-mini',
+      'allam-2-7b',
       'llama-3.3-70b-versatile',
+      'llama-3.1-8b-instant',
       'llama-3.1-70b-versatile',
       'llama3-70b-8192',
-      'llama3-8b-8192',
     ]
 
     let groqData = null
@@ -115,21 +121,22 @@ ${JSON.stringify(songsCatalogText, null, 2)}`
 
     for (const model of CANDIDATE_MODELS) {
       try {
+        const bodyPayload: Record<string, unknown> = {
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: 0.3,
+        }
+
         const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${groqApiKey}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt },
-            ],
-            temperature: 0.3,
-            response_format: { type: 'json_object' },
-          }),
+          body: JSON.stringify(bodyPayload),
         })
 
         if (groqResponse.ok) {
@@ -154,8 +161,18 @@ ${JSON.stringify(songsCatalogText, null, 2)}`
       )
     }
 
-    const content = groqData.choices?.[0]?.message?.content
-    const parsedResult = JSON.parse(content || '{"suggestions":[]}')
+    const rawContent = groqData.choices?.[0]?.message?.content || ''
+    let parsedResult = { suggestions: [] }
+    try {
+      const cleanContent = rawContent.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim()
+      parsedResult = JSON.parse(cleanContent)
+    } catch (_parseErr) {
+      const firstBrace = rawContent.indexOf('{')
+      const lastBrace = rawContent.lastIndexOf('}')
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        parsedResult = JSON.parse(rawContent.substring(firstBrace, lastBrace + 1))
+      }
+    }
 
     return new Response(JSON.stringify({ ...parsedResult, model: usedModel }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
