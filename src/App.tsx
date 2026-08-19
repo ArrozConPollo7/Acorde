@@ -3527,7 +3527,7 @@ function AISuggestionModal({
               </div>
               <div className="text-center">
                 <p className="text-fg text-sm font-medium">Analizando repertorio y coherencia teológica...</p>
-                <p className="text-fg-muted text-xs mt-1">Llama 3.3 clasificando canciones por momento pastoral</p>
+                <p className="text-fg-muted text-xs mt-1">Seleccionando las mejores canciones para el servicio</p>
               </div>
             </div>
           )}
@@ -4713,7 +4713,7 @@ function AdminScreen({
                 className="w-full py-4 rounded-2xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all shadow-xs cursor-pointer"
               >
                 <IconSparkles size={16} />
-                Sugerir canciones con IA (Groq)
+                Sugerir canciones con IA
               </button>
 
               {event && (
