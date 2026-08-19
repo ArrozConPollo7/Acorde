@@ -100,39 +100,64 @@ Canciones que ya están en el setlist: ${JSON.stringify(currentSetlist)}
 Catálogo oficial de canciones de IBAMI:
 ${JSON.stringify(songsCatalogText, null, 2)}`
 
-    // 3. Llamada a Groq API
-    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${groqApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.2,
-        response_format: { type: 'json_object' },
-      }),
-    })
+    // 3. Llamada a Groq API con cascada de modelos compatibles
+    const CANDIDATE_MODELS = [
+      'llama-3.1-8b-instant',
+      'llama-3.3-70b-versatile',
+      'llama-3.1-70b-versatile',
+      'llama3-70b-8192',
+      'llama3-8b-8192',
+    ]
 
-    if (!groqResponse.ok) {
-      const errText = await groqResponse.text()
-      console.error('Error de Groq API:', errText)
+    let groqData = null
+    let usedModel = ''
+    let lastError = ''
+
+    for (const model of CANDIDATE_MODELS) {
+      try {
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${groqApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+            temperature: 0.3,
+            response_format: { type: 'json_object' },
+          }),
+        })
+
+        if (groqResponse.ok) {
+          groqData = await groqResponse.json()
+          usedModel = model
+          break
+        } else {
+          lastError = await groqResponse.text()
+          console.warn(`Groq error con modelo ${model}:`, lastError)
+        }
+      } catch (e) {
+        lastError = (e as Error).message
+        console.warn(`Fallo request con modelo ${model}:`, e)
+      }
+    }
+
+    if (!groqData) {
+      console.error('Ningún modelo de Groq estuvo disponible:', lastError)
       return new Response(
-        JSON.stringify({ error: 'Error al comunicarse con el modelo de IA' }),
+        JSON.stringify({ error: 'No se pudo conectar con los modelos de Groq', details: lastError }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const groqData = await groqResponse.json()
     const content = groqData.choices?.[0]?.message?.content
-
     const parsedResult = JSON.parse(content || '{"suggestions":[]}')
 
-    return new Response(JSON.stringify(parsedResult), {
+    return new Response(JSON.stringify({ ...parsedResult, model: usedModel }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
