@@ -937,11 +937,54 @@ const THEMATIC_KNOWLEDGE_BASE: Record<string, ThematicCategory> = {
   },
 }
 
+function formatCompactCandidateCatalog(
+  topic: string,
+  catalog: Song[],
+  moment: string,
+  maxCandidates = 32
+): string {
+  const cleanTopic = topic.toLowerCase().trim()
+  const words = cleanTopic.split(/[\s,.:;/-]+/).filter(w => w.length > 2)
+
+  const scored = catalog.map(song => {
+    let score = 0
+    const title = (song.title || '').toLowerCase()
+    const tags = (song.tags || []).map(t => t.toLowerCase()).join(' ')
+    const resumen = (song.resumen_tematico || '').toLowerCase()
+
+    words.forEach(w => {
+      if (title.includes(w)) score += 12
+      if (resumen.includes(w)) score += 8
+      if (tags.includes(w)) score += 6
+    })
+
+    if (moment !== 'todos') {
+      if (moment === 'Apertura' && (song.tempo === 'rápida' || song.tempo === 'media')) score += 5
+      if (moment === 'Adoración' && (song.tempo === 'media' || song.tempo === 'lenta')) score += 5
+      if (moment === 'Ministración' && (song.tempo === 'lenta' || song.tempo === 'media')) score += 5
+    }
+
+    if (song.is_classic) score += 3
+
+    return { song, score }
+  })
+
+  scored.sort((a, b) => b.score - a.score)
+  const top = scored.slice(0, maxCandidates).map(item => item.song)
+
+  return top
+    .map(s => {
+      const tags = (s.tags || []).join(', ')
+      return `ID: "${s.id}" | ${s.title} (${s.artist}) | Tempo: ${s.tempo} | Tags: ${tags} | ${s.resumen_tematico || ''}`
+    })
+    .join('\n')
+}
+
 async function queryGroqDirectly(
   apiKey: string,
   topic: string,
   currentSetlist: string[],
-  compactCatalog: any[],
+  catalog: Song[],
   moment: string,
   limit: number
 ): Promise<AISuggestion[] | null> {
@@ -950,8 +993,11 @@ async function queryGroqDirectly(
     'qwen/qwen3.6-27b',
     'groq/compound-mini',
     'groq/compound',
+    'meta-llama/llama-4-scout-17b-16e-instruct',
     'openai/gpt-oss-120b',
   ]
+
+  const compactCatalogText = formatCompactCandidateCatalog(topic, catalog, moment, 32)
 
   const systemPrompt = `Eres un pastor de adoración y teólogo musical de la iglesia cristiana IBAMI.
 Tu tarea es seleccionar exactamente ${limit} canciones del catálogo oficial de IBAMI que mejor se conecten con el tema bíblico o sermón provisto.
@@ -964,7 +1010,7 @@ REGLAS LITÚRGICAS DE IBAMI:
 ${moment !== 'todos' ? `ENFOQUE SOLICITADO: Recomienda únicamente canciones para el momento de "${moment}".` : 'DISTRIBUCIÓN: Proporciona una mezcla equilibrada de Apertura, Adoración y Ministración.'}
 
 REGLAS ESTRICTAS:
-- Usa ÚNICAMENTE canciones que existan en el catálogo provisto (utilizando su id exacto).
+- Usa ÚNICAMENTE canciones que existan en el catálogo provisto (utilizando su ID exacto entre comillas).
 - No inventes canciones ni cambies los IDs.
 - Cero emojis en cualquier parte del texto.
 - Justificación: Explica en 1 o 2 oraciones profundas y claras por qué la letra o temática conecta con el mensaje bíblico.
@@ -972,7 +1018,7 @@ REGLAS ESTRICTAS:
 {
   "suggestions": [
     {
-      "songId": "id-de-la-cancion",
+      "songId": "id-exacto-de-la-cancion",
       "moment": "Apertura",
       "reason": "Justificación pastoral fundamentada."
     }
@@ -982,8 +1028,8 @@ REGLAS ESTRICTAS:
   const userPrompt = `Tema o pasaje del sermón: "${topic}"
 Canciones que ya están en el setlist: ${JSON.stringify(currentSetlist)}
 
-Catálogo oficial de canciones de IBAMI:
-${JSON.stringify(compactCatalog, null, 2)}`
+Catálogo de canciones candidatas de IBAMI:
+${compactCatalogText}`
 
   for (const model of CANDIDATE_MODELS) {
     try {
@@ -1059,7 +1105,7 @@ export async function suggestSongsWithGroq(
         directKey,
         topic,
         currentSetlist,
-        compactCatalog,
+        enrichedCatalog,
         moment,
         limit
       )
