@@ -111,12 +111,24 @@ create table if not exists public.service_setlists (
 alter table public.service_setlists drop constraint if exists service_setlists_song_id_fkey;
 alter table public.service_setlists alter column song_id type text;
 
--- 8. DESACTIVAR RLS Y OTORGAR ACCESO TOTAL
+-- 8. TABLA: musician_availability (Disponibilidad de Integrantes por Fecha)
+create table if not exists public.musician_availability (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null,
+  date text not null,
+  available boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(user_id, date)
+);
+
+-- 9. DESACTIVAR RLS Y OTORGAR ACCESO TOTAL
 alter table public.profiles disable row level security;
 alter table public.songs disable row level security;
 alter table public.service_events disable row level security;
 alter table public.service_roster disable row level security;
 alter table public.service_setlists disable row level security;
+alter table public.musician_availability disable row level security;
 
 -- Otorgar permisos globales a todos los roles
 grant usage on schema public to postgres, anon, authenticated, service_role;

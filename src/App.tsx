@@ -15,6 +15,9 @@ import {
   parseChordProText,
   formatLyricsToChordPro,
   updateAttendanceStatus,
+  fetchAvailability,
+  saveMusicianAvailability,
+  batchSaveMusicianAvailability,
   suggestSongsWithGroq,
   hasRole,
   findMusicianByIdentifier,
@@ -25,6 +28,7 @@ import {
   type Instrument,
   type Role,
   type AISuggestion,
+  type AvailabilityMap,
   INITIAL_SONGS,
   INITIAL_EVENTS,
   INITIAL_MUSICIANS,
@@ -40,7 +44,7 @@ import {
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
-type Screen = 'login' | 'calendar' | 'day-detail' | 'library' | 'song' | 'admin' | 'profile'
+type Screen = 'login' | 'calendar' | 'day-detail' | 'library' | 'song' | 'admin' | 'profile' | 'availability'
 type AIState = 'idle' | 'loading' | 'results' | 'error'
 type Theme = 'light' | 'dark'
 
@@ -155,6 +159,18 @@ function IconCalendar({ size = 20 }: { size?: number }) {
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="8" y1="2" x2="8" y2="6" />
       <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  )
+}
+
+function IconCalendarCheck({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+      <path d="m9 16 2 2 4-4" />
     </svg>
   )
 }
@@ -1084,11 +1100,13 @@ function DesktopHeader({
   const isActive = (s: Screen) =>
     (['calendar', 'day-detail'].includes(screen) && s === 'calendar') ||
     (['library', 'song'].includes(screen) && s === 'library') ||
+    (screen === 'availability' && s === 'availability') ||
     (screen === 'admin' && s === 'admin') ||
     (screen === 'profile' && s === 'profile')
 
   const navItems = [
     { id: 'calendar' as Screen, label: 'Inicio', icon: <IconCalendar size={18} /> },
+    { id: 'availability' as Screen, label: 'Disponibilidad', icon: <IconCalendarCheck size={18} /> },
     { id: 'library' as Screen, label: 'Repertorio', icon: <IconMusic size={18} /> },
     ...(isAdm ? [{ id: 'admin' as Screen, label: 'Admin', icon: <IconSettings size={18} /> }] : []),
   ]
@@ -1153,12 +1171,14 @@ function BottomNav({ screen, setScreen, currentUser }: { screen: Screen; setScre
 
   const isActive = (s: Screen) =>
     (['calendar', 'day-detail'].includes(screen) && s === 'calendar') ||
+    (screen === 'availability' && s === 'availability') ||
     (['library', 'song'].includes(screen) && s === 'library') ||
     (screen === 'admin' && s === 'admin') ||
     (screen === 'profile' && s === 'profile')
 
   const tabs = [
     { id: 'calendar' as Screen, label: 'Inicio', icon: <IconCalendar /> },
+    { id: 'availability' as Screen, label: 'Disponibilidad', icon: <IconCalendarCheck /> },
     { id: 'library' as Screen, label: 'Repertorio', icon: <IconMusic /> },
     ...(isAdm ? [{ id: 'admin' as Screen, label: 'Admin', icon: <IconSettings /> }] : []),
     { id: 'profile' as Screen, label: 'Perfil', icon: <IconUser /> },
@@ -1629,6 +1649,7 @@ function CalendarScreen({
   events,
   musicians,
   onDaySelect,
+  onNavigateAvailability,
   currentUser,
   theme,
   onToggleTheme,
@@ -1636,6 +1657,7 @@ function CalendarScreen({
   events: ServiceEvent[]
   musicians: Musician[]
   onDaySelect: (date: string) => void
+  onNavigateAvailability?: () => void
   currentUser: Musician
   theme: Theme
   onToggleTheme: () => void
@@ -1795,8 +1817,416 @@ function CalendarScreen({
                 )
               })}
             </div>
+
+            {onNavigateAvailability && (
+              <div className="rounded-3xl p-5 bg-surface border border-border flex items-center justify-between gap-4 shadow-xs">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-surface-2 border border-border text-accent flex-shrink-0">
+                    <IconCalendarCheck size={20} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-fg truncate">Mi Disponibilidad del Mes</p>
+                    <p className="text-xs text-fg-muted truncate">Indica los días que puedes servir</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={onNavigateAvailability}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-accent text-accent-fg hover:bg-accent-hover active:scale-95 transition cursor-pointer shadow-xs whitespace-nowrap flex-shrink-0"
+                >
+                  Gestionar
+                </button>
+              </div>
+            )}
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── AVAILABILITY SCREEN (MÓDULO DE DISPONIBILIDAD MINISTERIAL) ──────────────
+
+function AvailabilityScreen({
+  currentUser,
+  musicians,
+  events,
+  availability,
+  onToggleAvailability,
+  onBatchAvailability,
+  theme,
+  onToggleTheme,
+}: {
+  currentUser: Musician
+  musicians: Musician[]
+  events: ServiceEvent[]
+  availability: AvailabilityMap
+  onToggleAvailability: (userId: string, date: string, available: boolean) => void
+  onBatchAvailability: (userId: string, updates: { date: string; available: boolean }[]) => void
+  theme: Theme
+  onToggleTheme: () => void
+}) {
+  const isAdm = hasRole(currentUser, 'admin')
+  const [adminViewMode, setAdminViewMode] = useState<'my' | 'team'>('my')
+  const now = new Date()
+  const [year, setYear] = useState(() => now.getFullYear())
+  const [month, setMonth] = useState(() => now.getMonth())
+  const [selectedAdminDate, setSelectedAdminDate] = useState(() => getTodayDateString())
+
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const cells: (number | null)[] = [
+    ...Array(firstDay).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ]
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  function dateStr(day: number) {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+  function prevMonth() {
+    if (month === 0) { setYear(y => y - 1); setMonth(11) } else setMonth(m => m - 1)
+  }
+  function nextMonth() {
+    if (month === 11) { setYear(y => y + 1); setMonth(0) } else setMonth(m => m + 1)
+  }
+
+  const userAvailability = availability[currentUser.id] || {}
+
+  const monthEvents = events.filter(e => {
+    const [ey, em] = e.date.split('-').map(Number)
+    return ey === year && em === month + 1
+  }).sort((a, b) => a.date.localeCompare(b.date))
+
+  function handleMakeSundaysAvailable() {
+    const updates: { date: string; available: boolean }[] = []
+    for (let day = 1; day <= daysInMonth; day++) {
+      const d = new Date(year, month, day)
+      if (d.getDay() === 0) {
+        updates.push({ date: dateStr(day), available: true })
+      }
+    }
+    onBatchAvailability(currentUser.id, updates)
+  }
+
+  function handleMakeAllServicesAvailable() {
+    const updates: { date: string; available: boolean }[] = []
+    monthEvents.forEach(e => {
+      updates.push({ date: e.date, available: true })
+    })
+    onBatchAvailability(currentUser.id, updates)
+  }
+
+  function handleClearMonth() {
+    const updates: { date: string; available: boolean }[] = []
+    for (let day = 1; day <= daysInMonth; day++) {
+      updates.push({ date: dateStr(day), available: false })
+    }
+    onBatchAvailability(currentUser.id, updates)
+  }
+
+  return (
+    <div className="min-h-screen bg-bg text-fg pb-20 md:pb-12">
+      {/* Mobile Top Bar */}
+      <div className="md:hidden px-5 pt-10 pb-5 bg-surface-2 border-b border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-surface border border-border text-accent p-1.5 shadow-xs">
+              <LogoIbami className="w-full h-full" />
+            </div>
+            <div>
+              <p className="text-fg-muted text-[10px] font-semibold tracking-widest uppercase">IBAMI</p>
+              <h1 className="font-display text-2xl text-fg tracking-wide leading-none">DISPONIBILIDAD</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            <Avatar initials={currentUser.initials} size="sm" />
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 lg:px-8 pt-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="font-display text-3xl text-fg tracking-wide">MI DISPONIBILIDAD</h2>
+            <p className="text-sm text-fg-muted mt-0.5">
+              Marca los días en que puedes servir para que los líderes te convoquen a los servicios.
+            </p>
+          </div>
+
+          {isAdm && (
+            <div className="flex p-1 rounded-2xl bg-surface-2 border border-border self-start sm:self-auto shadow-xs">
+              <button
+                type="button"
+                onClick={() => setAdminViewMode('my')}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  adminViewMode === 'my'
+                    ? 'bg-accent text-accent-fg shadow-xs'
+                    : 'text-fg-muted hover:text-fg'
+                }`}
+              >
+                Mi Disponibilidad
+              </button>
+              <button
+                type="button"
+                onClick={() => setAdminViewMode('team')}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  adminViewMode === 'team'
+                    ? 'bg-accent text-accent-fg shadow-xs'
+                    : 'text-fg-muted hover:text-fg'
+                }`}
+              >
+                Equipo (Admin)
+              </button>
+            </div>
+          )}
+        </div>
+
+        {adminViewMode === 'my' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Columna Izquierda: Calendario interactivo */}
+            <div className="lg:col-span-7 bg-surface border border-border rounded-3xl p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+                <button onClick={prevMonth} className="w-9 h-9 rounded-xl flex items-center justify-center text-fg-muted hover:text-fg bg-surface-2 border border-border transition-colors cursor-pointer">
+                  <IconChevronLeft />
+                </button>
+                <div className="text-center">
+                  <h2 className="font-display text-2xl text-fg tracking-wide">{MONTH_NAMES[month].toUpperCase()}</h2>
+                  <p className="text-fg-muted text-xs">{year}</p>
+                </div>
+                <button onClick={nextMonth} className="w-9 h-9 rounded-xl flex items-center justify-center text-fg-muted hover:text-fg bg-surface-2 border border-border transition-colors cursor-pointer">
+                  <IconChevronRight />
+                </button>
+              </div>
+
+              {/* Botones de acción rápida */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                <button
+                  type="button"
+                  onClick={handleMakeSundaysAvailable}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-2 border border-border hover:border-accent text-fg hover:text-accent transition cursor-pointer shadow-xs active:scale-95"
+                >
+                  Disponible los Domingos
+                </button>
+                <button
+                  type="button"
+                  onClick={handleMakeAllServicesAvailable}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-2 border border-border hover:border-accent text-fg hover:text-accent transition cursor-pointer shadow-xs active:scale-95"
+                >
+                  Disponible en todos los servicios
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearMonth}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-2 border border-border text-fg-muted hover:text-fg transition cursor-pointer shadow-xs active:scale-95"
+                >
+                  Limpiar mes
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 mb-3">
+                {WEEKDAYS.map((d) => (
+                  <div key={d} className="text-center text-xs font-semibold text-fg-muted uppercase tracking-wider py-1">{d}</div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-1.5 md:gap-2">
+                {cells.map((day, i) => {
+                  if (!day) return <div key={i} className="min-h-[56px]" />
+                  const ds = dateStr(day)
+                  const event = events.find(e => e.date === ds)
+                  const isAvailable = userAvailability[ds] === true
+
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => onToggleAvailability(currentUser.id, ds, !isAvailable)}
+                      className={`min-h-[56px] md:min-h-[64px] flex flex-col items-center justify-between p-1.5 rounded-2xl transition-all relative border cursor-pointer active:scale-95 ${
+                        isAvailable
+                          ? 'border-accent bg-accent/15 text-accent shadow-xs'
+                          : event
+                          ? 'border-border bg-surface-2 text-fg hover:border-border-hover'
+                          : 'border-transparent bg-surface-2/40 text-fg-muted hover:border-border'
+                      }`}
+                    >
+                      <span className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-semibold ${
+                        isAvailable ? 'bg-accent text-accent-fg font-bold' : 'text-fg'
+                      }`}>
+                        {day}
+                      </span>
+
+                      <div className="flex flex-col items-center gap-0.5 mt-0.5">
+                        {event && (
+                          <div className={`w-1.5 h-1.5 rounded-full ${event.type === 'domingo' ? 'bg-warm' : 'bg-accent'}`} />
+                        )}
+                        <span className={`text-[9px] font-bold uppercase leading-none ${
+                          isAvailable ? 'text-accent' : 'text-fg-subtle opacity-60'
+                        }`}>
+                          {isAvailable ? 'Si' : 'No'}
+                        </span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="flex items-center gap-6 mt-6 pt-4 border-t border-border">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-accent" />
+                  <span className="text-xs text-fg-muted font-medium">Disponible</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-warm" />
+                  <span className="text-xs text-fg-muted">Servicio Dominical</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-fg-muted" />
+                  <span className="text-xs text-fg-muted">No disponible</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Columna Derecha: Lista de servicios del mes */}
+            <div className="lg:col-span-5 flex flex-col gap-4">
+              <h3 className="font-display text-xl text-fg tracking-wide">SERVICIOS DE {MONTH_NAMES[month].toUpperCase()}</h3>
+              {monthEvents.length === 0 ? (
+                <div className="p-6 rounded-3xl bg-surface border border-border text-center text-fg-muted text-sm shadow-xs">
+                  No hay servicios programados para este mes aún.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {monthEvents.map(ev => {
+                    const date = new Date(ev.date + 'T12:00:00')
+                    const isAvailable = userAvailability[ev.date] === true
+
+                    return (
+                      <div
+                        key={ev.date}
+                        className="rounded-3xl p-5 flex items-center justify-between gap-4 bg-surface border border-border shadow-xs"
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div
+                            className="w-12 h-12 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 border border-border"
+                            style={{ background: ev.type === 'domingo' ? 'var(--warm-accent)' : 'var(--accent)', color: '#FFFFFF' }}
+                          >
+                            <span className="text-sm font-bold leading-none">{date.toLocaleDateString('es', { day: '2-digit' })}</span>
+                            <span className="text-[10px] uppercase tracking-wide leading-none mt-0.5 opacity-90">{date.toLocaleDateString('es', { month: 'short' })}</span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-fg text-sm truncate">{ev.label}</p>
+                            <p className="text-xs text-fg-muted mt-0.5 capitalize">{ev.type === 'domingo' ? 'Servicio Dominical' : 'Reunión Entre semana'}</p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => onToggleAvailability(currentUser.id, ev.date, !isAvailable)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 flex-shrink-0 ${
+                            isAvailable
+                              ? 'bg-accent text-accent-fg'
+                              : 'bg-surface-2 text-fg-muted border border-border hover:text-fg'
+                          }`}
+                        >
+                          {isAvailable ? (
+                            <>
+                              <IconCheck size={13} />
+                              <span>Disponible</span>
+                            </>
+                          ) : (
+                            <span>Marcar Disponible</span>
+                          )}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Vista General del Equipo para Administradores */
+          <div className="bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-border">
+              <div>
+                <h3 className="font-display text-2xl text-fg tracking-wide">DISPONIBILIDAD DEL EQUIPO</h3>
+                <p className="text-xs text-fg-muted mt-0.5">Selecciona una fecha para ver qué músicos pueden servir ese día.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-fg-muted uppercase">Fecha:</label>
+                <input
+                  type="date"
+                  value={selectedAdminDate}
+                  onChange={e => setSelectedAdminDate(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-fg bg-surface-2 border border-border focus:outline-none focus:border-accent cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Disponibles */}
+              <div className="p-5 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-fg uppercase tracking-wider">
+                    Disponibles ({musicians.filter(m => availability[m.id]?.[selectedAdminDate] === true).length})
+                  </span>
+                  <span className="text-[10px] text-accent font-semibold px-2 py-0.5 rounded-full bg-surface border border-border">Confirmaron disponibilidad</span>
+                </div>
+                <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
+                  {musicians.filter(m => availability[m.id]?.[selectedAdminDate] === true).length === 0 ? (
+                    <p className="text-xs text-fg-muted py-4 text-center italic">Ningún integrante ha marcado disponibilidad para esta fecha.</p>
+                  ) : (
+                    musicians
+                      .filter(m => availability[m.id]?.[selectedAdminDate] === true)
+                      .map(m => (
+                        <div key={m.id} className="p-3 rounded-xl bg-surface border border-border flex items-center justify-between gap-2 shadow-xs">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Avatar initials={m.initials} size="sm" />
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-fg truncate">{m.name}</p>
+                              <p className="text-[10px] text-fg-subtle capitalize truncate">{m.instrument}</p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-accent px-2 py-0.5 rounded-md bg-surface-2 border border-border flex-shrink-0">
+                            Disponible
+                          </span>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+
+              {/* No Disponibles / Sin Registrar */}
+              <div className="p-5 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-fg-muted uppercase tracking-wider">
+                    No Disponibles / Sin Registrar ({musicians.filter(m => availability[m.id]?.[selectedAdminDate] !== true).length})
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
+                  {musicians
+                    .filter(m => availability[m.id]?.[selectedAdminDate] !== true)
+                    .map(m => (
+                      <div key={m.id} className="p-3 rounded-xl bg-surface/50 border border-border flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0 opacity-70">
+                          <Avatar initials={m.initials} size="sm" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium text-fg truncate">{m.name}</p>
+                            <p className="text-[10px] text-fg-subtle capitalize truncate">{m.instrument}</p>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-fg-subtle px-2 py-0.5 rounded-md bg-surface-2 border border-border flex-shrink-0">
+                          {availability[m.id]?.[selectedAdminDate] === false ? 'No disponible' : 'Sin registrar'}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -3204,6 +3634,7 @@ function AdminScreen({
   events,
   musicians,
   songs,
+  availability,
   onDaySelect,
   adminSetlist,
   setAdminSetlist,
@@ -3220,6 +3651,7 @@ function AdminScreen({
   events: ServiceEvent[]
   musicians: Musician[]
   songs: Song[]
+  availability: AvailabilityMap
   onDaySelect: (date: string) => void
   adminSetlist: string[]
   setAdminSetlist: (sl: string[]) => void
@@ -3267,6 +3699,7 @@ function AdminScreen({
   const [serviceDate, setServiceDate] = useState('')
   const [serviceType, setServiceType] = useState<'domingo' | 'midweek'>('domingo')
   const [serviceLabel, setServiceLabel] = useState('')
+  const [filterOnlyAvailable, setFilterOnlyAvailable] = useState(true)
   
   interface ServiceRosterDraftItem {
     mid: string
@@ -3799,40 +4232,83 @@ function AdminScreen({
                   </div>
                 )}
 
-                {/* Sección para agregar más músicos registrados */}
-                {musicians.filter(m => !serviceRoster.some(r => r.mid === m.id)).length > 0 ? (
-                  <div className="flex flex-col gap-1.5 pt-1">
-                    <label className="text-[11px] font-semibold text-fg-muted uppercase">
-                      {serviceRoster.length === 0 ? 'Músicos disponibles para convocar:' : 'Convocar más integrantes:'}
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto p-2 rounded-xl bg-surface-2 border border-border">
-                      {musicians
-                        .filter(m => !serviceRoster.some(r => r.mid === m.id))
-                        .map(m => (
+                {/* Sección para agregar más músicos registrados con filtro de disponibilidad */}
+                {(() => {
+                  const unassigned = musicians.filter(m => !serviceRoster.some(r => r.mid === m.id))
+                  if (unassigned.length === 0) {
+                    return <p className="text-[11px] text-fg-subtle italic text-center py-1">Todos los integrantes registrados han sido convocados.</p>
+                  }
+
+                  const availableList = unassigned.filter(m => availability[m.id]?.[serviceDate] === true)
+                  const displayList = (filterOnlyAvailable && availableList.length > 0) ? availableList : unassigned
+
+                  return (
+                    <div className="flex flex-col gap-1.5 pt-1">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-semibold text-fg-muted uppercase">
+                          {filterOnlyAvailable && availableList.length > 0
+                            ? `Músicos disponibles para este día (${availableList.length}):`
+                            : `Todos los integrantes registrados (${unassigned.length}):`}
+                        </label>
+                        {availableList.length > 0 && availableList.length < unassigned.length && (
                           <button
                             type="button"
-                            key={m.id}
-                            onClick={() => addMusicianToService(m.id)}
-                            className="px-3 py-2 rounded-xl text-xs font-medium bg-surface text-fg hover:text-accent border border-border flex items-center justify-between gap-2 transition cursor-pointer hover:border-accent/40 shadow-xs active:scale-[0.99]"
+                            onClick={() => setFilterOnlyAvailable(v => !v)}
+                            className="text-[10px] text-accent font-semibold hover:underline cursor-pointer"
                           >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Avatar initials={m.initials} size="sm" />
-                              <div className="text-left min-w-0">
-                                <span className="font-semibold block truncate">{m.name}</span>
-                                <span className="text-[10px] text-fg-subtle capitalize block truncate">{m.instrument}</span>
-                              </div>
-                            </div>
-                            <span className="text-xs font-bold text-accent flex items-center gap-0.5 flex-shrink-0">
-                              <IconPlus size={12} />
-                              <span>Agregar</span>
-                            </span>
+                            {filterOnlyAvailable ? `Ver todos (${unassigned.length})` : `Solo disponibles (${availableList.length})`}
                           </button>
-                        ))}
+                        )}
+                      </div>
+
+                      {availableList.length === 0 && (
+                        <div className="p-2.5 rounded-xl bg-surface-2 border border-border text-center text-xs text-fg-muted">
+                          <p className="font-medium text-fg">Ningún músico ha marcado disponibilidad para el {serviceDate} aún.</p>
+                          <p className="text-[10px] text-fg-subtle mt-0.5">Mostrando todos los integrantes registrados para poder convocar:</p>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-44 overflow-y-auto p-2 rounded-xl bg-surface-2 border border-border">
+                        {displayList.map(m => {
+                          const isAvail = availability[m.id]?.[serviceDate] === true
+                          const isUnavail = availability[m.id]?.[serviceDate] === false
+                          return (
+                            <button
+                              type="button"
+                              key={m.id}
+                              onClick={() => addMusicianToService(m.id)}
+                              className="px-3 py-2 rounded-xl text-xs font-medium bg-surface text-fg hover:text-accent border border-border flex items-center justify-between gap-2 transition cursor-pointer hover:border-accent/40 shadow-xs active:scale-[0.99]"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Avatar initials={m.initials} size="sm" />
+                                <div className="text-left min-w-0">
+                                  <span className="font-semibold block truncate">{m.name}</span>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span className="text-[10px] text-fg-subtle capitalize block truncate">{m.instrument}</span>
+                                    {isAvail && (
+                                      <span className="text-[9px] font-bold text-accent px-1.5 py-0.2 rounded bg-accent/15 border border-accent/30 flex-shrink-0">
+                                        Disponible
+                                      </span>
+                                    )}
+                                    {isUnavail && (
+                                      <span className="text-[9px] text-fg-subtle px-1.5 py-0.2 rounded bg-surface-2 flex-shrink-0">
+                                        No disponible
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <span className="text-xs font-bold text-accent flex items-center gap-0.5 flex-shrink-0">
+                                <IconPlus size={12} />
+                                <span>Agregar</span>
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-fg-subtle italic text-center py-1">Todos los integrantes registrados han sido convocados.</p>
-                )}
+                  )
+                })()}
               </div>
 
               <div className="flex gap-3 pt-3 border-t border-border">
@@ -4173,19 +4649,22 @@ export default function App() {
   const [songs, setSongs] = useState<Song[]>([])
   const [events, setEvents] = useState<ServiceEvent[]>([])
   const [musicians, setMusicians] = useState<Musician[]>([])
+  const [availability, setAvailability] = useState<AvailabilityMap>({})
   const [activeUser, setActiveUser] = useState<Musician | null>(null)
 
   // Carga inicial de datos desde Supabase / LocalCache
   useEffect(() => {
     async function loadData() {
       try {
-        const [loadedSongs, loadedEvents, loadedMusicians] = await Promise.all([
+        const [loadedSongs, loadedEvents, loadedMusicians, loadedAvailability] = await Promise.all([
           fetchSongs(),
           fetchEvents(),
           fetchMusicians(),
+          fetchAvailability(),
         ])
         if (Array.isArray(loadedSongs)) setSongs(loadedSongs)
         if (Array.isArray(loadedEvents)) setEvents(loadedEvents)
+        if (loadedAvailability) setAvailability(loadedAvailability)
         if (Array.isArray(loadedMusicians)) {
           setMusicians(loadedMusicians)
 
@@ -4292,6 +4771,31 @@ export default function App() {
     await updateAttendanceStatus(selectedDate, mid, status)
   }
 
+  async function handleToggleAvailability(userId: string, date: string, available: boolean) {
+    setAvailability(prev => ({
+      ...prev,
+      [userId]: {
+        ...(prev[userId] || {}),
+        [date]: available,
+      },
+    }))
+    await saveMusicianAvailability(userId, date, available)
+  }
+
+  async function handleBatchAvailability(userId: string, updates: { date: string; available: boolean }[]) {
+    setAvailability(prev => {
+      const userMap = { ...(prev[userId] || {}) }
+      updates.forEach(u => {
+        userMap[u.date] = u.available
+      })
+      return {
+        ...prev,
+        [userId]: userMap,
+      }
+    })
+    await batchSaveMusicianAvailability(userId, updates)
+  }
+
   async function handleAddMusician(m: {
     name: string
     instrument: string
@@ -4396,7 +4900,20 @@ export default function App() {
             events={events}
             musicians={musicians}
             onDaySelect={date => { setSelectedDate(date); nav('day-detail', 'calendar') }}
+            onNavigateAvailability={() => nav('availability', 'calendar')}
             currentUser={currentMusician}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        )}
+        {screen === 'availability' && (
+          <AvailabilityScreen
+            currentUser={currentMusician}
+            musicians={musicians}
+            events={events}
+            availability={availability}
+            onToggleAvailability={handleToggleAvailability}
+            onBatchAvailability={handleBatchAvailability}
             theme={theme}
             onToggleTheme={toggleTheme}
           />
@@ -4438,6 +4955,7 @@ export default function App() {
             events={events}
             musicians={musicians}
             songs={songs}
+            availability={availability}
             onDaySelect={date => { setSelectedDate(date); nav('day-detail', 'admin') }}
             adminSetlist={adminSetlist}
             setAdminSetlist={setAdminSetlist}

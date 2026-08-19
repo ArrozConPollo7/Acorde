@@ -109,6 +109,7 @@ const STORAGE_KEYS = {
   SONGS: 'acorde_custom_songs',
   EVENTS: 'acorde_custom_events',
   MUSICIANS: 'acorde_custom_musicians',
+  AVAILABILITY: 'acorde_custom_availability',
 }
 
 function getStored<T>(key: string): T | null {
@@ -801,6 +802,82 @@ export async function updateAttendanceStatus(date: string, mid: string, status: 
       }, { onConflict: 'event_id,user_id' })
   } catch (err) {
     console.error('Error actualizando asistencia en Supabase:', err)
+  }
+}
+
+// ─── DISPONIBILIDAD DE INTEGRANTES ──────────────────────────────────────────
+
+export type AvailabilityMap = Record<string, Record<string, boolean>> // { [userId]: { [date]: boolean } }
+
+export async function fetchAvailability(): Promise<AvailabilityMap> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('musician_availability')
+        .select('user_id, date, available')
+
+      if (!error && data) {
+        const map: AvailabilityMap = {}
+        data.forEach((row: { user_id: string; date: string; available: boolean }) => {
+          if (!map[row.user_id]) map[row.user_id] = {}
+          map[row.user_id][row.date] = row.available
+        })
+        setStored(STORAGE_KEYS.AVAILABILITY, map)
+        return map
+      }
+    } catch (err) {
+      console.error('Error al obtener disponibilidad de Supabase:', err)
+    }
+  }
+
+  const cached = getStored<AvailabilityMap>(STORAGE_KEYS.AVAILABILITY)
+  return cached || {}
+}
+
+export async function saveMusicianAvailability(userId: string, date: string, available: boolean): Promise<void> {
+  const cached = getStored<AvailabilityMap>(STORAGE_KEYS.AVAILABILITY) || {}
+  if (!cached[userId]) cached[userId] = {}
+  cached[userId][date] = available
+  setStored(STORAGE_KEYS.AVAILABILITY, cached)
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase
+        .from('musician_availability')
+        .upsert({
+          user_id: userId,
+          date,
+          available,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,date' })
+    } catch (err) {
+      console.error('Error guardando disponibilidad en Supabase:', err)
+    }
+  }
+}
+
+export async function batchSaveMusicianAvailability(userId: string, updates: { date: string; available: boolean }[]): Promise<void> {
+  const cached = getStored<AvailabilityMap>(STORAGE_KEYS.AVAILABILITY) || {}
+  if (!cached[userId]) cached[userId] = {}
+  updates.forEach(u => {
+    cached[userId][u.date] = u.available
+  })
+  setStored(STORAGE_KEYS.AVAILABILITY, cached)
+
+  if (isSupabaseConfigured && supabase && updates.length > 0) {
+    try {
+      const rows = updates.map(u => ({
+        user_id: userId,
+        date: u.date,
+        available: u.available,
+        updated_at: new Date().toISOString(),
+      }))
+      await supabase
+        .from('musician_availability')
+        .upsert(rows, { onConflict: 'user_id,date' })
+    } catch (err) {
+      console.error('Error guardando lote de disponibilidad en Supabase:', err)
+    }
   }
 }
 
