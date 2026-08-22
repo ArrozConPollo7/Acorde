@@ -80,24 +80,55 @@ export const MUSICAL_TYPES = [
   'Especial',
 ]
 
-// ─── CHORD TRANSPOSITION ─────────────────────────────────────────────────────
+// ─── CHORD TRANSPOSITION & TONALIDADES ───────────────────────────────────────
 
-const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-const FLAT_MAP: Record<string, string> = { Db: 'C#', Eb: 'D#', Gb: 'F#', Ab: 'G#', Bb: 'A#' }
+export const MUSICAL_KEYS = [
+  'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B',
+  'Cm', 'C#m', 'Dbm', 'Dm', 'D#m', 'Ebm', 'Em', 'Fm', 'F#m', 'Gbm', 'Gm', 'G#m', 'Abm', 'Am', 'A#m', 'Bbm', 'Bm'
+]
 
-function transposeNote(note: string, n: number): string {
-  const sharp = FLAT_MAP[note] ?? note
-  const idx = CHROMATIC.indexOf(sharp)
-  if (idx === -1) return note
-  return CHROMATIC[((idx + n) % 12 + 12) % 12]
+const CHROMATIC_SHARPS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+const CHROMATIC_FLATS  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+
+const FLAT_TO_SHARP_MAP: Record<string, string> = {
+  Db: 'C#', Eb: 'D#', Gb: 'F#', Ab: 'G#', Bb: 'A#',
+  Dbm: 'C#m', Ebm: 'D#m', Gbm: 'F#m', Abm: 'G#m', Bbm: 'A#m'
 }
 
-function transposeChord(chord: string, n: number): string {
+function transposeNote(note: string, n: number, preferFlats = false): string {
+  const sharp = FLAT_TO_SHARP_MAP[note] ?? note
+  const idx = CHROMATIC_SHARPS.indexOf(sharp)
+  if (idx === -1) {
+    const flatIdx = CHROMATIC_FLATS.indexOf(note)
+    if (flatIdx === -1) return note
+    const newIdx = ((flatIdx + n) % 12 + 12) % 12
+    return preferFlats ? CHROMATIC_FLATS[newIdx] : CHROMATIC_SHARPS[newIdx]
+  }
+  const newIdx = ((idx + n) % 12 + 12) % 12
+  return preferFlats ? CHROMATIC_FLATS[newIdx] : CHROMATIC_SHARPS[newIdx]
+}
+
+function transposeChord(chord: string, n: number, preferFlats?: boolean): string {
+  if (!chord || typeof chord !== 'string') return ''
   if (n === 0) return chord
+
+  // Manejar acordes con bajo alterado / slash chords (ej: D/F#, G/B, Bb/D)
+  if (chord.includes('/')) {
+    const parts = chord.split('/')
+    return `${transposeChord(parts[0], n, preferFlats)}/${transposeChord(parts[1], n, preferFlats)}`
+  }
+
+  const useFlats = preferFlats !== undefined ? preferFlats : (chord.includes('b') || chord.startsWith('F'))
+
   const r2 = chord.slice(0, 2)
   const r1 = chord.slice(0, 1)
-  if (CHROMATIC.includes(r2) || FLAT_MAP[r2]) return transposeNote(r2, n) + chord.slice(2)
-  if (CHROMATIC.includes(r1)) return transposeNote(r1, n) + chord.slice(1)
+
+  if (CHROMATIC_SHARPS.includes(r2) || FLAT_TO_SHARP_MAP[r2] || CHROMATIC_FLATS.includes(r2)) {
+    return transposeNote(r2, n, useFlats) + chord.slice(2)
+  }
+  if (CHROMATIC_SHARPS.includes(r1) || CHROMATIC_FLATS.includes(r1)) {
+    return transposeNote(r1, n, useFlats) + chord.slice(1)
+  }
   return chord
 }
 
@@ -744,7 +775,7 @@ function AddSongModal({
   allSongs = [],
 }: {
   onClose: () => void
-  onSave: (song: Omit<Song, 'id'>) => void
+  onSave: (song: Omit<Song, 'id'>) => Promise<void> | void
   allSongs?: Song[]
 }) {
   const [title, setTitle] = useState('')
@@ -753,35 +784,70 @@ function AddSongModal({
   const [tempo, setTempo] = useState<'rápida' | 'media' | 'lenta'>('media')
   const [tags, setTags] = useState<string[]>(['Alabanza'])
   const [mediaUrl, setMediaUrl] = useState('')
-  const [lyricsRaw, setLyricsRaw] = useState('')
   const [isClassic, setIsClassic] = useState(false)
   const [churchDomain, setChurchDomain] = useState('Conocida')
   const [teamDomain, setTeamDomain] = useState('Por practicar')
   const [musicalType, setMusicalType] = useState('Worship contemporáneo')
   const [technicalComplexity, setTechnicalComplexity] = useState('Básica')
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
-  function handleSubmit(e: React.FormEvent) {
+  // Partituras y notas por instrumento (Guitarra, Piano, Bajo)
+  const [instScoreTab, setInstScoreTab] = useState<'guitarra' | 'piano' | 'bajo'>('guitarra')
+  const [lyricsGuitar, setLyricsGuitar] = useState('')
+  const [lyricsPiano, setLyricsPiano] = useState('')
+  const [lyricsBajo, setLyricsBajo] = useState('')
+  const [notesGuitar, setNotesGuitar] = useState('')
+  const [notesPiano, setNotesPiano] = useState('')
+  const [notesBajo, setNotesBajo] = useState('')
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!title.trim() || !artist.trim()) return
+    if (!title.trim() || !artist.trim() || isSaving) return
 
-    const parsedLyrics = parseChordProText(lyricsRaw)
+    setIsSaving(true)
+    setSaveError(null)
+    try {
+      const parsedGuitar = parseChordProText(lyricsGuitar)
+      const parsedPiano = lyricsPiano.trim() ? parseChordProText(lyricsPiano) : undefined
+      const parsedBajo = lyricsBajo.trim() ? parseChordProText(lyricsBajo) : undefined
 
-    onSave({
-      title: title.trim(),
-      artist: artist.trim(),
-      key: key.trim(),
-      tempo,
-      tags: tags.length > 0 ? tags : ['Alabanza'],
-      lyrics: parsedLyrics,
-      media_url: mediaUrl.trim() || undefined,
-      is_classic: isClassic,
-      church_domain: churchDomain,
-      team_domain: teamDomain,
-      musical_type: musicalType,
-      technical_complexity: technicalComplexity,
-    })
+      const instLyrics: InstrumentScores = {
+        guitarra: parsedGuitar,
+        ...(parsedPiano ? { piano: parsedPiano } : {}),
+        ...(parsedBajo ? { bajo: parsedBajo } : {}),
+      }
 
-    onClose()
+      const instNotes: InstrumentNotes = {
+        ...(notesGuitar.trim() ? { guitarra: notesGuitar.trim() } : {}),
+        ...(notesPiano.trim() ? { piano: notesPiano.trim() } : {}),
+        ...(notesBajo.trim() ? { bajo: notesBajo.trim() } : {}),
+      }
+
+      await onSave({
+        title: title.trim(),
+        artist: artist.trim(),
+        key: key.trim(),
+        tempo,
+        tags: tags.length > 0 ? tags : ['Alabanza'],
+        lyrics: parsedGuitar,
+        instrument_lyrics: instLyrics,
+        instrument_notes: instNotes,
+        media_url: mediaUrl.trim() || undefined,
+        is_classic: isClassic,
+        church_domain: churchDomain,
+        team_domain: teamDomain,
+        musical_type: musicalType,
+        technical_complexity: technicalComplexity,
+      })
+
+      onClose()
+    } catch (err) {
+      console.error('Error al guardar canción:', err)
+      setSaveError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -791,7 +857,7 @@ function AddSongModal({
         <div className="px-6 pt-6 pb-4 flex-shrink-0 border-b border-border flex items-center justify-between">
           <div>
             <h3 className="font-display text-xl text-fg tracking-wide">AGREGAR NUEVA CANCIÓN</h3>
-            <p className="text-fg-muted text-xs">Registra una canción en el repertorio oficial con todos sus datos</p>
+            <p className="text-fg-muted text-xs">Registra una canción con tonos, partituras y notas específicas por instrumento</p>
           </div>
           <button onClick={onClose} className="text-fg-muted hover:text-fg transition-colors cursor-pointer">
             <IconX size={20} />
@@ -799,6 +865,12 @@ function AddSongModal({
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
+          {saveError && (
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-start gap-2">
+              <span className="font-semibold">Error al guardar:</span>
+              <span className="flex-1">{saveError}</span>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Título de la Canción *</label>
@@ -832,7 +904,7 @@ function AddSongModal({
                 onChange={e => setKey(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer"
               >
-                {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'Cm', 'C#m', 'Dm', 'D#m', 'Em', 'Fm', 'F#m', 'Gm', 'G#m', 'Am', 'A#m', 'Bm'].map(k => (
+                {MUSICAL_KEYS.map(k => (
                   <option key={k} value={k}>{k}</option>
                 ))}
               </select>
@@ -942,33 +1014,170 @@ function AddSongModal({
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Letra y Acordes en ChordPro</label>
-              <span className="text-[11px] text-fg-subtle">Formato: [G]Letra o por secciones</span>
+          {/* ─── SECCIÓN: PARTITURAS Y NOTAS DIFERENCIADAS POR INSTRUMENTO ─── */}
+          <div className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
+              <div>
+                <p className="text-xs font-bold text-fg uppercase tracking-wider flex items-center gap-1.5">
+                  <IconMusic size={14} className="text-accent" />
+                  <span>Partitura y Notas por Instrumento</span>
+                </p>
+                <p className="text-[11px] text-fg-muted">
+                  Personaliza los acordes y notas técnicas según cada instrumento
+                </p>
+              </div>
+
+              {/* Selector de Pestaña de Instrumento en el Modal */}
+              <div className="flex bg-surface rounded-xl p-1 border border-border">
+                {(['guitarra', 'piano', 'bajo'] as const).map(inst => (
+                  <button
+                    key={inst}
+                    type="button"
+                    onClick={() => setInstScoreTab(inst)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize flex items-center gap-1.5 transition-all cursor-pointer ${
+                      instScoreTab === inst
+                        ? 'bg-accent text-accent-fg shadow-xs'
+                        : 'text-fg-muted hover:text-fg'
+                    }`}
+                  >
+                    {getInstrumentIcon(inst)}
+                    <span>{inst}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-            <textarea
-              rows={8}
-              placeholder={`Verso 1\n[G]Tu fidelidad es [D]grande\n[Em]Tu fidelidad incom[C]parable es\n\nCoro\n[G]Grande es tu [D]fidelidad...`}
-              value={lyricsRaw}
-              onChange={e => setLyricsRaw(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent"
-            />
+
+            {/* Pestaña: Guitarra (Principal / General) */}
+            {instScoreTab === 'guitarra' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-semibold text-fg-muted uppercase">
+                    Notas e Indicaciones para Guitarra (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Capo 3 (G shapes), rasgueo suave en estrofas, solo acústica en intro"
+                    value={notesGuitar}
+                    onChange={e => setNotesGuitar(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs text-fg bg-surface border border-border focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">
+                      Letra y Acordes para Guitarra / General *
+                    </label>
+                    <span className="text-[11px] text-fg-subtle">Formato ChordPro: [G]Letra</span>
+                  </div>
+                  <textarea
+                    rows={8}
+                    placeholder={`Verso 1\n[G]Tu fidelidad es [D]grande\n[Em]Tu fidelidad incom[C]parable es\n\nCoro\n[G]Grande es tu [D]fidelidad...`}
+                    value={lyricsGuitar}
+                    onChange={e => setLyricsGuitar(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Pestaña: Piano */}
+            {instScoreTab === 'piano' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-semibold text-fg-muted uppercase">
+                    Notas e Indicaciones para Piano (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Intro piano solo, arpegios abiertos con octavas en coro, pad sutil en verso 2"
+                    value={notesPiano}
+                    onChange={e => setNotesPiano(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs text-fg bg-surface border border-border focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">
+                      Acordes / Voicings para Piano (Opcional)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setLyricsPiano(lyricsGuitar)}
+                      className="text-[11px] font-semibold text-accent hover:underline cursor-pointer"
+                    >
+                      Copiar desde Guitarra
+                    </button>
+                  </div>
+                  <textarea
+                    rows={8}
+                    placeholder="Si se deja vacío, el pianista verá los acordes generales. O escribe acordes específicos con inversiones (ej: [G/B], [Cadd9], [Dsus4])."
+                    value={lyricsPiano}
+                    onChange={e => setLyricsPiano(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Pestaña: Bajo */}
+            {instScoreTab === 'bajo' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-semibold text-fg-muted uppercase">
+                    Notas e Indicaciones para Bajo (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Entrar en verso 2, marcar tónicas y quintas, dinámica fuerte en coro"
+                    value={notesBajo}
+                    onChange={e => setNotesBajo(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs text-fg bg-surface border border-border focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">
+                      Acordes / Líneas para Bajo (Opcional)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setLyricsBajo(lyricsGuitar)}
+                      className="text-[11px] font-semibold text-accent hover:underline cursor-pointer"
+                    >
+                      Copiar desde Guitarra
+                    </button>
+                  </div>
+                  <textarea
+                    rows={8}
+                    placeholder="Si se deja vacío, el bajista verá los acordes generales. O escribe líneas y tónicas específicas para bajo."
+                    value={lyricsBajo}
+                    onChange={e => setLyricsBajo(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
             <button
               type="button"
+              disabled={isSaving}
               onClick={onClose}
-              className="flex-1 py-3.5 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg cursor-pointer"
+              className="flex-1 py-3.5 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg disabled:opacity-50 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-3.5 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover text-sm font-semibold shadow-xs cursor-pointer"
+              disabled={isSaving}
+              className="flex-1 py-3.5 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover disabled:opacity-50 text-sm font-semibold shadow-xs cursor-pointer flex items-center justify-center gap-2"
             >
-              Guardar Canción
+              {isSaving && <IconLoader size={16} className="animate-spin" />}
+              <span>{isSaving ? 'Guardando Canción...' : 'Guardar Canción'}</span>
             </button>
           </div>
         </form>
@@ -987,7 +1196,7 @@ function EditSongModal({
 }: {
   song: Song
   onClose: () => void
-  onSave: (updates: Partial<Song>) => void
+  onSave: (updates: Partial<Song>) => Promise<void> | void
   allSongs?: Song[]
 }) {
   const [title, setTitle] = useState(song.title)
@@ -996,35 +1205,76 @@ function EditSongModal({
   const [tempo, setTempo] = useState<'rápida' | 'media' | 'lenta'>(song.tempo)
   const [tags, setTags] = useState<string[]>(song.tags && song.tags.length > 0 ? song.tags : ['Alabanza'])
   const [mediaUrl, setMediaUrl] = useState(song.media_url || '')
-  const [lyricsRaw, setLyricsRaw] = useState(formatLyricsToChordPro(song.lyrics))
   const [isClassic, setIsClassic] = useState(song.is_classic ?? false)
   const [churchDomain, setChurchDomain] = useState(song.church_domain || 'Conocida')
   const [teamDomain, setTeamDomain] = useState(song.team_domain || 'Por practicar')
   const [musicalType, setMusicalType] = useState(song.musical_type || 'Worship contemporáneo')
   const [technicalComplexity, setTechnicalComplexity] = useState(song.technical_complexity || 'Básica')
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
-  function handleSubmit(e: React.FormEvent) {
+  // Partituras y notas por instrumento (Guitarra, Piano, Bajo)
+  const [instScoreTab, setInstScoreTab] = useState<'guitarra' | 'piano' | 'bajo'>('guitarra')
+  const [lyricsGuitar, setLyricsGuitar] = useState(
+    formatLyricsToChordPro(song.instrument_lyrics?.guitarra && song.instrument_lyrics.guitarra.length > 0 ? song.instrument_lyrics.guitarra : song.lyrics)
+  )
+  const [lyricsPiano, setLyricsPiano] = useState(
+    song.instrument_lyrics?.piano && song.instrument_lyrics.piano.length > 0 ? formatLyricsToChordPro(song.instrument_lyrics.piano) : ''
+  )
+  const [lyricsBajo, setLyricsBajo] = useState(
+    song.instrument_lyrics?.bajo && song.instrument_lyrics.bajo.length > 0 ? formatLyricsToChordPro(song.instrument_lyrics.bajo) : ''
+  )
+  const [notesGuitar, setNotesGuitar] = useState(song.instrument_notes?.guitarra || '')
+  const [notesPiano, setNotesPiano] = useState(song.instrument_notes?.piano || '')
+  const [notesBajo, setNotesBajo] = useState(song.instrument_notes?.bajo || '')
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!title.trim() || !artist.trim()) return
+    if (!title.trim() || !artist.trim() || isSaving) return
 
-    const parsedLyrics = parseChordProText(lyricsRaw)
+    setIsSaving(true)
+    setSaveError(null)
+    try {
+      const parsedGuitar = parseChordProText(lyricsGuitar)
+      const parsedPiano = lyricsPiano.trim() ? parseChordProText(lyricsPiano) : undefined
+      const parsedBajo = lyricsBajo.trim() ? parseChordProText(lyricsBajo) : undefined
 
-    onSave({
-      title: title.trim(),
-      artist: artist.trim(),
-      key: key.trim(),
-      tempo,
-      tags: tags.length > 0 ? tags : ['Alabanza'],
-      lyrics: parsedLyrics,
-      media_url: mediaUrl.trim() || undefined,
-      is_classic: isClassic,
-      church_domain: churchDomain,
-      team_domain: teamDomain,
-      musical_type: musicalType,
-      technical_complexity: technicalComplexity,
-    })
+      const instLyrics: InstrumentScores = {
+        guitarra: parsedGuitar,
+        ...(parsedPiano ? { piano: parsedPiano } : {}),
+        ...(parsedBajo ? { bajo: parsedBajo } : {}),
+      }
 
-    onClose()
+      const instNotes: InstrumentNotes = {
+        ...(notesGuitar.trim() ? { guitarra: notesGuitar.trim() } : {}),
+        ...(notesPiano.trim() ? { piano: notesPiano.trim() } : {}),
+        ...(notesBajo.trim() ? { bajo: notesBajo.trim() } : {}),
+      }
+
+      await onSave({
+        title: title.trim(),
+        artist: artist.trim(),
+        key: key.trim(),
+        tempo,
+        tags: tags.length > 0 ? tags : ['Alabanza'],
+        lyrics: parsedGuitar,
+        instrument_lyrics: instLyrics,
+        instrument_notes: instNotes,
+        media_url: mediaUrl.trim() || undefined,
+        is_classic: isClassic,
+        church_domain: churchDomain,
+        team_domain: teamDomain,
+        musical_type: musicalType,
+        technical_complexity: technicalComplexity,
+      })
+
+      onClose()
+    } catch (err) {
+      console.error('Error al actualizar canción:', err)
+      setSaveError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -1034,7 +1284,7 @@ function EditSongModal({
         <div className="px-6 pt-6 pb-4 flex-shrink-0 border-b border-border flex items-center justify-between">
           <div>
             <h3 className="font-display text-xl text-fg tracking-wide">EDITAR INFORMACIÓN Y NOTAS</h3>
-            <p className="text-fg-muted text-xs">Actualiza acordes, dominio de la iglesia, tipo musical y datos del repertorio</p>
+            <p className="text-fg-muted text-xs">Actualiza acordes, dominio de la iglesia, tipo musical y datos por instrumento</p>
           </div>
           <button onClick={onClose} className="text-fg-muted hover:text-fg transition-colors cursor-pointer">
             <IconX size={20} />
@@ -1042,6 +1292,12 @@ function EditSongModal({
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
+          {saveError && (
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-start gap-2">
+              <span className="font-semibold">Error al actualizar:</span>
+              <span className="flex-1">{saveError}</span>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Título *</label>
@@ -1073,7 +1329,7 @@ function EditSongModal({
                 onChange={e => setKey(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent cursor-pointer"
               >
-                {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'Cm', 'C#m', 'Dm', 'D#m', 'Em', 'Fm', 'F#m', 'Gm', 'G#m', 'Am', 'A#m', 'Bm'].map(k => (
+                {MUSICAL_KEYS.map(k => (
                   <option key={k} value={k}>{k}</option>
                 ))}
               </select>
@@ -1182,33 +1438,170 @@ function EditSongModal({
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Letra y Acordes en ChordPro</label>
-              <span className="text-[11px] text-fg-subtle">Inserta acordes entre corchetes ej: [G]Subo mis [D]manos</span>
+          {/* ─── SECCIÓN: PARTITURAS Y NOTAS DIFERENCIADAS POR INSTRUMENTO ─── */}
+          <div className="p-4 rounded-2xl bg-surface-2 border border-border flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
+              <div>
+                <p className="text-xs font-bold text-fg uppercase tracking-wider flex items-center gap-1.5">
+                  <IconMusic size={14} className="text-accent" />
+                  <span>Partitura y Notas por Instrumento</span>
+                </p>
+                <p className="text-[11px] text-fg-muted">
+                  Personaliza los acordes y notas técnicas según cada instrumento
+                </p>
+              </div>
+
+              {/* Selector de Pestaña de Instrumento en el Modal */}
+              <div className="flex bg-surface rounded-xl p-1 border border-border">
+                {(['guitarra', 'piano', 'bajo'] as const).map(inst => (
+                  <button
+                    key={inst}
+                    type="button"
+                    onClick={() => setInstScoreTab(inst)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize flex items-center gap-1.5 transition-all cursor-pointer ${
+                      instScoreTab === inst
+                        ? 'bg-accent text-accent-fg shadow-xs'
+                        : 'text-fg-muted hover:text-fg'
+                    }`}
+                  >
+                    {getInstrumentIcon(inst)}
+                    <span>{inst}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-            <textarea
-              rows={12}
-              value={lyricsRaw}
-              onChange={e => setLyricsRaw(e.target.value)}
-              placeholder={`Verso 1\n[G]Tu fidelidad es [D]grande\n[Em]Tu fidelidad incom[C]parable es\n\nCoro\n[G]Grande es tu [D]fidelidad`}
-              className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent leading-relaxed"
-            />
+
+            {/* Pestaña: Guitarra (Principal / General) */}
+            {instScoreTab === 'guitarra' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-semibold text-fg-muted uppercase">
+                    Notas e Indicaciones para Guitarra (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Capo 3 (G shapes), rasgueo suave en estrofas, solo acústica en intro"
+                    value={notesGuitar}
+                    onChange={e => setNotesGuitar(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs text-fg bg-surface border border-border focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">
+                      Letra y Acordes para Guitarra / General *
+                    </label>
+                    <span className="text-[11px] text-fg-subtle">Formato ChordPro: [G]Letra</span>
+                  </div>
+                  <textarea
+                    rows={8}
+                    placeholder={`Verso 1\n[G]Tu fidelidad es [D]grande\n[Em]Tu fidelidad incom[C]parable es\n\nCoro\n[G]Grande es tu [D]fidelidad...`}
+                    value={lyricsGuitar}
+                    onChange={e => setLyricsGuitar(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Pestaña: Piano */}
+            {instScoreTab === 'piano' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-semibold text-fg-muted uppercase">
+                    Notas e Indicaciones para Piano (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Intro piano solo, arpegios abiertos con octavas en coro, pad sutil en verso 2"
+                    value={notesPiano}
+                    onChange={e => setNotesPiano(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs text-fg bg-surface border border-border focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">
+                      Acordes / Voicings para Piano (Opcional)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setLyricsPiano(lyricsGuitar)}
+                      className="text-[11px] font-semibold text-accent hover:underline cursor-pointer"
+                    >
+                      Copiar desde Guitarra
+                    </button>
+                  </div>
+                  <textarea
+                    rows={8}
+                    placeholder="Si se deja vacío, el pianista verá los acordes generales. O escribe acordes específicos con inversiones (ej: [G/B], [Cadd9], [Dsus4])."
+                    value={lyricsPiano}
+                    onChange={e => setLyricsPiano(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Pestaña: Bajo */}
+            {instScoreTab === 'bajo' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-semibold text-fg-muted uppercase">
+                    Notas e Indicaciones para Bajo (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Entrar en verso 2, marcar tónicas y quintas, dinámica fuerte en coro"
+                    value={notesBajo}
+                    onChange={e => setNotesBajo(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-xs text-fg bg-surface border border-border focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">
+                      Acordes / Líneas para Bajo (Opcional)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setLyricsBajo(lyricsGuitar)}
+                      className="text-[11px] font-semibold text-accent hover:underline cursor-pointer"
+                    >
+                      Copiar desde Guitarra
+                    </button>
+                  </div>
+                  <textarea
+                    rows={8}
+                    placeholder="Si se deja vacío, el bajista verá los acordes generales. O escribe líneas y tónicas específicas para bajo."
+                    value={lyricsBajo}
+                    onChange={e => setLyricsBajo(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-fg bg-surface border border-border font-mono text-base md:text-sm focus:outline-none focus:border-accent leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
             <button
               type="button"
+              disabled={isSaving}
               onClick={onClose}
-              className="flex-1 py-3.5 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg cursor-pointer"
+              className="flex-1 py-3.5 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg disabled:opacity-50 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-3.5 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover text-sm font-semibold shadow-xs cursor-pointer"
+              disabled={isSaving}
+              className="flex-1 py-3.5 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover disabled:opacity-50 text-sm font-semibold shadow-xs cursor-pointer flex items-center justify-center gap-2"
             >
-              Guardar Cambios
+              {isSaving && <IconLoader size={16} className="animate-spin" />}
+              <span>{isSaving ? 'Guardando Cambios...' : 'Guardar Cambios'}</span>
             </button>
           </div>
         </form>
@@ -3148,14 +3541,22 @@ function SongViewScreen({
     }
   }, [song.title, song.artist])
 
-  const displayKey = transposeChord(song.key, transpose)
-  const transposedLyrics = song.lyrics.map(line => ({
+  const preferFlats = song.key.includes('b') || song.key.startsWith('F')
+  const displayKey = transposeChord(song.key, transpose, preferFlats)
+
+  const currentLyrics = (song.instrument_lyrics?.[instTab] && song.instrument_lyrics[instTab]!.length > 0)
+    ? song.instrument_lyrics[instTab]!
+    : song.lyrics
+
+  const transposedLyrics = currentLyrics.map(line => ({
     ...line,
     segments: line.segments.map(seg => ({
       ...seg,
-      chord: seg.chord ? transposeChord(seg.chord, transpose) : undefined,
+      chord: seg.chord ? transposeChord(seg.chord, transpose, preferFlats) : undefined,
     })),
   }))
+
+  const activeNotes = song.instrument_notes?.[instTab]
 
   function handleExportPDF() {
     generateSongPDF({
@@ -3172,21 +3573,53 @@ function SongViewScreen({
     return (
       <div className="fixed inset-0 z-[70] bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8 pb-44">
         <div className="max-w-xl mx-auto w-full overflow-x-hidden">
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
-            <button
-              onClick={() => setIsFocusMode(false)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface border border-border text-fg text-xs font-semibold hover:bg-surface-2 cursor-pointer shadow-xs active:scale-95 transition-all"
-            >
-              <IconChevronLeft size={16} />
-              <span>Volver</span>
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-accent px-3 py-1 rounded-lg bg-surface-2 border border-border">
-                Tono {displayKey}
-              </span>
-              <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-border">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setIsFocusMode(false)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface border border-border text-fg text-xs font-semibold hover:bg-surface-2 cursor-pointer shadow-xs active:scale-95 transition-all"
+              >
+                <IconChevronLeft size={16} />
+                <span>Volver</span>
+              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-accent px-3 py-1 rounded-lg bg-surface-2 border border-border">
+                  Tono {displayKey}
+                </span>
+                <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+              </div>
+            </div>
+
+            {/* Selector de Instrumento en Modo Enfoque */}
+            <div className="flex gap-1 p-1 rounded-xl bg-surface border border-border items-center">
+              {INSTRUMENTS_TABS.map(inst => (
+                <button
+                  key={inst}
+                  onClick={() => setInstTab(inst)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    instTab === inst
+                      ? 'bg-accent text-accent-fg shadow-xs'
+                      : 'text-fg-muted hover:text-fg'
+                  }`}
+                >
+                  {getInstrumentIcon(inst)}
+                  <span className="capitalize">{inst}</span>
+                </button>
+              ))}
             </div>
           </div>
+
+          {activeNotes && (
+            <div className="p-3.5 rounded-2xl bg-surface-2 border border-accent/40 text-xs text-fg flex items-start gap-2.5 mb-6 shadow-xs">
+              <IconFileText size={15} className="text-accent shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-accent uppercase tracking-wider block text-[10px] mb-0.5">
+                  Indicación para {instTab}
+                </span>
+                <span>{activeNotes}</span>
+              </div>
+            </div>
+          )}
 
           <article
             className="w-full max-w-full overflow-x-hidden break-words"
@@ -3336,6 +3769,21 @@ function SongViewScreen({
           </div>
         </div>
 
+        {/* Indicación Técnica para el Instrumentista Activo */}
+        {activeNotes && (
+          <div className="p-4 rounded-2xl bg-surface border border-accent/40 text-xs text-fg flex items-start gap-3 mb-6 shadow-xs">
+            <div className="p-2 rounded-xl bg-accent/15 text-accent shrink-0">
+              {getInstrumentIcon(instTab)}
+            </div>
+            <div>
+              <span className="font-bold text-accent uppercase tracking-wider block text-[11px] mb-0.5">
+                Indicación técnica para {instTab}
+              </span>
+              <p className="text-fg text-xs md:text-sm">{activeNotes}</p>
+            </div>
+          </div>
+        )}
+
         {/* Partitura y Letra */}
         <div className="rounded-3xl p-6 md:p-10 font-mono text-sm md:text-base bg-surface border border-border shadow-xs leading-relaxed">
           {transposedLyrics.map((line, li) => (
@@ -3347,7 +3795,7 @@ function SongViewScreen({
                 {line.segments.map((seg, si) => (
                   <div key={si} className="flex flex-col mr-1 mb-1.5">
                     <span className="text-accent font-bold text-xs md:text-sm leading-tight min-w-[1ch]">
-                      {seg.chord ?? ' '}
+                      {seg.chord ?? ' '}
                     </span>
                     <span className="text-fg text-sm md:text-base leading-snug whitespace-pre">{seg.text}</span>
                   </div>
@@ -5000,15 +5448,27 @@ export default function App() {
   }
 
   async function handleAddSong(newSongData: Omit<Song, 'id'>) {
-    const created = await createSong(newSongData)
-    setSongs(prev => [created, ...prev])
+    try {
+      const created = await createSong(newSongData)
+      setSongs(prev => [created, ...prev.filter(s => s.id !== created.id)])
+      setSelectedSongId(created.id)
+      nav('song', 'library')
+    } catch (err) {
+      console.error('Error al agregar canción:', err)
+      throw err
+    }
   }
 
   async function handleUpdateSong(updates: Partial<Song>) {
     if (!editingSong) return
-    const updated = await updateSong(editingSong.id, updates)
-    setSongs(prev => prev.map(s => (s.id === updated.id ? updated : s)))
-    setEditingSong(null)
+    try {
+      const updated = await updateSong(editingSong.id, updates)
+      setSongs(prev => prev.map(s => (s.id === updated.id ? updated : s)))
+      setEditingSong(null)
+    } catch (err) {
+      console.error('Error al actualizar canción:', err)
+      throw err
+    }
   }
 
   if (screen === 'login') {

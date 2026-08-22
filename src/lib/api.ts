@@ -65,6 +65,20 @@ export interface LyricLine {
   segments: SongSegment[]
 }
 
+export interface InstrumentScores {
+  guitarra?: LyricLine[]
+  piano?: LyricLine[]
+  bajo?: LyricLine[]
+  [key: string]: LyricLine[] | undefined
+}
+
+export interface InstrumentNotes {
+  guitarra?: string
+  piano?: string
+  bajo?: string
+  [key: string]: string | undefined
+}
+
 export interface Song {
   id: string
   title: string
@@ -73,6 +87,8 @@ export interface Song {
   tempo: 'rápida' | 'media' | 'lenta'
   tags: string[]
   lyrics: LyricLine[]
+  instrument_lyrics?: InstrumentScores // Letra y acordes personalizados para Guitarra, Piano, Bajo
+  instrument_notes?: InstrumentNotes   // Indicaciones técnicas para cada instrumentista
   media_url?: string
   is_classic?: boolean
   church_domain?: string // 'Nueva' | 'Conocida' | 'Dominada'
@@ -221,6 +237,8 @@ export const INITIAL_EVENTS: ServiceEvent[] = []
 // ─── CANCIONES API ────────────────────────────────────────────────────────────
 
 export async function fetchSongs(): Promise<Song[]> {
+  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || []
+
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
@@ -229,32 +247,56 @@ export async function fetchSongs(): Promise<Song[]> {
         .order('title', { ascending: true })
 
       if (!error && data) {
-        const mapped = data.map(item => ({
-          id: item.id,
-          title: item.title,
-          artist: item.artist,
-          key: item.key,
-          tempo: item.tempo,
-          tags: item.tags || [],
-          lyrics: Array.isArray(item.lyrics) ? item.lyrics : [],
-          media_url: item.media_url,
-          is_classic: item.is_classic ?? false,
-          church_domain: item.church_domain || 'Conocida',
-          team_domain: item.team_domain || 'Por practicar',
-          musical_type: item.musical_type || 'Worship contemporáneo',
-          technical_complexity: item.technical_complexity || 'Básica',
-          resumen_tematico: item.resumen_tematico || generateSongThematicSummary(item),
-        }))
-        setStored(STORAGE_KEYS.SONGS, mapped)
-        return mapped
+        const mapped: Song[] = data.map(item => {
+          let instLyrics: InstrumentScores | undefined
+          let instNotes: InstrumentNotes | undefined
+
+          if (item.chordpro && typeof item.chordpro === 'string') {
+            try {
+              const parsedChordpro = JSON.parse(item.chordpro)
+              if (parsedChordpro && typeof parsedChordpro === 'object') {
+                if (parsedChordpro.instrument_lyrics) instLyrics = parsedChordpro.instrument_lyrics
+                if (parsedChordpro.instrument_notes) instNotes = parsedChordpro.instrument_notes
+              }
+            } catch {
+              // Si no es formato JSON, es texto plano
+            }
+          }
+
+          return {
+            id: item.id,
+            title: item.title,
+            artist: item.artist,
+            key: item.key,
+            tempo: item.tempo,
+            tags: item.tags || [],
+            lyrics: Array.isArray(item.lyrics) ? item.lyrics : [],
+            instrument_lyrics: instLyrics,
+            instrument_notes: instNotes,
+            media_url: item.media_url,
+            is_classic: item.is_classic ?? false,
+            church_domain: item.church_domain || 'Conocida',
+            team_domain: item.team_domain || 'Por practicar',
+            musical_type: item.musical_type || 'Worship contemporáneo',
+            technical_complexity: item.technical_complexity || 'Básica',
+            resumen_tematico: generateSongThematicSummary(item),
+          }
+        })
+
+        // Preservar canciones locales si no se han sincronizado
+        const dbIds = new Set(mapped.map(s => s.id))
+        const localOnly = cached.filter(s => !dbIds.has(s.id))
+        const combined = [...localOnly, ...mapped]
+
+        setStored(STORAGE_KEYS.SONGS, combined)
+        return combined
       }
     } catch (err) {
       console.error('Error al obtener canciones de Supabase:', err)
     }
   }
 
-  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS)
-  if (cached !== null) return cached
+  if (cached.length > 0) return cached
   return INITIAL_SONGS
 }
 
@@ -308,6 +350,15 @@ export function generateSongThematicSummary(song: Partial<Song>): string {
 
 export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
   const resumen = newSong.resumen_tematico || generateSongThematicSummary(newSong)
+  
+  // Empaquetar instrument_lyrics e instrument_notes en chordpro JSON
+  const chordproData = (newSong.instrument_lyrics || newSong.instrument_notes)
+    ? JSON.stringify({
+        instrument_lyrics: newSong.instrument_lyrics,
+        instrument_notes: newSong.instrument_notes,
+      })
+    : null
+
   let created: Song = {
     id: `custom-${Date.now()}`,
     ...newSong,
@@ -317,6 +368,8 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
     musical_type: newSong.musical_type || 'Worship contemporáneo',
     technical_complexity: newSong.technical_complexity || 'Básica',
     resumen_tematico: resumen,
+    instrument_lyrics: newSong.instrument_lyrics,
+    instrument_notes: newSong.instrument_notes,
   }
 
   if (isSupabaseConfigured && supabase) {
@@ -330,13 +383,13 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
           tempo: newSong.tempo,
           tags: newSong.tags,
           lyrics: newSong.lyrics,
-          media_url: newSong.media_url,
+          chordpro: chordproData,
+          media_url: newSong.media_url || null,
           is_classic: newSong.is_classic ?? false,
           church_domain: newSong.church_domain || 'Conocida',
           team_domain: newSong.team_domain || 'Por practicar',
           musical_type: newSong.musical_type || 'Worship contemporáneo',
           technical_complexity: newSong.technical_complexity || 'Básica',
-          resumen_tematico: resumen,
         })
         .select()
         .single()
@@ -356,21 +409,35 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
           team_domain: data.team_domain || 'Por practicar',
           musical_type: data.musical_type || 'Worship contemporáneo',
           technical_complexity: data.technical_complexity || 'Básica',
-          resumen_tematico: data.resumen_tematico || resumen,
+          resumen_tematico: resumen,
+          instrument_lyrics: newSong.instrument_lyrics,
+          instrument_notes: newSong.instrument_notes,
         }
+      } else if (error) {
+        console.error('Error creando canción en Supabase:', error.message, error.details, error.hint, error)
+        throw new Error(error.message || error.details || 'Error desconocido al insertar en Supabase')
       }
     } catch (err) {
       console.error('Error creando canción en Supabase:', err)
+      throw err
     }
   }
 
   const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
-  setStored(STORAGE_KEYS.SONGS, [created, ...cached])
+  setStored(STORAGE_KEYS.SONGS, [created, ...cached.filter(s => s.id !== created.id)])
   return created
 }
 
 export async function updateSong(id: string, updates: Partial<Song>): Promise<Song> {
   const resumen = updates.resumen_tematico || generateSongThematicSummary(updates)
+
+  const chordproData = (updates.instrument_lyrics !== undefined || updates.instrument_notes !== undefined)
+    ? JSON.stringify({
+        instrument_lyrics: updates.instrument_lyrics,
+        instrument_notes: updates.instrument_notes,
+      })
+    : undefined
+
   let updated: Song = {
     id,
     title: updates.title || '',
@@ -379,6 +446,8 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
     tempo: updates.tempo || 'media',
     tags: updates.tags || [],
     lyrics: updates.lyrics || [],
+    instrument_lyrics: updates.instrument_lyrics,
+    instrument_notes: updates.instrument_notes,
     media_url: updates.media_url,
     is_classic: updates.is_classic,
     church_domain: updates.church_domain,
@@ -397,13 +466,13 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
       if (updates.tempo !== undefined) payload.tempo = updates.tempo
       if (updates.tags !== undefined) payload.tags = updates.tags
       if (updates.lyrics !== undefined) payload.lyrics = updates.lyrics
-      if (updates.media_url !== undefined) payload.media_url = updates.media_url
+      if (chordproData !== undefined) payload.chordpro = chordproData
+      if (updates.media_url !== undefined) payload.media_url = updates.media_url || null
       if (updates.is_classic !== undefined) payload.is_classic = updates.is_classic
       if (updates.church_domain !== undefined) payload.church_domain = updates.church_domain
       if (updates.team_domain !== undefined) payload.team_domain = updates.team_domain
       if (updates.musical_type !== undefined) payload.musical_type = updates.musical_type
       if (updates.technical_complexity !== undefined) payload.technical_complexity = updates.technical_complexity
-      payload.resumen_tematico = resumen
 
       const { data, error } = await supabase
         .from('songs')
@@ -427,11 +496,17 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
           team_domain: data.team_domain || 'Por practicar',
           musical_type: data.musical_type || 'Worship contemporáneo',
           technical_complexity: data.technical_complexity || 'Básica',
-          resumen_tematico: data.resumen_tematico || resumen,
+          resumen_tematico: resumen,
+          instrument_lyrics: updates.instrument_lyrics,
+          instrument_notes: updates.instrument_notes,
         }
+      } else if (error) {
+        console.error('Error actualizando canción en Supabase:', error.message, error.details, error.hint, error)
+        throw new Error(error.message || error.details || 'Error al actualizar canción en Supabase')
       }
     } catch (err) {
       console.error('Error actualizando canción en Supabase:', err)
+      throw err
     }
   }
 
@@ -825,8 +900,8 @@ export async function fetchAvailability(): Promise<AvailabilityMap> {
         setStored(STORAGE_KEYS.AVAILABILITY, map)
         return map
       }
-    } catch (err) {
-      console.error('Error al obtener disponibilidad de Supabase:', err)
+    } catch {
+      // Si la tabla no existe en Supabase, se utiliza el almacenamiento local
     }
   }
 
@@ -850,8 +925,8 @@ export async function saveMusicianAvailability(userId: string, date: string, ava
           available,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,date' })
-    } catch (err) {
-      console.error('Error guardando disponibilidad en Supabase:', err)
+    } catch {
+      // Fallback a localStorage si la tabla no está creada
     }
   }
 }
@@ -875,8 +950,8 @@ export async function batchSaveMusicianAvailability(userId: string, updates: { d
       await supabase
         .from('musician_availability')
         .upsert(rows, { onConflict: 'user_id,date' })
-    } catch (err) {
-      console.error('Error guardando lote de disponibilidad en Supabase:', err)
+    } catch {
+      // Fallback a localStorage si la tabla no está creada
     }
   }
 }
