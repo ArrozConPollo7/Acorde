@@ -1192,11 +1192,13 @@ function EditSongModal({
   song,
   onClose,
   onSave,
+  onDelete,
   allSongs = [],
 }: {
   song: Song
   onClose: () => void
   onSave: (updates: Partial<Song>) => Promise<void> | void
+  onDelete?: (id: string) => Promise<void> | void
   allSongs?: Song[]
 }) {
   const [title, setTitle] = useState(song.title)
@@ -1212,6 +1214,23 @@ function EditSongModal({
   const [technicalComplexity, setTechnicalComplexity] = useState(song.technical_complexity || 'Básica')
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  async function handleDelete() {
+    if (!onDelete || isDeleting) return
+    setIsDeleting(true)
+    try {
+      await onDelete(song.id)
+      setShowDeleteConfirm(false)
+      onClose()
+    } catch (err) {
+      console.error('Error al eliminar canción:', err)
+      setSaveError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   // Partituras y notas por instrumento (Guitarra, Piano, Bajo)
   const [instScoreTab, setInstScoreTab] = useState<'guitarra' | 'piano' | 'bajo'>('guitarra')
@@ -1586,24 +1605,64 @@ function EditSongModal({
             )}
           </div>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              disabled={isSaving}
-              onClick={onClose}
-              className="flex-1 py-3.5 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg disabled:opacity-50 cursor-pointer"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="flex-1 py-3.5 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover disabled:opacity-50 text-sm font-semibold shadow-xs cursor-pointer flex items-center justify-center gap-2"
-            >
-              {isSaving && <IconLoader size={16} className="animate-spin" />}
-              <span>{isSaving ? 'Guardando Cambios...' : 'Guardar Cambios'}</span>
-            </button>
-          </div>
+          {showDeleteConfirm ? (
+            <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <div className="flex items-center gap-2 text-xs text-red-400">
+                <IconTrash size={16} className="shrink-0" />
+                <span>¿Confirmas eliminar permanentemente esta canción?</span>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-fg-muted border border-border text-xs font-semibold hover:text-fg disabled:opacity-50 cursor-pointer"
+                >
+                  No, volver
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={handleDelete}
+                  className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 text-xs font-semibold shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all"
+                >
+                  {isDeleting ? <IconLoader size={13} className="animate-spin" /> : <IconTrash size={13} />}
+                  <span>{isDeleting ? 'Eliminando...' : 'Sí, eliminar'}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 pt-2">
+              {onDelete && (
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="p-3.5 rounded-xl text-red-400 border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-sm font-semibold hover:text-red-300 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5 transition-all"
+                  title="Eliminar canción"
+                >
+                  <IconTrash size={16} />
+                  <span className="hidden sm:inline">Eliminar</span>
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={onClose}
+                className="flex-1 py-3.5 rounded-xl text-fg-muted border border-border text-sm font-semibold hover:text-fg disabled:opacity-50 cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="flex-1 py-3.5 rounded-xl text-accent-fg bg-accent hover:bg-accent-hover disabled:opacity-50 text-sm font-semibold shadow-xs cursor-pointer flex items-center justify-center gap-2"
+              >
+                {isSaving && <IconLoader size={16} className="animate-spin" />}
+                <span>{isSaving ? 'Guardando Cambios...' : 'Guardar Cambios'}</span>
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>
@@ -3519,18 +3578,35 @@ function SongViewScreen({
   song,
   onBack,
   onEdit,
+  onDelete,
   theme,
   onToggleTheme,
 }: {
   song: Song
   onBack: () => void
   onEdit: () => void
+  onDelete?: (id: string) => Promise<void> | void
   theme: Theme
   onToggleTheme: () => void
 }) {
   const [transpose, setTranspose] = useState(0)
   const [instTab, setInstTab] = useState<typeof INSTRUMENTS_TABS[number]>('guitarra')
   const [isFocusMode, setIsFocusMode] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  async function handleConfirmDelete() {
+    if (!onDelete || isDeleting) return
+    setIsDeleting(true)
+    try {
+      await onDelete(song.id)
+      setShowDeleteModal(false)
+    } catch (err) {
+      console.error('Error al eliminar canción:', err)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   // Actualizar el título del documento para Safari Reader View y marcadores
   useEffect(() => {
@@ -3672,6 +3748,48 @@ function SongViewScreen({
 
   return (
     <div className="min-h-screen bg-bg text-fg pb-40 md:pb-16">
+      {/* Modal de Confirmación para Eliminar Canción */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => !isDeleting && setShowDeleteModal(false)} />
+          <div className="relative w-full max-w-md rounded-3xl bg-surface border border-border shadow-2xl p-6 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0 border border-red-500/20">
+                <IconTrash size={18} />
+              </div>
+              <div>
+                <h3 className="font-display text-lg text-fg tracking-wide">¿ELIMINAR CANCIÓN?</h3>
+                <p className="text-fg-muted text-xs">Esta acción no se puede deshacer</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-fg-muted leading-relaxed">
+              ¿Estás seguro de que deseas eliminar <strong className="text-fg font-semibold">"{song.title}"</strong> de <strong className="text-fg font-semibold">{song.artist}</strong> del repertorio oficial?
+            </p>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 py-3 rounded-xl text-fg-muted border border-border text-xs font-semibold hover:text-fg disabled:opacity-50 cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmDelete}
+                className="flex-1 py-3 rounded-xl text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 text-xs font-semibold shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all"
+              >
+                {isDeleting ? <IconLoader size={14} className="animate-spin" /> : <IconTrash size={14} />}
+                <span>{isDeleting ? 'Eliminando...' : 'Eliminar Canción'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6">
         <div className="flex items-center justify-between mb-6">
           <button onClick={onBack} className="flex items-center gap-1.5 text-fg-muted text-sm hover:text-fg transition-colors cursor-pointer">
@@ -3805,24 +3923,24 @@ function SongViewScreen({
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 mt-6">
           <button
             onClick={() => setIsFocusMode(true)}
-            className="py-3.5 px-4 rounded-2xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
+            className="py-3.5 px-4 rounded-2xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold text-xs md:text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
           >
             <IconBook size={16} />
-            Solo Letra y Acordes
+            Solo Letra
           </button>
           <button
             onClick={onEdit}
-            className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer shadow-xs"
+            className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-xs md:text-sm flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer shadow-xs"
           >
             <IconEdit size={16} />
             Editar Canción
           </button>
           <button
             onClick={handleExportPDF}
-            className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer shadow-xs"
+            className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-xs md:text-sm flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer shadow-xs"
           >
             <IconFileText size={16} />
             Exportar PDF
@@ -3832,7 +3950,7 @@ function SongViewScreen({
               href={song.media_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
+              className="py-3.5 px-4 rounded-2xl text-fg bg-surface border border-border hover:bg-surface-2 font-semibold text-xs md:text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
             >
               <IconPlay size={14} />
               Ver video
@@ -3840,10 +3958,19 @@ function SongViewScreen({
           ) : (
             <button
               onClick={onEdit}
-              className="py-3.5 px-4 rounded-2xl text-fg-muted bg-surface-2 border border-border hover:text-fg font-semibold text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
+              className="py-3.5 px-4 rounded-2xl text-fg-muted bg-surface-2 border border-border hover:text-fg font-semibold text-xs md:text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
             >
               <IconPlus size={13} />
               Agregar video
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="py-3.5 px-4 rounded-2xl text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 font-semibold text-xs md:text-sm flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer shadow-xs"
+            >
+              <IconTrash size={15} />
+              Eliminar
             </button>
           )}
         </div>
@@ -5471,6 +5598,18 @@ export default function App() {
     }
   }
 
+  async function handleDeleteSong(id: string) {
+    try {
+      await deleteSong(id)
+      setSongs(prev => prev.filter(s => s.id !== id))
+      setSelectedSongId(null)
+      nav('library')
+    } catch (err) {
+      console.error('Error al eliminar canción:', err)
+      throw err
+    }
+  }
+
   if (screen === 'login') {
     return (
       <LoginScreen
@@ -5499,6 +5638,7 @@ export default function App() {
           song={editingSong}
           onClose={() => setEditingSong(null)}
           onSave={handleUpdateSong}
+          onDelete={handleDeleteSong}
           allSongs={songs}
         />
       )}
@@ -5564,6 +5704,7 @@ export default function App() {
             song={songs.find(s => s.id === selectedSongId)!}
             onBack={() => nav(prevScreen)}
             onEdit={() => setEditingSong(songs.find(s => s.id === selectedSongId) || null)}
+            onDelete={handleDeleteSong}
             theme={theme}
             onToggleTheme={toggleTheme}
           />

@@ -518,9 +518,14 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
 export async function deleteSong(id: string): Promise<void> {
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.from('songs').delete().eq('id', id)
+      const { error } = await supabase.from('songs').delete().eq('id', id)
+      if (error) {
+        console.error('Error eliminando canción en Supabase:', error)
+        throw new Error(error.message || 'Error al eliminar canción en Supabase')
+      }
     } catch (err) {
       console.error('Error eliminando canción en Supabase:', err)
+      throw err
     }
   }
   const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
