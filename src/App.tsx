@@ -112,7 +112,7 @@ function transposeChord(chord: string, n: number, preferFlats?: boolean): string
   if (!chord || typeof chord !== 'string') return ''
   if (n === 0) return chord
 
-  // Manejar acordes con bajo alterado / slash chords (ej: D/F#, G/B, Bb/D)
+  // Manejar acordes con bajo alterado / slash chords (ej: D/F#, G7M/B, Bb/D)
   if (chord.includes('/')) {
     const parts = chord.split('/')
     return `${transposeChord(parts[0], n, preferFlats)}/${transposeChord(parts[1], n, preferFlats)}`
@@ -120,15 +120,13 @@ function transposeChord(chord: string, n: number, preferFlats?: boolean): string
 
   const useFlats = preferFlats !== undefined ? preferFlats : (chord.includes('b') || chord.startsWith('F'))
 
-  const r2 = chord.slice(0, 2)
-  const r1 = chord.slice(0, 1)
+  const match = chord.match(/^([A-G][b#]?)(.*)$/)
+  if (match) {
+    const root = match[1]
+    const suffix = match[2]
+    return transposeNote(root, n, useFlats) + suffix
+  }
 
-  if (CHROMATIC_SHARPS.includes(r2) || FLAT_TO_SHARP_MAP[r2] || CHROMATIC_FLATS.includes(r2)) {
-    return transposeNote(r2, n, useFlats) + chord.slice(2)
-  }
-  if (CHROMATIC_SHARPS.includes(r1) || CHROMATIC_FLATS.includes(r1)) {
-    return transposeNote(r1, n, useFlats) + chord.slice(1)
-  }
   return chord
 }
 
@@ -392,6 +390,15 @@ function IconPlay({ size = 13 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
       <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
+  )
+}
+
+function IconPause({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <rect x="6" y="4" width="4" height="16" rx="1" />
+      <rect x="14" y="4" width="4" height="16" rx="1" />
     </svg>
   )
 }
@@ -3570,6 +3577,87 @@ function LibraryScreen({
   )
 }
 
+// ─── CIFRACLUB-GRADE CHORD SHEET RENDERER ─────────────────────────────────────
+
+function ChordSheetRenderer({
+  lyrics,
+  fontSize = 'base',
+}: {
+  lyrics: LyricLine[]
+  fontSize?: 'sm' | 'base' | 'lg' | 'xl'
+}) {
+  const fontSizes = {
+    sm: { chord: 'text-[11px] md:text-xs', text: 'text-xs md:text-sm', lineGap: 'gap-3.5' },
+    base: { chord: 'text-xs md:text-sm', text: 'text-sm md:text-base', lineGap: 'gap-5' },
+    lg: { chord: 'text-sm md:text-base', text: 'text-base md:text-lg', lineGap: 'gap-6' },
+    xl: { chord: 'text-base md:text-lg', text: 'text-lg md:text-xl', lineGap: 'gap-7' },
+  }[fontSize]
+
+  return (
+    <div className={`flex flex-col ${fontSizes.lineGap} font-mono select-text leading-tight w-full max-w-full overflow-x-hidden`}>
+      {lyrics.map((line, li) => {
+        if (line.isTab) {
+          return (
+            <div key={li} className="my-2">
+              {line.label && (
+                <div className="mb-2">
+                  <span className="inline-block font-body text-[11px] font-bold text-accent px-2.5 py-0.5 rounded-lg bg-surface-2 border border-border uppercase tracking-wider">
+                    {line.label}
+                  </span>
+                </div>
+              )}
+              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-4 rounded-2xl bg-surface-2 border border-border leading-relaxed text-accent/90 whitespace-pre shadow-xs">
+                {line.segments.map(s => s.text).join('')}
+              </pre>
+            </div>
+          )
+        }
+
+        const isPureText = line.segments.every(s => !s.chord)
+
+        return (
+          <div key={li} className="flex flex-col select-text w-full max-w-full overflow-x-hidden">
+            {line.label && (
+              <div className="mb-2.5 mt-2">
+                <span className="inline-block font-body text-xs font-bold text-accent px-3 py-1 rounded-xl bg-surface-2 border border-border uppercase tracking-widest shadow-xs">
+                  {line.label}
+                </span>
+              </div>
+            )}
+
+            {isPureText ? (
+              <p className={`text-fg ${fontSizes.text} leading-relaxed whitespace-pre-wrap break-words font-mono`}>
+                {line.segments.map(s => s.text).join('')}
+              </p>
+            ) : (
+              <div className="flex flex-wrap items-end leading-none max-w-full overflow-x-hidden">
+                {line.segments.map((seg, si) => {
+                  const hasChord = Boolean(seg.chord)
+                  const text = seg.text || ''
+                  return (
+                    <span key={si} className="inline-flex flex-col flex-nowrap align-bottom select-text mr-0.5 mb-2">
+                      {hasChord ? (
+                        <strong className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-1 min-w-[1.2ch] tracking-tight`}>
+                          {seg.chord}
+                        </strong>
+                      ) : (
+                        <span className={`${fontSizes.chord} leading-none mb-1 opacity-0 select-none`}>·</span>
+                      )}
+                      <span className={`text-fg ${fontSizes.text} font-mono leading-none whitespace-pre`}>
+                        {text || (hasChord ? '\u00A0\u00A0' : '')}
+                      </span>
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ─── SONG VIEW SCREEN ─────────────────────────────────────────────────────────
 
 const INSTRUMENTS_TABS = ['guitarra', 'piano', 'bajo'] as const
@@ -3592,8 +3680,21 @@ function SongViewScreen({
   const [transpose, setTranspose] = useState(0)
   const [instTab, setInstTab] = useState<typeof INSTRUMENTS_TABS[number]>('guitarra')
   const [isFocusMode, setIsFocusMode] = useState(false)
+  const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base')
+  const [isAutoScrolling, setIsAutoScrolling] = useState(false)
+  const [scrollSpeed, setScrollSpeed] = useState<1 | 2 | 3>(1)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Auto-scroll logic for reading hands-free (like CifraClub)
+  useEffect(() => {
+    if (!isAutoScrolling) return
+    const speedMs = scrollSpeed === 1 ? 50 : scrollSpeed === 2 ? 30 : 15
+    const interval = setInterval(() => {
+      window.scrollBy({ top: 1, behavior: 'smooth' })
+    }, speedMs)
+    return () => clearInterval(interval)
+  }, [isAutoScrolling, scrollSpeed])
 
   async function handleConfirmDelete() {
     if (!onDelete || isDeleting) return
@@ -3644,21 +3745,46 @@ function SongViewScreen({
     })
   }
 
+  function handleZoomIn() {
+    setFontSize(curr => (curr === 'sm' ? 'base' : curr === 'base' ? 'lg' : 'xl'))
+  }
+
+  function handleZoomOut() {
+    setFontSize(curr => (curr === 'xl' ? 'lg' : curr === 'lg' ? 'base' : 'sm'))
+  }
+
   // Vista de solo letra y acordes (Modo Lectura / Enfoque)
   if (isFocusMode) {
     return (
       <div className="fixed inset-0 z-[70] bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8 pb-44">
         <div className="max-w-xl mx-auto w-full overflow-x-hidden">
-          <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-border">
+          <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-border sticky top-0 bg-bg/95 backdrop-blur-md z-10">
             <div className="flex items-center justify-between">
               <button
-                onClick={() => setIsFocusMode(false)}
+                onClick={() => { setIsFocusMode(false); setIsAutoScrolling(false) }}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface border border-border text-fg text-xs font-semibold hover:bg-surface-2 cursor-pointer shadow-xs active:scale-95 transition-all"
               >
                 <IconChevronLeft size={16} />
                 <span>Volver</span>
               </button>
               <div className="flex items-center gap-2">
+                <div className="flex items-center rounded-xl bg-surface border border-border p-0.5">
+                  <button
+                    onClick={handleZoomOut}
+                    className="px-2.5 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
+                    title="Reducir fuente"
+                  >
+                    A-
+                  </button>
+                  <span className="text-[10px] text-fg-muted px-1 font-mono uppercase">{fontSize}</span>
+                  <button
+                    onClick={handleZoomIn}
+                    className="px-2.5 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
+                    title="Aumentar fuente"
+                  >
+                    A+
+                  </button>
+                </div>
                 <span className="text-xs font-bold text-accent px-3 py-1 rounded-lg bg-surface-2 border border-border">
                   Tono {displayKey}
                 </span>
@@ -3666,22 +3792,47 @@ function SongViewScreen({
               </div>
             </div>
 
-            {/* Selector de Instrumento en Modo Enfoque */}
-            <div className="flex gap-1 p-1 rounded-xl bg-surface border border-border items-center">
-              {INSTRUMENTS_TABS.map(inst => (
+            {/* Selector de Instrumento y Auto-Scroll en Modo Enfoque */}
+            <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
+              <div className="flex-1 flex gap-1 p-1 rounded-xl bg-surface border border-border items-center">
+                {INSTRUMENTS_TABS.map(inst => (
+                  <button
+                    key={inst}
+                    onClick={() => setInstTab(inst)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      instTab === inst
+                        ? 'bg-accent text-accent-fg shadow-xs'
+                        : 'text-fg-muted hover:text-fg'
+                    }`}
+                  >
+                    {getInstrumentIcon(inst)}
+                    <span className="capitalize">{inst}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Botón de Auto-Scroll estilo CifraClub */}
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface border border-border shrink-0">
                 <button
-                  key={inst}
-                  onClick={() => setInstTab(inst)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    instTab === inst
-                      ? 'bg-accent text-accent-fg shadow-xs'
-                      : 'text-fg-muted hover:text-fg'
+                  onClick={() => setIsAutoScrolling(!isAutoScrolling)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                    isAutoScrolling
+                      ? 'bg-accent text-accent-fg animate-pulse'
+                      : 'text-fg-muted hover:text-fg bg-surface-2'
                   }`}
                 >
-                  {getInstrumentIcon(inst)}
-                  <span className="capitalize">{inst}</span>
+                  {isAutoScrolling ? <IconPause size={13} /> : <IconPlay size={13} />}
+                  <span>{isAutoScrolling ? 'Pausar Scroll' : 'Auto-Scroll'}</span>
                 </button>
-              ))}
+                {isAutoScrolling && (
+                  <button
+                    onClick={() => setScrollSpeed(s => (s === 1 ? 2 : s === 2 ? 3 : 1))}
+                    className="px-2 py-1 rounded-lg text-[10px] font-bold text-accent bg-accent/15 border border-accent/30 cursor-pointer"
+                  >
+                    {scrollSpeed}x
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -3714,31 +3865,8 @@ function SongViewScreen({
               </p>
             </header>
 
-            <main
-              className="flex flex-col gap-6 font-mono text-base md:text-lg text-fg leading-relaxed max-w-full overflow-x-hidden break-words pb-24"
-              itemProp="lyrics"
-            >
-              {transposedLyrics.map((line, li) => (
-                <section key={li} className="max-w-full overflow-x-hidden break-words">
-                  {line.label && (
-                    <p className="font-body text-xs font-bold text-accent uppercase tracking-widest mb-2">
-                      {line.label}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 max-w-full overflow-x-hidden break-words leading-loose">
-                    {line.segments.map((seg, si) => (
-                      <span key={si} className="inline-flex flex-col max-w-full overflow-x-hidden break-words">
-                        {seg.chord && (
-                          <strong className="text-accent font-bold text-sm md:text-base leading-none mb-0.5">
-                            {seg.chord}
-                          </strong>
-                        )}
-                        <span className="text-fg whitespace-pre-wrap break-words">{seg.text || ' '}</span>
-                      </span>
-                    ))}
-                  </div>
-                </section>
-              ))}
+            <main className="pb-32">
+              <ChordSheetRenderer lyrics={transposedLyrics} fontSize={fontSize} />
             </main>
           </article>
         </div>
@@ -3797,6 +3925,23 @@ function SongViewScreen({
             <span>Volver al Repertorio</span>
           </button>
           <div className="flex items-center gap-2">
+            <div className="flex items-center rounded-xl bg-surface border border-border p-0.5">
+              <button
+                onClick={handleZoomOut}
+                className="px-2.5 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
+                title="Reducir fuente"
+              >
+                A-
+              </button>
+              <span className="text-[10px] text-fg-muted px-1 font-mono uppercase">{fontSize}</span>
+              <button
+                onClick={handleZoomIn}
+                className="px-2.5 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
+                title="Aumentar fuente"
+              >
+                A+
+              </button>
+            </div>
             <button
               onClick={() => setIsFocusMode(true)}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent text-accent-fg font-semibold text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
@@ -3902,25 +4047,9 @@ function SongViewScreen({
           </div>
         )}
 
-        {/* Partitura y Letra */}
-        <div className="rounded-3xl p-6 md:p-10 font-mono text-sm md:text-base bg-surface border border-border shadow-xs leading-relaxed">
-          {transposedLyrics.map((line, li) => (
-            <div key={li} className={li > 0 ? 'mt-6' : ''}>
-              {line.label && (
-                <p className="font-body text-xs font-bold text-accent uppercase tracking-widest mb-2.5">{line.label}</p>
-              )}
-              <div className="flex flex-wrap">
-                {line.segments.map((seg, si) => (
-                  <div key={si} className="flex flex-col mr-1 mb-1.5">
-                    <span className="text-accent font-bold text-xs md:text-sm leading-tight min-w-[1ch]">
-                      {seg.chord ?? ' '}
-                    </span>
-                    <span className="text-fg text-sm md:text-base leading-snug whitespace-pre">{seg.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+        {/* Partitura y Letra Estilo CifraClub */}
+        <div className="rounded-3xl p-6 md:p-10 bg-surface border border-border shadow-xs">
+          <ChordSheetRenderer lyrics={transposedLyrics} fontSize={fontSize} />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 mt-6">

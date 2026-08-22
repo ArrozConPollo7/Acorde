@@ -147,52 +147,179 @@ function setStored<T>(key: string, value: T): void {
   }
 }
 
-// ─── PARSER DE CHORDPRO / TEXTO PARA NUEVAS CANCIONES ─────────────────────────
+// ─── PARSER DE CHORDPRO Y CIFRACLUB UNIVERSAL ─────────────────────────────────
+
+const CHORD_CORE_PATTERN = '[A-G][b#]?(?:[mM]|maj|min|aug|dim|sus|add|[0-9]|\\+|\\-|\\(|\\)|º|ø|M)*'
+const CHORD_FULL_VALIDATOR = new RegExp(`^${CHORD_CORE_PATTERN}(?:\\/${CHORD_CORE_PATTERN})?$`)
+
+function isSingleChordToken(token: string): boolean {
+  if (!token) return false
+  const clean = token.replace(/^[\[\(]+|[\]\)]+$/g, '').trim()
+  return CHORD_FULL_VALIDATOR.test(clean)
+}
+
+function isPureChordLine(line: string): boolean {
+  const trimmed = line.trim()
+  if (!trimmed) return false
+  if (/^\[[^\]]+\]$/.test(trimmed)) return false
+  if (/^[eEaAdDgGbB]\|/.test(trimmed)) return false
+
+  const tokens = trimmed.split(/\s+/)
+  return tokens.length > 0 && tokens.every(token => isSingleChordToken(token))
+}
 
 export function parseChordProText(text: string): LyricLine[] {
   if (!text || !text.trim()) {
     return [{ segments: [{ text: 'Letra no ingresada.' }] }]
   }
 
-  const lines = text.split('\n').map(l => l.trimEnd()).filter(Boolean)
+  // 1. Limpiar artefactos de copiado de CifraClub (">Gm, duplicados de accesibilidad)
+  let cleaned = text.replace(/^">\s*/gm, '').replace(/">\s*/g, '')
+  const rawLines = cleaned.split('\n')
+  const deduplicatedLines: string[] = []
+  let lastNonEmpty = ''
+
+  for (const l of rawLines) {
+    const trimmed = l.trim()
+    if (trimmed && trimmed === lastNonEmpty) {
+      continue
+    }
+    deduplicatedLines.push(l)
+    if (trimmed) lastNonEmpty = trimmed
+  }
+
   const result: LyricLine[] = []
   let currentLabel: string | undefined
 
-  for (const line of lines) {
-    const trimmed = line.trim()
-    if (/^(verso|estrofa|coro|puente|intro|outro|pre-coro|tag|coda|final)/i.test(trimmed)) {
-      currentLabel = trimmed
+  for (let i = 0; i < deduplicatedLines.length; i++) {
+    const rawLine = deduplicatedLines[i]
+    const trimmed = rawLine.trim()
+
+    if (!trimmed) continue
+
+    // Detectar encabezados de sección ([Intro], [Verso 1], [Estribillo], [Solo], [Puente], etc.)
+    if (/^\[([^\]]+)\]$/.test(trimmed) || /^(verso|estrofa|coro|puente|intro|outro|pre-coro|pre-estribillo|estribillo|tag|coda|final|solo|instrumental|parte\s+\d+)/i.test(trimmed)) {
+      currentLabel = trimmed.replace(/^\[|\]$/g, '')
       continue
     }
 
+    // Detectar líneas de tablatura (E|---, B|---, etc.)
+    if (/^[eEaAdDgGbB]\|/.test(trimmed) || /^\|\s*[-0-9pbh~\/\\r\s]+\|?$/.test(trimmed)) {
+      result.push({
+        label: currentLabel,
+        isTab: true,
+        segments: [{ text: rawLine }],
+      })
+      currentLabel = undefined
+      continue
+    }
+
+    // Caso 1: Línea en formato CifraClub (Acordes en línea superior + Letra en línea inferior)
+    if (isPureChordLine(rawLine)) {
+      const nextLine = deduplicatedLines[i + 1]
+      if (nextLine && nextLine.trim() && !isPureChordLine(nextLine) && !/^\[[^\]]+\]$/.test(nextLine.trim()) && !/^[eEaAdDgGbB]\|/.test(nextLine.trim())) {
+        const chordLine = rawLine
+        const lyricLine = nextLine
+        i++ // Consumir la siguiente línea
+
+        const chordMatches: { chord: string; index: number }[] = []
+        const chordTokenRegex = /\S+/g
+        let cMatch: RegExpExecArray | null
+        while ((cMatch = chordTokenRegex.exec(chordLine)) !== null) {
+          const cleanChord = cMatch[0].replace(/^[\[\(]+|[\]\)]+$/g, '')
+          if (CHORD_FULL_VALIDATOR.test(cleanChord)) {
+            chordMatches.push({
+              chord: cleanChord,
+              index: cMatch.index,
+            })
+          }
+        }
+
+        if (chordMatches.length === 0) {
+          result.push({ label: currentLabel, segments: [{ text: lyricLine }] })
+        } else {
+          const segments: SongSegment[] = []
+          let lastLyricIdx = 0
+
+          for (let m = 0; m < chordMatches.length; m++) {
+            const { chord, index } = chordMatches[m]
+            const nextIndex = m + 1 < chordMatches.length ? chordMatches[m + 1].index : lyricLine.length
+
+            if (index > lastLyricIdx) {
+              const textBefore = lyricLine.slice(lastLyricIdx, index)
+              if (textBefore) {
+                segments.push({ text: textBefore })
+              }
+            }
+
+            const segText = lyricLine.slice(index, Math.max(index + 1, nextIndex))
+            segments.push({ chord, text: segText })
+            lastLyricIdx = Math.max(index + 1, nextIndex)
+          }
+
+          if (lastLyricIdx < lyricLine.length) {
+            segments.push({ text: lyricLine.slice(lastLyricIdx) })
+          }
+
+          result.push({
+            label: currentLabel,
+            segments: segments.length > 0 ? segments : [{ text: lyricLine }],
+          })
+        }
+
+        currentLabel = undefined
+        continue
+      } else {
+        // Línea de acordes sueltos (Intro, Interludio, etc.)
+        const chordTokenRegex = /\S+/g
+        const segments: SongSegment[] = []
+        let cMatch: RegExpExecArray | null
+        while ((cMatch = chordTokenRegex.exec(rawLine)) !== null) {
+          const cleanChord = cMatch[0].replace(/^[\[\(]+|[\]\)]+$/g, '')
+          segments.push({ chord: cleanChord, text: '   ' })
+        }
+        result.push({
+          label: currentLabel,
+          segments: segments.length > 0 ? segments : [{ text: rawLine }],
+        })
+        currentLabel = undefined
+        continue
+      }
+    }
+
+    // Caso 2: Formato ChordPro nativo con corchetes [C9] o [D/F#]
+    const bracketRegex = /\[([A-G][b#]?(?:[mM]|maj|min|aug|dim|sus|add|[0-9]|\+|\-|\(|\)|º|ø|M)*(?:\/[A-G][b#]?(?:[mM]|maj|min|aug|dim|sus|add|[0-9]|\+|\-|\(|\)|º|ø|M)*)?)\]/g
     const segments: SongSegment[] = []
-    const regex = /\[([A-G][b#]?(?:m|maj7|m7|7|sus4|sus2|dim|aug|add9)?(?:\/[A-G][b#]?)?)\]/g
     let lastIndex = 0
     let match: RegExpExecArray | null
 
-    const hasBrackets = regex.test(line)
-    regex.lastIndex = 0
-
-    if (hasBrackets) {
-      let pendingChord: string | undefined
-      while ((match = regex.exec(line)) !== null) {
-        const textBefore = line.slice(lastIndex, match.index)
-        if (textBefore || pendingChord) {
-          segments.push({ chord: pendingChord, text: textBefore })
-          pendingChord = undefined
+    while ((match = bracketRegex.exec(rawLine)) !== null) {
+      const textBefore = rawLine.slice(lastIndex, match.index)
+      if (textBefore || segments.length === 0 && match.index > 0) {
+        if (segments.length > 0 && segments[segments.length - 1].chord && !segments[segments.length - 1].text) {
+          segments[segments.length - 1].text = textBefore
+        } else if (textBefore) {
+          segments.push({ text: textBefore })
         }
-        pendingChord = match[1]
-        lastIndex = regex.lastIndex
       }
-      const remainingText = line.slice(lastIndex)
-      segments.push({ chord: pendingChord, text: remainingText })
+      segments.push({ chord: match[1], text: '' })
+      lastIndex = bracketRegex.lastIndex
+    }
+
+    const remainingText = rawLine.slice(lastIndex)
+    if (segments.length > 0) {
+      if (segments[segments.length - 1].chord && !segments[segments.length - 1].text) {
+        segments[segments.length - 1].text = remainingText
+      } else if (remainingText) {
+        segments.push({ text: remainingText })
+      }
     } else {
-      segments.push({ text: line })
+      segments.push({ text: rawLine })
     }
 
     result.push({
       label: currentLabel,
-      segments: segments.length > 0 ? segments : [{ text: line }],
+      segments: segments.length > 0 ? segments : [{ text: rawLine }],
     })
     currentLabel = undefined
   }
@@ -204,7 +331,10 @@ export function formatLyricsToChordPro(lyrics: LyricLine[]): string {
   if (!lyrics || lyrics.length === 0) return ''
   return lyrics
     .map(line => {
-      const header = line.label ? `${line.label}\n` : ''
+      const header = line.label ? `[${line.label}]\n` : ''
+      if (line.isTab) {
+        return header + line.segments.map(s => s.text).join('')
+      }
       const body = line.segments
         .map(seg => (seg.chord ? `[${seg.chord}]${seg.text}` : seg.text))
         .join('')
