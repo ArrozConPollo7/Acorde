@@ -29,6 +29,10 @@ import {
   type Role,
   type AISuggestion,
   type AvailabilityMap,
+  getInitialSongs,
+  getInitialEvents,
+  getInitialMusicians,
+  getInitialAvailability,
   INITIAL_SONGS,
   INITIAL_EVENTS,
   INITIAL_MUSICIANS,
@@ -5505,57 +5509,55 @@ export default function App() {
   const [addSongModalOpen, setAddSongModalOpen] = useState(false)
   const [editingSong, setEditingSong] = useState<Song | null>(null)
 
-  // Database State
-  const [songs, setSongs] = useState<Song[]>([])
-  const [events, setEvents] = useState<ServiceEvent[]>([])
-  const [musicians, setMusicians] = useState<Musician[]>([])
-  const [availability, setAvailability] = useState<AvailabilityMap>({})
+  // Database State - Carga instantánea a 0ms desde almacenamiento local
+  const [songs, setSongs] = useState<Song[]>(getInitialSongs)
+  const [events, setEvents] = useState<ServiceEvent[]>(getInitialEvents)
+  const [musicians, setMusicians] = useState<Musician[]>(getInitialMusicians)
+  const [availability, setAvailability] = useState<AvailabilityMap>(getInitialAvailability)
   const [activeUser, setActiveUser] = useState<Musician | null>(null)
 
-  // Carga inicial de datos desde Supabase / LocalCache
+  // Sincronización en segundo plano desde Supabase (sin bloquear la interfaz)
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [loadedSongs, loadedEvents, loadedMusicians, loadedAvailability] = await Promise.all([
-          fetchSongs(),
-          fetchEvents(),
-          fetchMusicians(),
-          fetchAvailability(),
-        ])
-        if (Array.isArray(loadedSongs)) setSongs(loadedSongs)
-        if (Array.isArray(loadedEvents)) setEvents(loadedEvents)
-        if (loadedAvailability) setAvailability(loadedAvailability)
-        if (Array.isArray(loadedMusicians)) {
-          setMusicians(loadedMusicians)
+    fetchSongs().then(loaded => {
+      if (Array.isArray(loaded) && loaded.length > 0) setSongs(loaded)
+    }).catch(() => {})
 
-          // Leer parámetros de URL para enlaces directos de WhatsApp
-          const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-          const urlDate = urlParams?.get('date')
-          const urlUser = urlParams?.get('user') || urlParams?.get('mid')
+    fetchEvents().then(loaded => {
+      if (Array.isArray(loaded)) setEvents(loaded)
+    }).catch(() => {})
 
-          const savedUserId = localStorage.getItem('acorde_logged_user_id')
-          const targetUserId = urlUser || savedUserId
+    fetchAvailability().then(loaded => {
+      if (loaded) setAvailability(loaded)
+    }).catch(() => {})
 
-          if (targetUserId) {
-            const found = loadedMusicians.find(m => m.id === targetUserId)
-            if (found) {
-              setActiveUser(found)
-              localStorage.setItem('acorde_logged_user_id', found.id)
-            }
-          }
+    fetchMusicians().then(loadedMusicians => {
+      if (Array.isArray(loadedMusicians)) {
+        if (loadedMusicians.length > 0) setMusicians(loadedMusicians)
 
-          if (urlDate) {
-            setSelectedDate(urlDate)
-            setScreen('day-detail')
-          } else if (targetUserId) {
-            setScreen('calendar')
+        // Leer parámetros de URL para enlaces directos de WhatsApp
+        const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+        const urlDate = urlParams?.get('date')
+        const urlUser = urlParams?.get('user') || urlParams?.get('mid')
+
+        const savedUserId = localStorage.getItem('acorde_logged_user_id')
+        const targetUserId = urlUser || savedUserId
+
+        if (targetUserId) {
+          const found = loadedMusicians.find(m => m.id === targetUserId)
+          if (found) {
+            setActiveUser(found)
+            localStorage.setItem('acorde_logged_user_id', found.id)
           }
         }
-      } catch (err) {
-        console.warn('Carga de datos con fallback:', err)
+
+        if (urlDate) {
+          setSelectedDate(urlDate)
+          setScreen('day-detail')
+        } else if (targetUserId) {
+          setScreen('calendar')
+        }
       }
-    }
-    loadData()
+    }).catch(() => {})
   }, [])
 
   // Sincronización de clase de tema y persistencia en localStorage

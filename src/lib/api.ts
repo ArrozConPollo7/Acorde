@@ -121,14 +121,14 @@ export interface AISuggestion {
 
 // ─── LOCAL STORAGE PERSISTENCE HELPERS ────────────────────────────────────────
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   SONGS: 'acorde_custom_songs',
   EVENTS: 'acorde_custom_events',
   MUSICIANS: 'acorde_custom_musicians',
   AVAILABILITY: 'acorde_custom_availability',
 }
 
-function getStored<T>(key: string): T | null {
+export function getStored<T>(key: string): T | null {
   if (typeof window === 'undefined') return null
   try {
     const raw = localStorage.getItem(key)
@@ -138,13 +138,70 @@ function getStored<T>(key: string): T | null {
   }
 }
 
-function setStored<T>(key: string, value: T): void {
+export function setStored<T>(key: string, value: T): void {
   if (typeof window === 'undefined') return
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch (err) {
     console.warn('Error guardando en localStorage:', err)
   }
+}
+
+// Timeout helper para que Supabase nunca cuelgue la app si está pausado o sin red
+export function withTimeout<T>(promiseLike: PromiseLike<T>, timeoutMs = 3000): Promise<T> {
+  return Promise.race([
+    Promise.resolve(promiseLike),
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Timeout de ${timeoutMs}ms excedido en consulta a Supabase`)), timeoutMs)
+    ),
+  ])
+}
+
+// Control de circuito para evitar múltiples llamadas bloqueantes cuando Supabase está caído
+let supabaseReachable = true
+let lastFailureTimestamp = 0
+
+export function isDatabaseTemporarilyUnreachable(): boolean {
+  if (supabaseReachable) return false
+  // Reintentar verificar después de 25 segundos
+  if (Date.now() - lastFailureTimestamp > 25000) {
+    supabaseReachable = true
+    return false
+  }
+  return true
+}
+
+export function markDatabaseUnreachable(): void {
+  supabaseReachable = false
+  lastFailureTimestamp = Date.now()
+}
+
+export function markDatabaseReachable(): void {
+  supabaseReachable = true
+}
+
+export function getInitialSongs(): Song[] {
+  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS)
+  if (cached && cached.length > 0) return cached
+  return INITIAL_SONGS
+}
+
+export function getInitialEvents(): ServiceEvent[] {
+  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS)
+  if (cached && cached.length > 0) return cached
+  return INITIAL_EVENTS
+}
+
+export function getInitialMusicians(): Musician[] {
+  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS)
+  if (cached && cached.length > 0) return cached
+  return INITIAL_MUSICIANS
+}
+
+export function getInitialAvailability(): AvailabilityMap {
+  const cached = getStored<AvailabilityMap>(STORAGE_KEYS.AVAILABILITY)
+  if (cached) return cached
+  return {}
 }
 
 // ─── PARSER DE CHORDPRO Y CIFRACLUB UNIVERSAL ─────────────────────────────────
@@ -369,14 +426,18 @@ export const INITIAL_EVENTS: ServiceEvent[] = []
 export async function fetchSongs(): Promise<Song[]> {
   const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || []
 
-  if (isSupabaseConfigured && supabase) {
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      const { data, error } = await supabase
-        .from('songs')
-        .select('*')
-        .order('title', { ascending: true })
+      const { data, error } = await withTimeout(
+        supabase
+          .from('songs')
+          .select('*')
+          .order('title', { ascending: true }),
+        2500
+      )
 
       if (!error && data) {
+        markDatabaseReachable()
         const mapped: Song[] = data.map(item => {
           let instLyrics: InstrumentScores | undefined
           let instNotes: InstrumentNotes | undefined
@@ -420,9 +481,12 @@ export async function fetchSongs(): Promise<Song[]> {
 
         setStored(STORAGE_KEYS.SONGS, combined)
         return combined
+      } else if (error) {
+        console.warn('Aviso obteniendo canciones de Supabase (usando datos locales):', error.message)
       }
     } catch (err) {
-      console.error('Error al obtener canciones de Supabase:', err)
+      markDatabaseUnreachable()
+      console.warn('Supabase no disponible o pausado para canciones (usando cache local):', err)
     }
   }
 
@@ -502,59 +566,53 @@ export async function createSong(newSong: Omit<Song, 'id'>): Promise<Song> {
     instrument_notes: newSong.instrument_notes,
   }
 
-  if (isSupabaseConfigured && supabase) {
+  // Guardar SIEMPRE en almacenamiento local primero (garantía 100% de persistencia)
+  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
+  setStored(STORAGE_KEYS.SONGS, [created, ...cached.filter(s => s.id !== created.id)])
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      const { data, error } = await supabase
-        .from('songs')
-        .insert({
-          title: newSong.title,
-          artist: newSong.artist,
-          key: newSong.key,
-          tempo: newSong.tempo,
-          tags: newSong.tags,
-          lyrics: newSong.lyrics,
-          chordpro: chordproData,
-          media_url: newSong.media_url || null,
-          is_classic: newSong.is_classic ?? false,
-          church_domain: newSong.church_domain || 'Conocida',
-          team_domain: newSong.team_domain || 'Por practicar',
-          musical_type: newSong.musical_type || 'Worship contemporáneo',
-          technical_complexity: newSong.technical_complexity || 'Básica',
-        })
-        .select()
-        .single()
+      const { data, error } = await withTimeout(
+        supabase
+          .from('songs')
+          .insert({
+            title: newSong.title,
+            artist: newSong.artist,
+            key: newSong.key,
+            tempo: newSong.tempo,
+            tags: newSong.tags,
+            lyrics: newSong.lyrics,
+            chordpro: chordproData,
+            media_url: newSong.media_url || null,
+            is_classic: newSong.is_classic ?? false,
+            church_domain: newSong.church_domain || 'Conocida',
+            team_domain: newSong.team_domain || 'Por practicar',
+            musical_type: newSong.musical_type || 'Worship contemporáneo',
+            technical_complexity: newSong.technical_complexity || 'Básica',
+          })
+          .select()
+          .single(),
+        3500
+      )
 
       if (!error && data) {
+        markDatabaseReachable()
+        const oldId = created.id
         created = {
+          ...created,
           id: data.id,
-          title: data.title,
-          artist: data.artist,
-          key: data.key,
-          tempo: data.tempo,
-          tags: data.tags || [],
-          lyrics: Array.isArray(data.lyrics) ? data.lyrics : [],
-          media_url: data.media_url,
-          is_classic: data.is_classic ?? false,
-          church_domain: data.church_domain || 'Conocida',
-          team_domain: data.team_domain || 'Por practicar',
-          musical_type: data.musical_type || 'Worship contemporáneo',
-          technical_complexity: data.technical_complexity || 'Básica',
-          resumen_tematico: resumen,
-          instrument_lyrics: newSong.instrument_lyrics,
-          instrument_notes: newSong.instrument_notes,
         }
+        const currentCache = getStored<Song[]>(STORAGE_KEYS.SONGS) || []
+        setStored(STORAGE_KEYS.SONGS, currentCache.map(s => s.id === oldId ? created : s))
       } else if (error) {
-        console.error('Error creando canción en Supabase:', error.message, error.details, error.hint, error)
-        throw new Error(error.message || error.details || 'Error desconocido al insertar en Supabase')
+        console.warn('Aviso guardando en Supabase (guardado localmente):', error.message)
       }
     } catch (err) {
-      console.error('Error creando canción en Supabase:', err)
-      throw err
+      markDatabaseUnreachable()
+      console.warn('Supabase no disponible o pausado (canción guardada en almacenamiento local):', err)
     }
   }
 
-  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
-  setStored(STORAGE_KEYS.SONGS, [created, ...cached.filter(s => s.id !== created.id)])
   return created
 }
 
@@ -568,26 +626,33 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
       })
     : undefined
 
+  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
+  const existing = cached.find(s => s.id === id)
+
   let updated: Song = {
+    ...(existing || {}),
     id,
-    title: updates.title || '',
-    artist: updates.artist || '',
-    key: updates.key || 'G',
-    tempo: updates.tempo || 'media',
-    tags: updates.tags || [],
-    lyrics: updates.lyrics || [],
-    instrument_lyrics: updates.instrument_lyrics,
-    instrument_notes: updates.instrument_notes,
-    media_url: updates.media_url,
-    is_classic: updates.is_classic,
-    church_domain: updates.church_domain,
-    team_domain: updates.team_domain,
-    musical_type: updates.musical_type,
-    technical_complexity: updates.technical_complexity,
+    title: updates.title !== undefined ? updates.title : (existing?.title || ''),
+    artist: updates.artist !== undefined ? updates.artist : (existing?.artist || ''),
+    key: updates.key !== undefined ? updates.key : (existing?.key || 'G'),
+    tempo: updates.tempo !== undefined ? updates.tempo : (existing?.tempo || 'media'),
+    tags: updates.tags !== undefined ? updates.tags : (existing?.tags || []),
+    lyrics: updates.lyrics !== undefined ? updates.lyrics : (existing?.lyrics || []),
+    instrument_lyrics: updates.instrument_lyrics !== undefined ? updates.instrument_lyrics : existing?.instrument_lyrics,
+    instrument_notes: updates.instrument_notes !== undefined ? updates.instrument_notes : existing?.instrument_notes,
+    media_url: updates.media_url !== undefined ? updates.media_url : existing?.media_url,
+    is_classic: updates.is_classic !== undefined ? updates.is_classic : existing?.is_classic,
+    church_domain: updates.church_domain !== undefined ? updates.church_domain : existing?.church_domain,
+    team_domain: updates.team_domain !== undefined ? updates.team_domain : existing?.team_domain,
+    musical_type: updates.musical_type !== undefined ? updates.musical_type : existing?.musical_type,
+    technical_complexity: updates.technical_complexity !== undefined ? updates.technical_complexity : existing?.technical_complexity,
     resumen_tematico: resumen,
   }
 
-  if (isSupabaseConfigured && supabase) {
+  // Guardar SIEMPRE en almacenamiento local primero (éxito garantizado de la edición)
+  setStored(STORAGE_KEYS.SONGS, cached.map(s => s.id === id ? { ...s, ...updated } : s))
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
       const payload: any = { updated_at: new Date().toISOString() }
       if (updates.title !== undefined) payload.title = updates.title
@@ -604,82 +669,76 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
       if (updates.musical_type !== undefined) payload.musical_type = updates.musical_type
       if (updates.technical_complexity !== undefined) payload.technical_complexity = updates.technical_complexity
 
-      const { data, error } = await supabase
-        .from('songs')
-        .update(payload)
-        .eq('id', id)
-        .select()
-        .single()
+      const { data, error } = await withTimeout(
+        supabase
+          .from('songs')
+          .update(payload)
+          .eq('id', id)
+          .select()
+          .single(),
+        3500
+      )
 
       if (!error && data) {
-        updated = {
-          id: data.id,
-          title: data.title,
-          artist: data.artist,
-          key: data.key,
-          tempo: data.tempo,
-          tags: data.tags || [],
-          lyrics: Array.isArray(data.lyrics) ? data.lyrics : [],
-          media_url: data.media_url,
-          is_classic: data.is_classic ?? false,
-          church_domain: data.church_domain || 'Conocida',
-          team_domain: data.team_domain || 'Por practicar',
-          musical_type: data.musical_type || 'Worship contemporáneo',
-          technical_complexity: data.technical_complexity || 'Básica',
-          resumen_tematico: resumen,
-          instrument_lyrics: updates.instrument_lyrics,
-          instrument_notes: updates.instrument_notes,
-        }
+        markDatabaseReachable()
       } else if (error) {
-        console.error('Error actualizando canción en Supabase:', error.message, error.details, error.hint, error)
-        throw new Error(error.message || error.details || 'Error al actualizar canción en Supabase')
+        console.warn('Aviso actualizando en Supabase (guardado localmente):', error.message)
       }
     } catch (err) {
-      console.error('Error actualizando canción en Supabase:', err)
-      throw err
+      markDatabaseUnreachable()
+      console.warn('Supabase no disponible o pausado (edición guardada localmente):', err)
     }
   }
 
-  const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
-  setStored(STORAGE_KEYS.SONGS, cached.map(s => s.id === id ? { ...s, ...updated } : s))
   return updated
 }
 
 export async function deleteSong(id: string): Promise<void> {
-  if (isSupabaseConfigured && supabase) {
-    try {
-      const { error } = await supabase.from('songs').delete().eq('id', id)
-      if (error) {
-        console.error('Error eliminando canción en Supabase:', error)
-        throw new Error(error.message || 'Error al eliminar canción en Supabase')
-      }
-    } catch (err) {
-      console.error('Error eliminando canción en Supabase:', err)
-      throw err
-    }
-  }
   const cached = getStored<Song[]>(STORAGE_KEYS.SONGS) || INITIAL_SONGS
   setStored(STORAGE_KEYS.SONGS, cached.filter(s => s.id !== id))
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
+    try {
+      const { error } = await withTimeout(
+        supabase.from('songs').delete().eq('id', id),
+        3500
+      )
+      if (!error) {
+        markDatabaseReachable()
+      } else {
+        console.warn('Aviso eliminando en Supabase (eliminado localmente):', error.message)
+      }
+    } catch (err) {
+      markDatabaseUnreachable()
+      console.warn('Supabase no disponible o pausado (eliminado localmente):', err)
+    }
+  }
 }
 
 // ─── SERVICIOS / EVENTOS API ──────────────────────────────────────────────────
 
 export async function fetchEvents(): Promise<ServiceEvent[]> {
-  if (isSupabaseConfigured && supabase) {
+  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS)
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      const { data: events, error: eventsError } = await supabase
-        .from('service_events')
-        .select(`
-          id,
-          date,
-          type,
-          label,
-          service_setlists ( song_id, position ),
-          service_roster ( user_id, status, instrument, secondary_instruments )
-        `)
-        .order('date', { ascending: true })
+      const { data: events, error: eventsError } = await withTimeout(
+        supabase
+          .from('service_events')
+          .select(`
+            id,
+            date,
+            type,
+            label,
+            service_setlists ( song_id, position ),
+            service_roster ( user_id, status, instrument, secondary_instruments )
+          `)
+          .order('date', { ascending: true }),
+        2500
+      )
 
       if (!eventsError && events) {
+        markDatabaseReachable()
         const mapped = events.map((ev: any) => ({
           date: ev.date,
           type: ev.type,
@@ -698,29 +757,36 @@ export async function fetchEvents(): Promise<ServiceEvent[]> {
         return mapped
       }
     } catch (err) {
-      console.error('Error al obtener eventos de Supabase:', err)
+      markDatabaseUnreachable()
+      console.warn('Supabase no disponible para eventos (usando datos locales):', err)
     }
   }
 
-  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS)
   if (cached !== null) return cached
   return INITIAL_EVENTS
 }
 
 export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEvent> {
+  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS) || INITIAL_EVENTS
+  const updated = [...cached.filter(e => e.date !== event.date), event].sort((a, b) => a.date.localeCompare(b.date))
+  setStored(STORAGE_KEYS.EVENTS, updated)
+
   const newEventId = generateUUID()
-  if (isSupabaseConfigured && supabase) {
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      const { data: eventRow, error: evErr } = await supabase
-        .from('service_events')
-        .insert({
-          id: newEventId,
-          date: event.date,
-          type: event.type,
-          label: event.label,
-        })
-        .select()
-        .single()
+      const { data: eventRow } = await withTimeout(
+        supabase
+          .from('service_events')
+          .insert({
+            id: newEventId,
+            date: event.date,
+            type: event.type,
+            label: event.label,
+          })
+          .select()
+          .single(),
+        3500
+      )
 
       const targetId = eventRow ? eventRow.id : newEventId
 
@@ -744,25 +810,30 @@ export async function createServiceEvent(event: ServiceEvent): Promise<ServiceEv
           }))
         )
       }
+      markDatabaseReachable()
     } catch (err) {
-      console.error('Error creando servicio en Supabase:', err)
+      markDatabaseUnreachable()
+      console.warn('Aviso guardando servicio en Supabase (guardado localmente):', err)
     }
   }
 
-  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS) || INITIAL_EVENTS
-  const updated = [...cached.filter(e => e.date !== event.date), event].sort((a, b) => a.date.localeCompare(b.date))
-  setStored(STORAGE_KEYS.EVENTS, updated)
   return event
 }
 
 export async function updateServiceEvent(date: string, updates: Partial<ServiceEvent>): Promise<void> {
-  if (isSupabaseConfigured && supabase) {
+  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS) || INITIAL_EVENTS
+  setStored(STORAGE_KEYS.EVENTS, cached.map(e => e.date === date ? { ...e, ...updates } : e))
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      const { data: existing } = await supabase
-        .from('service_events')
-        .select('id')
-        .eq('date', date)
-        .single()
+      const { data: existing } = await withTimeout(
+        supabase
+          .from('service_events')
+          .select('id')
+          .eq('date', date)
+          .single(),
+        3000
+      )
 
       if (existing) {
         if (updates.type || updates.label || updates.date) {
@@ -803,39 +874,47 @@ export async function updateServiceEvent(date: string, updates: Partial<ServiceE
             )
           }
         }
+        markDatabaseReachable()
       }
     } catch (err) {
-      console.error('Error actualizando servicio en Supabase:', err)
+      markDatabaseUnreachable()
+      console.warn('Aviso actualizando servicio en Supabase (guardado localmente):', err)
     }
   }
-
-  const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS) || INITIAL_EVENTS
-  setStored(STORAGE_KEYS.EVENTS, cached.map(e => e.date === date ? { ...e, ...updates } : e))
 }
 
 export async function deleteServiceEvent(date: string): Promise<void> {
-  if (isSupabaseConfigured && supabase) {
-    try {
-      await supabase.from('service_events').delete().eq('date', date)
-    } catch (err) {
-      console.error('Error eliminando servicio en Supabase:', err)
-    }
-  }
   const cached = getStored<ServiceEvent[]>(STORAGE_KEYS.EVENTS) || INITIAL_EVENTS
   setStored(STORAGE_KEYS.EVENTS, cached.filter(e => e.date !== date))
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
+    try {
+      await withTimeout(supabase.from('service_events').delete().eq('date', date), 3000)
+      markDatabaseReachable()
+    } catch (err) {
+      markDatabaseUnreachable()
+      console.warn('Aviso eliminando servicio en Supabase (eliminado localmente):', err)
+    }
+  }
 }
 
 // ─── MÚSICOS & PERFILES API ───────────────────────────────────────────────────
 
 export async function fetchMusicians(): Promise<Musician[]> {
-  if (isSupabaseConfigured && supabase) {
+  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS)
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('name', { ascending: true })
+      const { data, error } = await withTimeout(
+        supabase
+          .from('profiles')
+          .select('*')
+          .order('name', { ascending: true }),
+        2500
+      )
 
       if (!error && data) {
+        markDatabaseReachable()
         const mapped = data.map(item => ({
           id: item.id,
           name: item.name,
@@ -850,11 +929,11 @@ export async function fetchMusicians(): Promise<Musician[]> {
         return mapped
       }
     } catch (err) {
-      console.error('Error al obtener músicos de Supabase:', err)
+      markDatabaseUnreachable()
+      console.warn('Supabase no disponible para perfiles (usando datos locales):', err)
     }
   }
 
-  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS)
   if (cached !== null) return cached
   return INITIAL_MUSICIANS
 }
@@ -880,24 +959,32 @@ export async function createMusician(musician: {
     role: musician.role || 'musician',
   }
 
-  if (isSupabaseConfigured && supabase) {
+  // Guardar localmente de inmediato
+  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || INITIAL_MUSICIANS
+  setStored(STORAGE_KEYS.MUSICIANS, [...cached, created])
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert({
-          id: newId,
-          name: musician.name,
-          instrument: musician.instrument,
-          secondary_instruments: musician.secondary_instruments || [],
-          initials,
-          email: musician.email,
-          phone: musician.phone || '',
-          role: musician.role || 'musician',
-        })
-        .select()
-        .single()
+      const { data, error } = await withTimeout(
+        supabase
+          .from('profiles')
+          .insert({
+            id: newId,
+            name: musician.name,
+            instrument: musician.instrument,
+            secondary_instruments: musician.secondary_instruments || [],
+            initials,
+            email: musician.email,
+            phone: musician.phone || '',
+            role: musician.role || 'musician',
+          })
+          .select()
+          .single(),
+        3500
+      )
 
       if (!error && data) {
+        markDatabaseReachable()
         created = {
           id: data.id,
           name: data.name,
@@ -908,32 +995,38 @@ export async function createMusician(musician: {
           phone: data.phone,
           role: data.role,
         }
-      } else if (error) {
-        console.error('Error creando músico en Supabase:', error)
+        const currentCached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || []
+        setStored(STORAGE_KEYS.MUSICIANS, currentCached.map(m => m.id === newId ? created : m))
       }
     } catch (err) {
-      console.error('Error creando músico en Supabase:', err)
+      markDatabaseUnreachable()
+      console.warn('Aviso creando músico en Supabase (guardado localmente):', err)
     }
   }
 
-  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || INITIAL_MUSICIANS
-  setStored(STORAGE_KEYS.MUSICIANS, [...cached, created])
   return created
 }
 
 export async function updateMusician(id: string, updates: Partial<Musician>): Promise<Musician> {
+  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || INITIAL_MUSICIANS
+  const existing = cached.find(m => m.id === id)
+
   let updated: Musician = {
+    ...(existing || {}),
     id,
-    name: updates.name || '',
-    instrument: updates.instrument || 'guitarra',
-    secondary_instruments: updates.secondary_instruments || [],
-    initials: updates.name ? updates.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : 'IB',
-    email: updates.email || '',
-    phone: updates.phone,
-    role: updates.role || 'musician',
+    name: updates.name !== undefined ? updates.name : (existing?.name || ''),
+    instrument: updates.instrument !== undefined ? updates.instrument : (existing?.instrument || 'guitarra'),
+    secondary_instruments: updates.secondary_instruments !== undefined ? updates.secondary_instruments : (existing?.secondary_instruments || []),
+    initials: updates.name ? updates.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : (existing?.initials || 'IB'),
+    email: updates.email !== undefined ? updates.email : (existing?.email || ''),
+    phone: updates.phone !== undefined ? updates.phone : existing?.phone,
+    role: updates.role !== undefined ? updates.role : (existing?.role || 'musician'),
   }
 
-  if (isSupabaseConfigured && supabase) {
+  // Guardar localmente de inmediato
+  setStored(STORAGE_KEYS.MUSICIANS, cached.map(m => m.id === id ? { ...m, ...updated } : m))
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
       const payload: any = { updated_at: new Date().toISOString() }
       if (updates.name !== undefined) {
@@ -946,72 +1039,74 @@ export async function updateMusician(id: string, updates: Partial<Musician>): Pr
       if (updates.phone !== undefined) payload.phone = updates.phone
       if (updates.role !== undefined) payload.role = updates.role
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(payload)
-        .eq('id', id)
-        .select()
-        .single()
+      const { data, error } = await withTimeout(
+        supabase
+          .from('profiles')
+          .update(payload)
+          .eq('id', id)
+          .select()
+          .single(),
+        3500
+      )
 
       if (!error && data) {
-        updated = {
-          id: data.id,
-          name: data.name,
-          instrument: data.instrument,
-          secondary_instruments: Array.isArray(data.secondary_instruments) ? data.secondary_instruments : [],
-          initials: data.initials,
-          email: data.email,
-          phone: data.phone,
-          role: data.role,
-        }
-      } else if (error) {
-        console.error('Error actualizando músico en Supabase:', error)
+        markDatabaseReachable()
       }
     } catch (err) {
-      console.error('Error actualizando músico en Supabase:', err)
+      markDatabaseUnreachable()
+      console.warn('Aviso actualizando músico en Supabase (guardado localmente):', err)
     }
   }
 
-  const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || INITIAL_MUSICIANS
-  setStored(STORAGE_KEYS.MUSICIANS, cached.map(m => m.id === id ? { ...m, ...updated } : m))
   return updated
 }
 
 export async function deleteMusician(id: string): Promise<void> {
-  if (isSupabaseConfigured && supabase) {
-    try {
-      await supabase.from('profiles').delete().eq('id', id)
-    } catch (err) {
-      console.error('Error eliminando músico en Supabase:', err)
-    }
-  }
   const cached = getStored<Musician[]>(STORAGE_KEYS.MUSICIANS) || INITIAL_MUSICIANS
   setStored(STORAGE_KEYS.MUSICIANS, cached.filter(m => m.id !== id))
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
+    try {
+      await withTimeout(supabase.from('profiles').delete().eq('id', id), 3500)
+      markDatabaseReachable()
+    } catch (err) {
+      markDatabaseUnreachable()
+      console.warn('Aviso eliminando músico en Supabase (eliminado localmente):', err)
+    }
+  }
 }
 
 export async function updateAttendanceStatus(date: string, mid: string, status: Status): Promise<void> {
-  if (!isSupabaseConfigured || !supabase) {
+  if (!isSupabaseConfigured || !supabase || isDatabaseTemporarilyUnreachable()) {
     return
   }
 
   try {
-    const { data: event } = await supabase
-      .from('service_events')
-      .select('id')
-      .eq('date', date)
-      .single()
+    const { data: event } = await withTimeout(
+      supabase
+        .from('service_events')
+        .select('id')
+        .eq('date', date)
+        .single(),
+      2500
+    )
 
     if (!event) return
 
-    await supabase
-      .from('service_roster')
-      .upsert({
-        event_id: event.id,
-        user_id: mid,
-        status,
-      }, { onConflict: 'event_id,user_id' })
+    await withTimeout(
+      supabase
+        .from('service_roster')
+        .upsert({
+          event_id: event.id,
+          user_id: mid,
+          status,
+        }, { onConflict: 'event_id,user_id' }),
+      2500
+    )
+    markDatabaseReachable()
   } catch (err) {
-    console.error('Error actualizando asistencia en Supabase:', err)
+    markDatabaseUnreachable()
+    console.warn('Aviso actualizando asistencia en Supabase:', err)
   }
 }
 
@@ -1020,13 +1115,19 @@ export async function updateAttendanceStatus(date: string, mid: string, status: 
 export type AvailabilityMap = Record<string, Record<string, boolean>> // { [userId]: { [date]: boolean } }
 
 export async function fetchAvailability(): Promise<AvailabilityMap> {
-  if (isSupabaseConfigured && supabase) {
+  const cached = getStored<AvailabilityMap>(STORAGE_KEYS.AVAILABILITY)
+
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      const { data, error } = await supabase
-        .from('musician_availability')
-        .select('user_id, date, available')
+      const { data, error } = await withTimeout(
+        supabase
+          .from('musician_availability')
+          .select('user_id, date, available'),
+        2500
+      )
 
       if (!error && data) {
+        markDatabaseReachable()
         const map: AvailabilityMap = {}
         data.forEach((row: { user_id: string; date: string; available: boolean }) => {
           if (!map[row.user_id]) map[row.user_id] = {}
@@ -1036,11 +1137,11 @@ export async function fetchAvailability(): Promise<AvailabilityMap> {
         return map
       }
     } catch {
-      // Si la tabla no existe en Supabase, se utiliza el almacenamiento local
+      markDatabaseUnreachable()
+      // Fallback a almacenamiento local
     }
   }
 
-  const cached = getStored<AvailabilityMap>(STORAGE_KEYS.AVAILABILITY)
   return cached || {}
 }
 
@@ -1050,18 +1151,22 @@ export async function saveMusicianAvailability(userId: string, date: string, ava
   cached[userId][date] = available
   setStored(STORAGE_KEYS.AVAILABILITY, cached)
 
-  if (isSupabaseConfigured && supabase) {
+  if (isSupabaseConfigured && supabase && !isDatabaseTemporarilyUnreachable()) {
     try {
-      await supabase
-        .from('musician_availability')
-        .upsert({
-          user_id: userId,
-          date,
-          available,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,date' })
+      await withTimeout(
+        supabase
+          .from('musician_availability')
+          .upsert({
+            user_id: userId,
+            date,
+            available,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id,date' }),
+        2500
+      )
+      markDatabaseReachable()
     } catch {
-      // Fallback a localStorage si la tabla no está creada
+      markDatabaseUnreachable()
     }
   }
 }
@@ -1074,7 +1179,7 @@ export async function batchSaveMusicianAvailability(userId: string, updates: { d
   })
   setStored(STORAGE_KEYS.AVAILABILITY, cached)
 
-  if (isSupabaseConfigured && supabase && updates.length > 0) {
+  if (isSupabaseConfigured && supabase && updates.length > 0 && !isDatabaseTemporarilyUnreachable()) {
     try {
       const rows = updates.map(u => ({
         user_id: userId,
@@ -1082,11 +1187,16 @@ export async function batchSaveMusicianAvailability(userId: string, updates: { d
         available: u.available,
         updated_at: new Date().toISOString(),
       }))
-      await supabase
-        .from('musician_availability')
-        .upsert(rows, { onConflict: 'user_id,date' })
+
+      await withTimeout(
+        supabase
+          .from('musician_availability')
+          .upsert(rows, { onConflict: 'user_id,date' }),
+        3000
+      )
+      markDatabaseReachable()
     } catch {
-      // Fallback a localStorage si la tabla no está creada
+      markDatabaseUnreachable()
     }
   }
 }
