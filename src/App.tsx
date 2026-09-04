@@ -841,6 +841,7 @@ function AddSongModal({
   const [artist, setArtist] = useState('')
   const [key, setKey] = useState('G')
   const [tempo, setTempo] = useState<'rápida' | 'media' | 'lenta'>('media')
+  const [bpm, setBpm] = useState<number | undefined>(undefined)
   const [tags, setTags] = useState<string[]>(['Alabanza'])
   const [mediaUrl, setMediaUrl] = useState('')
   const [isClassic, setIsClassic] = useState(false)
@@ -888,6 +889,7 @@ function AddSongModal({
         artist: artist.trim(),
         key: key.trim(),
         tempo,
+        bpm: bpm ? Number(bpm) : undefined,
         tags: tags.length > 0 ? tags : ['Alabanza'],
         lyrics: parsedGuitar,
         instrument_lyrics: instLyrics,
@@ -955,7 +957,7 @@ function AddSongModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Tono Original *</label>
               <select
@@ -979,6 +981,18 @@ function AddSongModal({
                 <option value="media">Media</option>
                 <option value="rápida">Rápida (Alabanza)</option>
               </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">BPM (Metrónomo)</label>
+              <input
+                type="number"
+                min={30}
+                max={300}
+                placeholder={tempo === 'rápida' ? '140' : tempo === 'media' ? '100' : '70'}
+                value={bpm ?? ''}
+                onChange={e => setBpm(e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
+              />
             </div>
           </div>
 
@@ -1264,6 +1278,7 @@ function EditSongModal({
   const [artist, setArtist] = useState(song.artist)
   const [key, setKey] = useState(song.key)
   const [tempo, setTempo] = useState<'rápida' | 'media' | 'lenta'>(song.tempo)
+  const [bpm, setBpm] = useState<number | undefined>(song.bpm)
   const [tags, setTags] = useState<string[]>(song.tags && song.tags.length > 0 ? song.tags : ['Alabanza'])
   const [mediaUrl, setMediaUrl] = useState(song.media_url || '')
   const [isClassic, setIsClassic] = useState(song.is_classic ?? false)
@@ -1334,6 +1349,7 @@ function EditSongModal({
         artist: artist.trim(),
         key: key.trim(),
         tempo,
+        bpm: bpm ? Number(bpm) : undefined,
         tags: tags.length > 0 ? tags : ['Alabanza'],
         lyrics: parsedGuitar,
         instrument_lyrics: instLyrics,
@@ -1399,7 +1415,7 @@ function EditSongModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">Tono Original</label>
               <select
@@ -1423,6 +1439,18 @@ function EditSongModal({
                 <option value="media">Media</option>
                 <option value="rápida">Rápida</option>
               </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-fg-muted uppercase tracking-wider">BPM (Metrónomo)</label>
+              <input
+                type="number"
+                min={30}
+                max={300}
+                placeholder={tempo === 'rápida' ? '140' : tempo === 'media' ? '100' : '70'}
+                value={bpm ?? ''}
+                onChange={e => setBpm(e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full px-4 py-3 rounded-xl text-fg bg-surface-2 border border-border text-base md:text-sm focus:outline-none focus:border-accent"
+              />
             </div>
           </div>
 
@@ -4051,6 +4079,22 @@ function SongViewScreen({
         ref={focusRef}
         className="fixed inset-0 z-[70] bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8 pb-48 select-text"
       >
+        {/* Guía Visual Rítmica Fija Superior (Metrónomo en pantalla completa) */}
+        {isMetronomeActive && (
+          <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none h-2 bg-surface/90 backdrop-blur-md grid grid-cols-4 gap-1.5 px-3 pt-0.5 border-b border-border/50">
+            {[0, 1, 2, 3].map(b => (
+              <div
+                key={b}
+                className={`h-1.5 rounded-full transition-all duration-75 ${
+                  beatIndex === b
+                    ? (b === 0 ? 'bg-accent shadow-[0_0_14px_#00A8E8] scale-y-125' : 'bg-warm shadow-[0_0_10px_#E76F51] scale-y-110')
+                    : 'bg-fg-muted/20'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
         <div className="max-w-2xl mx-auto w-full overflow-x-hidden">
           {/* Barra Superior Fija de Controles */}
           <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-border sticky top-0 bg-bg/95 backdrop-blur-md z-10">
@@ -4152,34 +4196,56 @@ function SongViewScreen({
               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface border border-border shrink-0">
                 <button
                   onClick={() => setIsMetronomeActive(!isMetronomeActive)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     isMetronomeActive
-                      ? 'bg-accent text-accent-fg'
+                      ? 'bg-accent text-accent-fg shadow-xs'
                       : 'text-fg-muted hover:text-fg bg-surface-2'
                   }`}
-                  title="Activar metrónomo"
+                  title={isMetronomeActive ? 'Detener metrónomo' : 'Iniciar metrónomo'}
                 >
-                  <span className={`w-2 h-2 rounded-full transition-all ${
-                    isMetronomeActive
-                      ? (beatIndex === 0 ? 'bg-white scale-125 shadow-sm' : 'bg-white/60 scale-100')
-                      : 'bg-fg-muted/40'
-                  }`} />
-                  <span>{bpm} BPM</span>
+                  <div className="flex items-center gap-1">
+                    {[0, 1, 2, 3].map(b => (
+                      <span
+                        key={b}
+                        className={`w-2 h-2 rounded-full transition-all duration-75 ${
+                          isMetronomeActive && beatIndex === b
+                            ? (b === 0 ? 'bg-white scale-125 shadow-sm' : 'bg-white/80 scale-110')
+                            : 'bg-fg-muted/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="font-mono font-bold">{bpm} BPM</span>
                 </button>
 
-                {isMetronomeActive && (
+                <div className="flex items-center">
                   <button
-                    onClick={() => setMetronomeAudio(!metronomeAudio)}
-                    className={`p-1 rounded-lg text-xs transition-all cursor-pointer ${
-                      metronomeAudio
-                        ? 'text-accent bg-accent/15 border border-accent/30'
-                        : 'text-fg-muted hover:text-fg'
-                    }`}
-                    title={metronomeAudio ? 'Silenciar click' : 'Activar sonido de click'}
+                    onClick={() => setBpm(b => Math.max(30, b - 5))}
+                    className="w-5 h-5 flex items-center justify-center rounded text-[11px] font-bold text-fg-muted hover:text-fg hover:bg-surface-2 cursor-pointer"
+                    title="Reducir 5 BPM"
                   >
-                    <IconVolume size={13} />
+                    -
                   </button>
-                )}
+                  <button
+                    onClick={() => setBpm(b => Math.min(280, b + 5))}
+                    className="w-5 h-5 flex items-center justify-center rounded text-[11px] font-bold text-fg-muted hover:text-fg hover:bg-surface-2 cursor-pointer"
+                    title="Aumentar 5 BPM"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setMetronomeAudio(!metronomeAudio)}
+                  className={`p-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                    metronomeAudio
+                      ? 'text-accent bg-accent/15 border border-accent/30'
+                      : 'text-fg-muted hover:text-fg'
+                  }`}
+                  title={metronomeAudio ? 'Silenciar click' : 'Activar sonido de click'}
+                >
+                  <IconVolume size={13} />
+                </button>
               </div>
             </div>
           </div>
@@ -4214,7 +4280,7 @@ function SongViewScreen({
           </article>
         </div>
 
-        {/* Botón Flotante Auto-Scroll (FAB) en Modo Enfoque */}
+        {/* Botón Flotante Auto-Scroll y Metrónomo (FAB) en Modo Enfoque */}
         <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
           {isAutoScrollPaused && (
             <div className="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold animate-pulse shadow-lg backdrop-blur-md">
@@ -4222,6 +4288,65 @@ function SongViewScreen({
             </div>
           )}
           <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-surface/95 border border-border shadow-2xl backdrop-blur-md">
+            {/* Metrónomo Flotante - Visible y pulsante siempre al bajar */}
+            <div className="flex items-center gap-1 px-2 py-1 bg-surface-2 rounded-xl border border-border">
+              <button
+                onClick={() => setIsMetronomeActive(!isMetronomeActive)}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                  isMetronomeActive
+                    ? 'bg-accent text-accent-fg shadow-xs'
+                    : 'text-fg-muted hover:text-fg'
+                }`}
+                title={isMetronomeActive ? 'Detener metrónomo' : 'Iniciar metrónomo'}
+              >
+                <div className="flex items-center gap-0.5">
+                  {[0, 1, 2, 3].map(b => (
+                    <span
+                      key={b}
+                      className={`w-1.5 h-3 rounded-full transition-all duration-75 ${
+                        isMetronomeActive && beatIndex === b
+                          ? (b === 0 ? 'bg-white scale-125 shadow-sm' : 'bg-white/80 scale-110')
+                          : 'bg-fg-muted/30'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="font-mono text-xs">{bpm}</span>
+              </button>
+
+              <div className="flex items-center">
+                <button
+                  onClick={() => setBpm(b => Math.max(30, b - 5))}
+                  className="w-4 h-4 flex items-center justify-center rounded text-[11px] font-bold text-fg-muted hover:text-fg cursor-pointer"
+                  title="Reducir 5 BPM"
+                >
+                  -
+                </button>
+                <button
+                  onClick={() => setBpm(b => Math.min(280, b + 5))}
+                  className="w-4 h-4 flex items-center justify-center rounded text-[11px] font-bold text-fg-muted hover:text-fg cursor-pointer"
+                  title="Aumentar 5 BPM"
+                >
+                  +
+                </button>
+              </div>
+
+              <button
+                onClick={() => setMetronomeAudio(!metronomeAudio)}
+                className={`p-1 rounded text-xs transition-all cursor-pointer ${
+                  metronomeAudio
+                    ? 'text-accent bg-accent/15'
+                    : 'text-fg-muted hover:text-fg'
+                }`}
+                title={metronomeAudio ? 'Silenciar click' : 'Activar sonido de click'}
+              >
+                <IconVolume size={12} />
+              </button>
+            </div>
+
+            <div className="w-[1px] h-6 bg-border hidden sm:block" />
+
+            {/* Auto-Scroll */}
             <button
               onClick={() => setIsAutoScrolling(!isAutoScrolling)}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
@@ -4491,7 +4616,25 @@ function SongViewScreen({
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-semibold text-fg block">Metrónomo</span>
-                  <span className="text-[10px] text-fg-muted font-mono">{bpm} BPM · 4/4</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[10px] text-fg-muted font-mono">{bpm} BPM · 4/4</span>
+                    <div className="flex items-center bg-surface border border-border rounded-md">
+                      <button
+                        onClick={() => setBpm(b => Math.max(30, b - 5))}
+                        className="w-4 h-4 rounded text-[10px] font-bold text-fg-muted hover:text-fg flex items-center justify-center cursor-pointer"
+                        title="Reducir 5 BPM"
+                      >
+                        -
+                      </button>
+                      <button
+                        onClick={() => setBpm(b => Math.min(280, b + 5))}
+                        className="w-4 h-4 rounded text-[10px] font-bold text-fg-muted hover:text-fg flex items-center justify-center cursor-pointer"
+                        title="Aumentar 5 BPM"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">

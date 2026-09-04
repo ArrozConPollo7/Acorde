@@ -695,6 +695,7 @@ export async function updateSong(id: string, updates: Partial<Song>): Promise<So
     musical_type: updates.musical_type !== undefined ? updates.musical_type : existing?.musical_type,
     technical_complexity: updates.technical_complexity !== undefined ? updates.technical_complexity : existing?.technical_complexity,
     resumen_tematico: resumen,
+    bpm: updates.bpm !== undefined ? updates.bpm : existing?.bpm,
   }
 
   // Guardar SIEMPRE en almacenamiento local primero (éxito garantizado de la edición)
