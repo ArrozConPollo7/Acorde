@@ -3675,7 +3675,7 @@ function ChordSheetRenderer({
                   </span>
                 </div>
               )}
-              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-3.5 rounded-2xl bg-surface-2 border border-border leading-tight text-orange-500/90 dark:text-orange-400/90 whitespace-pre shadow-xs">
+              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-3.5 rounded-2xl bg-surface-2 border border-border leading-tight text-accent whitespace-pre shadow-xs">
                 {line.segments.map(s => s.text).join('')}
               </pre>
             </div>
@@ -3723,7 +3723,7 @@ function ChordSheetRenderer({
                     >
                       {hasChord ? (
                         <strong
-                          className={`text-orange-500 dark:text-orange-400 font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 tracking-normal whitespace-nowrap select-text ${
+                          className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 tracking-normal whitespace-nowrap select-text ${
                             isBlankText ? 'min-w-[3.5ch] pr-2' : 'pr-1'
                           }`}
                         >
@@ -3973,22 +3973,53 @@ function SongViewScreen({
     }
   }, [song.title, song.artist])
 
-  // Transposición y Cejilla / Capo (Cálculo Inverso)
+  // Instrumento activo
+  const isGuitar = instTab === 'guitarra'
+  const isBass = instTab === 'bajo'
+
+  // Transposición y Cejilla / Capo (La cejilla aplica exclusivamente a guitarra)
   const preferFlats = song.key.includes('b') || song.key.startsWith('F')
   const displayKey = transposeChord(song.key, transpose, preferFlats)
-  const effectiveTranspose = transpose - capo
-  const capoKey = capo > 0 ? transposeChord(song.key, effectiveTranspose, preferFlats) : null
+  const activeCapo = isGuitar ? capo : 0
+  const effectiveTranspose = transpose - activeCapo
+  const capoKey = activeCapo > 0 ? transposeChord(song.key, effectiveTranspose, preferFlats) : null
 
-  const currentLyrics = (song.instrument_lyrics?.[instTab] && song.instrument_lyrics[instTab]!.length > 0)
-    ? song.instrument_lyrics[instTab]!
-    : song.lyrics
+  // Para el módulo de bajo, toma automáticamente las notas de piano (o letra general)
+  const currentLyrics = isBass
+    ? (song.instrument_lyrics?.piano && song.instrument_lyrics.piano.length > 0
+        ? song.instrument_lyrics.piano
+        : (song.instrument_lyrics?.bajo && song.instrument_lyrics.bajo.length > 0)
+          ? song.instrument_lyrics.bajo
+          : song.lyrics)
+    : (song.instrument_lyrics?.[instTab] && song.instrument_lyrics[instTab]!.length > 0)
+      ? song.instrument_lyrics[instTab]!
+      : song.lyrics
+
+  // Función para extraer exclusivamente la nota del bajo (sin menores ni extensiones, ej: C/A -> A, Am7 -> A)
+  function extractBassNote(chord: string): string {
+    if (!chord || typeof chord !== 'string') return ''
+    const trimmed = chord.trim()
+    if (trimmed.includes('/')) {
+      const parts = trimmed.split('/')
+      const bassPart = parts[parts.length - 1].trim()
+      const match = bassPart.match(/^([A-G][b#]?)/)
+      if (match) return match[1]
+    }
+    const match = trimmed.match(/^([A-G][b#]?)/)
+    if (match) return match[1]
+    return trimmed
+  }
 
   const transposedLyrics = currentLyrics.map(line => ({
     ...line,
-    segments: line.segments.map(seg => ({
-      ...seg,
-      chord: seg.chord ? transposeChord(seg.chord, capo > 0 ? effectiveTranspose : transpose, preferFlats) : undefined,
-    })),
+    segments: line.segments.map(seg => {
+      if (!seg.chord) return seg
+      const transposed = transposeChord(seg.chord, isGuitar && capo > 0 ? effectiveTranspose : transpose, preferFlats)
+      return {
+        ...seg,
+        chord: isBass ? extractBassNote(transposed) : transposed,
+      }
+    }),
   }))
 
   const activeNotes = song.instrument_notes?.[instTab]
@@ -3997,7 +4028,7 @@ function SongViewScreen({
     generateSongPDF({
       title: song.title,
       artist: song.artist,
-      key: capo > 0 ? `${displayKey} (Capo ${capo}: ${capoKey})` : displayKey,
+      key: isGuitar && capo > 0 ? `${displayKey} (Capo ${capo}: ${capoKey})` : displayKey,
       tempo: song.tempo,
       lyrics: transposedLyrics,
     })
@@ -4068,7 +4099,7 @@ function SongViewScreen({
 
                 {/* Badge de Tonalidad y Capo */}
                 <span className="text-xs font-bold text-accent px-2.5 py-1 rounded-lg bg-surface-2 border border-border">
-                  {displayKey} {capo > 0 && `(Capo ${capo}: ${capoKey})`}
+                  {displayKey} {isGuitar && capo > 0 && `(Capo ${capo}: ${capoKey})`}
                 </span>
 
                 <ThemeToggle theme={theme} onToggle={onToggleTheme} />
@@ -4095,25 +4126,27 @@ function SongViewScreen({
                 ))}
               </div>
 
-              {/* Selector de Cejilla / Capo Rápido */}
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-surface border border-border">
-                <span className="text-[10px] uppercase font-bold text-fg-muted">Capo</span>
-                <select
-                  value={capo}
-                  onChange={e => setCapo(Number(e.target.value))}
-                  aria-label="Seleccionar cejilla o capo"
-                  className="bg-surface-2 border border-border rounded-lg text-xs font-bold text-fg px-1.5 py-1 cursor-pointer"
-                >
-                  <option value={0}>0 (Sin capo)</option>
-                  <option value={1}>Traste 1</option>
-                  <option value={2}>Traste 2</option>
-                  <option value={3}>Traste 3</option>
-                  <option value={4}>Traste 4</option>
-                  <option value={5}>Traste 5</option>
-                  <option value={6}>Traste 6</option>
-                  <option value={7}>Traste 7</option>
-                </select>
-              </div>
+              {/* Selector de Cejilla / Capo Rápido (Solo Guitarra) */}
+              {isGuitar && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-surface border border-border">
+                  <span className="text-[10px] uppercase font-bold text-fg-muted">Capo</span>
+                  <select
+                    value={capo}
+                    onChange={e => setCapo(Number(e.target.value))}
+                    aria-label="Seleccionar cejilla o capo"
+                    className="bg-surface-2 border border-border rounded-lg text-xs font-bold text-fg px-1.5 py-1 cursor-pointer"
+                  >
+                    <option value={0}>0 (Sin capo)</option>
+                    <option value={1}>Traste 1</option>
+                    <option value={2}>Traste 2</option>
+                    <option value={3}>Traste 3</option>
+                    <option value={4}>Traste 4</option>
+                    <option value={5}>Traste 5</option>
+                    <option value={6}>Traste 6</option>
+                    <option value={7}>Traste 7</option>
+                  </select>
+                </div>
+              )}
 
               {/* Metrónomo Visual y Sonoro */}
               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface border border-border shrink-0">
@@ -4370,7 +4403,7 @@ function SongViewScreen({
               <span className="text-sm font-bold px-4 py-1.5 rounded-xl text-accent-fg bg-accent shadow-xs">
                 Tono {displayKey}
               </span>
-              {capo > 0 && (
+              {isGuitar && capo > 0 && (
                 <span className="text-xs font-bold px-3 py-1.5 rounded-xl text-warm bg-warm/15 border border-warm/30">
                   Capo {capo}: {capoKey}
                 </span>
@@ -4424,30 +4457,32 @@ function SongViewScreen({
                 </div>
               </div>
 
-              {/* Selector de Cejilla / Capo */}
-              <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                <div>
-                  <span className="text-xs font-semibold text-fg block">Cejilla / Capo</span>
-                  <span className="text-[10px] text-fg-muted">
-                    {capo > 0 ? `Digitación en ${capoKey}` : 'Sin cejilla (tono real)'}
-                  </span>
+              {/* Selector de Cejilla / Capo (Solo Guitarra) */}
+              {isGuitar && (
+                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                  <div>
+                    <span className="text-xs font-semibold text-fg block">Cejilla / Capo</span>
+                    <span className="text-[10px] text-fg-muted">
+                      {capo > 0 ? `Digitación en ${capoKey}` : 'Sin cejilla (tono real)'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map(fret => (
+                      <button
+                        key={fret}
+                        onClick={() => setCapo(fret)}
+                        className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          capo === fret
+                            ? 'bg-accent text-accent-fg shadow-xs scale-105'
+                            : 'bg-surface text-fg-muted hover:text-fg border border-border'
+                        }`}
+                      >
+                        {fret}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  {[0, 1, 2, 3, 4, 5, 6, 7].map(fret => (
-                    <button
-                      key={fret}
-                      onClick={() => setCapo(fret)}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        capo === fret
-                          ? 'bg-accent text-accent-fg shadow-xs scale-105'
-                          : 'bg-surface text-fg-muted hover:text-fg border border-border'
-                      }`}
-                    >
-                      {fret}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Metrónomo & Pestañas de Instrumento */}
