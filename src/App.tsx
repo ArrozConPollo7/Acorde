@@ -3736,32 +3736,28 @@ function ChordSheetRenderer({
 
           for (let si = 0; si < line.segments.length; si++) {
             const seg = line.segments[si]
-            const chord = seg.chord
+            let pendingChord = seg.chord
             const text = seg.text || ''
 
             if (!text) {
-              if (chord) {
+              if (pendingChord) {
                 if (currentWordColumns.length > 0) {
                   tokens.push({ type: 'word', columns: currentWordColumns })
                   currentWordColumns = []
                 }
-                tokens.push({ type: 'chord', chord, text: '' })
+                tokens.push({ type: 'chord', chord: pendingChord, text: '' })
               }
               continue
             }
 
             if (/^\s*$/.test(text)) {
-              if (chord) {
-                if (currentWordColumns.length > 0) {
-                  tokens.push({ type: 'word', columns: currentWordColumns })
-                  currentWordColumns = []
-                }
-                tokens.push({ type: 'chord', chord, text })
+              if (currentWordColumns.length > 0) {
+                tokens.push({ type: 'word', columns: currentWordColumns })
+                currentWordColumns = []
+              }
+              if (pendingChord) {
+                tokens.push({ type: 'chord', chord: pendingChord, text })
               } else {
-                if (currentWordColumns.length > 0) {
-                  tokens.push({ type: 'word', columns: currentWordColumns })
-                  currentWordColumns = []
-                }
                 tokens.push({ type: 'space', text })
               }
               continue
@@ -3780,9 +3776,18 @@ function ChordSheetRenderer({
                 }
                 tokens.push({ type: 'space', text: part })
               } else {
-                const colChord = pi === 0 ? chord : undefined
+                const colChord = pendingChord
+                pendingChord = undefined
                 currentWordColumns.push({ chord: colChord, text: part })
               }
+            }
+
+            if (pendingChord) {
+              if (currentWordColumns.length > 0) {
+                tokens.push({ type: 'word', columns: currentWordColumns })
+                currentWordColumns = []
+              }
+              tokens.push({ type: 'chord', chord: pendingChord, text: '' })
             }
           }
 

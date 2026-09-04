@@ -210,7 +210,7 @@ export function getInitialAvailability(): AvailabilityMap {
 
 // ─── PARSER DE CHORDPRO Y CIFRACLUB UNIVERSAL ─────────────────────────────────
 
-const CHORD_CORE_PATTERN = '[A-G][b#]?(?:[mM]|maj|min|aug|dim|sus|add|[0-9]|\\+|\\-|\\(|\\)|º|ø|M)*'
+const CHORD_CORE_PATTERN = '[A-G][b#]?(?:[mM]|maj|min|aug|dim|sus|add|[0-9]|b|#|\\+|\\-|\\(|\\)|º|ø|M)*'
 const CHORD_FULL_VALIDATOR = new RegExp(`^${CHORD_CORE_PATTERN}(?:\\/${CHORD_CORE_PATTERN})?$`)
 
 function isSingleChordToken(token: string): boolean {
@@ -228,6 +228,8 @@ function isPureChordLine(line: string): boolean {
   const tokens = trimmed.split(/\s+/)
   return tokens.length > 0 && tokens.every(token => isSingleChordToken(token))
 }
+
+const SECTION_HEADER_KEYWORDS = /^(?:verso|estrofa|coro|puente|intro|outro|pre-coro|pre-estribillo|estribillo|tag|coda|final|solo|instrumental|parte\s+\d+)/i
 
 export function parseChordProText(text: string): LyricLine[] {
   if (!text || !text.trim()) {
@@ -272,7 +274,9 @@ export function parseChordProText(text: string): LyricLine[] {
     }
 
     // Detectar encabezados de sección estándar ([Intro], [Verso 1], [Estribillo], [Solo], [Puente], etc.)
-    if (/^\[([^\]]+)\]$/.test(trimmed) || /^(verso|estrofa|coro|puente|intro|outro|pre-coro|pre-estribillo|estribillo|tag|coda|final|solo|instrumental|parte\s+\d+)/i.test(trimmed)) {
+    // Evitar que acordes únicos entre corchetes como [C] o [A] sean consumidos erróneamente como etiquetas de sección
+    const isSingleBracketChord = /^\[[^\]]+\]$/.test(trimmed) && isSingleChordToken(trimmed.slice(1, -1))
+    if (!isSingleBracketChord && (/^\[([^\]]+)\]$/.test(trimmed) || SECTION_HEADER_KEYWORDS.test(trimmed))) {
       currentLabel = trimmed.replace(/^\[|\]$/g, '')
       continue
     }
@@ -388,7 +392,7 @@ export function parseChordProText(text: string): LyricLine[] {
     }
 
     // Caso 2: Formato ChordPro nativo con corchetes [C9] o [D/F#]
-    const bracketRegex = /\[([A-G][b#]?(?:[mM]|maj|min|aug|dim|sus|add|[0-9]|\+|\-|\(|\)|º|ø|M)*(?:\/[A-G][b#]?(?:[mM]|maj|min|aug|dim|sus|add|[0-9]|\+|\-|\(|\)|º|ø|M)*)?)\]/g
+    const bracketRegex = new RegExp(`\\[(${CHORD_CORE_PATTERN}(?:\\/${CHORD_CORE_PATTERN})?)\\]`, 'g')
     const segments: SongSegment[] = []
     let lastIndex = 0
     let match: RegExpExecArray | null
