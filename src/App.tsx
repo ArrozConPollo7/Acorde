@@ -3669,14 +3669,14 @@ function ChordSheetRenderer({
   hideChords?: boolean
 }) {
   const fontSizes = {
-    sm: { chord: 'text-xs', text: 'text-xs md:text-sm', lineGap: 'gap-0.5 sm:gap-1' },
-    base: { chord: 'text-xs md:text-sm', text: 'text-sm md:text-base', lineGap: 'gap-1 sm:gap-1.5' },
-    lg: { chord: 'text-sm md:text-base', text: 'text-base md:text-lg', lineGap: 'gap-1.5 sm:gap-2' },
-    xl: { chord: 'text-base md:text-lg', text: 'text-lg md:text-xl', lineGap: 'gap-2 sm:gap-2.5' },
+    sm: { chord: 'text-[10px] sm:text-xs', text: 'text-[11px] sm:text-sm', lineGap: 'gap-0.5 sm:gap-1' },
+    base: { chord: 'text-[11px] sm:text-sm', text: 'text-xs sm:text-base', lineGap: 'gap-1 sm:gap-1.5' },
+    lg: { chord: 'text-xs sm:text-base', text: 'text-sm sm:text-lg', lineGap: 'gap-1.5 sm:gap-2' },
+    xl: { chord: 'text-sm sm:text-lg', text: 'text-base sm:text-xl', lineGap: 'gap-2 sm:gap-2.5' },
   }[fontSize]
 
   return (
-    <div className={`flex flex-col ${fontSizes.lineGap} font-mono select-text leading-tight w-full max-w-full overflow-x-hidden`}>
+    <div className={`flex flex-col ${fontSizes.lineGap} font-mono select-text leading-tight w-full max-w-full overflow-x-auto`}>
       {lyrics.map((line, li) => {
         if (line.isEmpty) {
           return <div key={li} className="h-3 sm:h-4.5 select-none pointer-events-none" aria-hidden="true" />
@@ -3703,7 +3703,7 @@ function ChordSheetRenderer({
                   </span>
                 </div>
               )}
-              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-3.5 rounded-2xl bg-surface-2 border border-border leading-tight text-accent whitespace-pre shadow-xs">
+              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-3 rounded-2xl bg-surface-2 border border-border leading-tight text-accent whitespace-pre shadow-xs">
                 {line.segments.map(s => s.text).join('')}
               </pre>
             </div>
@@ -3716,8 +3716,59 @@ function ChordSheetRenderer({
         // En modo Solo Letra, ocultar lineas de acordes puros (intros, interludios)
         if (hideChords && isPureChords) return null
 
+        // Agrupar sílabas pertenecientes a la misma palabra para que no se corten en flex-wrap
+        let wordClusters: Array<
+          | { type: 'word'; units: Array<{ chord?: string; text: string }> }
+          | { type: 'space'; text: string }
+          | { type: 'chord'; chord?: string; text: string }
+        > = []
+
+        if (isPureChords) {
+          wordClusters = line.segments.map(s => ({
+            type: 'chord',
+            chord: s.chord,
+            text: s.text || '',
+          }))
+        } else {
+          const fineUnits: Array<{ chord?: string; text: string; isSpace: boolean }> = []
+          for (const seg of line.segments) {
+            const chord = seg.chord
+            const text = seg.text || ''
+            if (!text) {
+              fineUnits.push({ chord, text: '', isSpace: false })
+              continue
+            }
+            const parts = text.split(/(\s+)/)
+            for (let i = 0; i < parts.length; i++) {
+              const p = parts[i]
+              if (!p) continue
+              if (/^\s+$/.test(p)) {
+                fineUnits.push({ isSpace: true, text: p })
+              } else {
+                fineUnits.push({ chord: i === 0 ? chord : undefined, text: p, isSpace: false })
+              }
+            }
+          }
+
+          let currentWordUnits: Array<{ chord?: string; text: string }> = []
+          for (const u of fineUnits) {
+            if (u.isSpace) {
+              if (currentWordUnits.length > 0) {
+                wordClusters.push({ type: 'word', units: currentWordUnits })
+                currentWordUnits = []
+              }
+              wordClusters.push({ type: 'space', text: u.text })
+            } else {
+              currentWordUnits.push({ chord: u.chord, text: u.text })
+            }
+          }
+          if (currentWordUnits.length > 0) {
+            wordClusters.push({ type: 'word', units: currentWordUnits })
+          }
+        }
+
         return (
-          <div key={li} className="flex flex-col select-text w-full max-w-full overflow-x-hidden">
+          <div key={li} className="flex flex-col select-text w-full max-w-full overflow-x-auto">
             {line.label && (
               <div className="mt-3 mb-1 first:mt-0">
                 <span className="font-mono text-xs sm:text-sm font-bold text-fg-muted tracking-wider">
@@ -3731,40 +3782,75 @@ function ChordSheetRenderer({
                 {line.segments.map(s => s.text).join('')}
               </p>
             ) : (
-              <div className="flex flex-wrap items-end leading-none max-w-full overflow-x-hidden my-0.5">
-                {line.segments.map((seg, si) => {
-                  const hasChord = Boolean(seg.chord)
-                  const text = seg.text || ''
-                  const isBlankText = !text.trim()
-
-                  // Margen para garantizar que los acordes nunca se peguen (ej: CAm -> C Am)
-                  const chordMargin = isPureChords
-                    ? 'mr-5 sm:mr-7'
-                    : hasChord
-                    ? (isBlankText ? 'mr-3 sm:mr-4' : 'mr-1 sm:mr-1.5')
-                    : 'mr-0'
-
-                  return (
-                    <span
-                      key={si}
-                      className={`inline-flex flex-col flex-nowrap align-bottom select-text ${chordMargin}`}
-                    >
-                      {hasChord ? (
-                        <strong
-                          className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 tracking-normal whitespace-nowrap select-text ${
-                            isBlankText ? 'min-w-[3.5ch] pr-2' : 'pr-1'
-                          }`}
-                        >
-                          {seg.chord}
+              <div className="flex flex-wrap items-end leading-none max-w-full overflow-x-auto my-0.5">
+                {wordClusters.map((cluster, ci) => {
+                  if (cluster.type === 'chord') {
+                    return (
+                      <span
+                        key={ci}
+                        className="inline-flex flex-col flex-nowrap align-bottom select-text mr-4 sm:mr-6"
+                      >
+                        <strong className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 whitespace-nowrap select-text pr-1`}>
+                          {cluster.chord}
                         </strong>
-                      ) : (
+                        <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
+                          {cluster.text || '\u00A0\u00A0\u00A0'}
+                        </span>
+                      </span>
+                    )
+                  }
+
+                  if (cluster.type === 'space') {
+                    return (
+                      <span
+                        key={ci}
+                        className="inline-flex flex-col flex-nowrap align-bottom select-text"
+                      >
                         <span className={`${fontSizes.chord} leading-none mb-0.5 opacity-0 select-none pointer-events-none`}>
                           ·
                         </span>
-                      )}
-                      <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
-                        {text || (hasChord ? '\u00A0\u00A0\u00A0' : '')}
+                        <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
+                          {cluster.text}
+                        </span>
                       </span>
+                    )
+                  }
+
+                  // cluster.type === 'word': Envoltura atómica de palabra para que las sílabas no se separen
+                  return (
+                    <span
+                      key={ci}
+                      className="inline-flex flex-nowrap items-end whitespace-nowrap select-text"
+                    >
+                      {cluster.units.map((unit, ui) => {
+                        const hasChord = Boolean(unit.chord)
+                        const text = unit.text || ''
+                        const isBlank = !text.trim()
+
+                        return (
+                          <span
+                            key={ui}
+                            className="inline-flex flex-col flex-nowrap align-bottom select-text"
+                          >
+                            {hasChord ? (
+                              <strong
+                                className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 tracking-normal whitespace-nowrap select-text ${
+                                  isBlank ? 'min-w-[3ch] pr-1.5' : 'pr-0.5'
+                                }`}
+                              >
+                                {unit.chord}
+                              </strong>
+                            ) : (
+                              <span className={`${fontSizes.chord} leading-none mb-0.5 opacity-0 select-none pointer-events-none`}>
+                                ·
+                              </span>
+                            )}
+                            <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
+                              {text || (hasChord ? '\u00A0\u00A0\u00A0' : '')}
+                            </span>
+                          </span>
+                        )
+                      })}
                     </span>
                   )
                 })}
@@ -3811,6 +3897,7 @@ function SongViewScreen({
   const [isAutoScrolling, setIsAutoScrolling] = useState(false)
   const [scrollSpeed, setScrollSpeed] = useState(3) // 1 - 10
   const [isAutoScrollPaused, setIsAutoScrollPaused] = useState(false)
+  const [isFabExpanded, setIsFabExpanded] = useState(false)
   const [isMetronomeActive, setIsMetronomeActive] = useState(false)
   const [metronomeAudio, setMetronomeAudio] = useState(false)
   const [beatIndex, setBeatIndex] = useState(0)
@@ -4280,133 +4367,199 @@ function SongViewScreen({
           </article>
         </div>
 
-        {/* Botón Flotante Auto-Scroll y Metrónomo (FAB) en Modo Enfoque */}
-        <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
+        {/* Controles Flotantes Desplegables al Costado Derecho (BPM, Metrónomo y Auto-Scroll) */}
+        <div className="fixed right-3 bottom-20 sm:bottom-24 z-30 flex flex-col items-end gap-2 select-none pointer-events-auto">
           {isAutoScrollPaused && (
-            <div className="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold animate-pulse shadow-lg backdrop-blur-md">
+            <div className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-semibold animate-pulse shadow-lg backdrop-blur-md">
               Pausa táctil temporal
             </div>
           )}
-          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-surface/95 border border-border shadow-2xl backdrop-blur-md">
-            {/* Metrónomo Flotante - Visible y pulsante siempre al bajar */}
-            <div className="flex items-center gap-1 px-2 py-1 bg-surface-2 rounded-xl border border-border">
-              <button
-                onClick={() => setIsMetronomeActive(!isMetronomeActive)}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                  isMetronomeActive
-                    ? 'bg-accent text-accent-fg shadow-xs'
-                    : 'text-fg-muted hover:text-fg'
-                }`}
-                title={isMetronomeActive ? 'Detener metrónomo' : 'Iniciar metrónomo'}
-              >
-                <div className="flex items-center gap-0.5">
-                  {[0, 1, 2, 3].map(b => (
-                    <span
-                      key={b}
-                      className={`w-1.5 h-3 rounded-full transition-all duration-75 ${
-                        isMetronomeActive && beatIndex === b
-                          ? (b === 0 ? 'bg-white scale-125 shadow-sm' : 'bg-white/80 scale-110')
-                          : 'bg-fg-muted/30'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="font-mono text-xs">{bpm}</span>
-              </button>
 
-              <div className="flex items-center">
+          {/* Panel Desplegable Extendido */}
+          {isFabExpanded ? (
+            <div className="flex flex-col gap-3 p-3.5 rounded-3xl bg-surface/95 border border-border shadow-2xl backdrop-blur-md w-72 transition-all duration-200">
+              <div className="flex items-center justify-between pb-2 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
+                  <span className="text-xs font-bold text-fg uppercase tracking-wider">Controles en Vivo</span>
+                </div>
                 <button
-                  onClick={() => setBpm(b => Math.max(30, b - 5))}
-                  className="w-4 h-4 flex items-center justify-center rounded text-[11px] font-bold text-fg-muted hover:text-fg cursor-pointer"
-                  title="Reducir 5 BPM"
+                  onClick={() => setIsFabExpanded(false)}
+                  className="w-7 h-7 rounded-xl bg-surface-2 border border-border text-fg-muted hover:text-fg flex items-center justify-center cursor-pointer transition-colors"
+                  title="Minimizar panel"
                 >
-                  -
-                </button>
-                <button
-                  onClick={() => setBpm(b => Math.min(280, b + 5))}
-                  className="w-4 h-4 flex items-center justify-center rounded text-[11px] font-bold text-fg-muted hover:text-fg cursor-pointer"
-                  title="Aumentar 5 BPM"
-                >
-                  +
+                  <IconX size={14} />
                 </button>
               </div>
 
-              <button
-                onClick={() => setMetronomeAudio(!metronomeAudio)}
-                className={`p-1 rounded text-xs transition-all cursor-pointer ${
-                  metronomeAudio
-                    ? 'text-accent bg-accent/15'
-                    : 'text-fg-muted hover:text-fg'
-                }`}
-                title={metronomeAudio ? 'Silenciar click' : 'Activar sonido de click'}
-              >
-                <IconVolume size={12} />
-              </button>
+              {/* Metrónomo */}
+              <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-surface-2 border border-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-fg-muted uppercase">Metrónomo</span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setBpm(b => Math.max(30, b - 5))}
+                      className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold bg-surface border border-border text-fg hover:bg-surface-3 cursor-pointer"
+                      title="Reducir 5 BPM"
+                    >
+                      -
+                    </button>
+                    <span className="font-mono text-xs font-bold text-fg w-12 text-center">{bpm} BPM</span>
+                    <button
+                      onClick={() => setBpm(b => Math.min(280, b + 5))}
+                      className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold bg-surface border border-border text-fg hover:bg-surface-3 cursor-pointer"
+                      title="Aumentar 5 BPM"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-1">
+                    {[0, 1, 2, 3].map(b => (
+                      <span
+                        key={b}
+                        className={`w-2 h-2 rounded-full transition-all duration-75 ${
+                          isMetronomeActive && beatIndex === b
+                            ? (b === 0 ? 'bg-accent scale-125 shadow-xs' : 'bg-warm scale-110')
+                            : 'bg-fg-muted/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setMetronomeAudio(!metronomeAudio)}
+                      className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
+                        metronomeAudio
+                          ? 'bg-accent/15 border-accent text-accent'
+                          : 'bg-surface border-border text-fg-muted hover:text-fg'
+                      }`}
+                      title={metronomeAudio ? 'Silenciar click' : 'Activar sonido'}
+                    >
+                      <IconVolume size={13} />
+                    </button>
+                    <button
+                      onClick={() => setIsMetronomeActive(!isMetronomeActive)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                        isMetronomeActive
+                          ? 'bg-accent text-accent-fg shadow-xs'
+                          : 'bg-surface border border-border text-fg hover:bg-surface-3'
+                      }`}
+                    >
+                      {isMetronomeActive ? <IconPause size={12} /> : <IconPlay size={12} />}
+                      <span>{isMetronomeActive ? 'Parar' : 'Iniciar'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Auto-Scroll */}
+              <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-surface-2 border border-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-fg-muted uppercase">Auto-Scroll</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-fg-muted">Vel:</span>
+                    <button
+                      onClick={() => setScrollSpeed(s => Math.max(1, s - 1))}
+                      className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold bg-surface border border-border text-fg hover:bg-surface-3 cursor-pointer"
+                      title="Reducir velocidad"
+                    >
+                      -
+                    </button>
+                    <span className="font-mono text-xs font-bold text-accent w-6 text-center">{scrollSpeed}x</span>
+                    <button
+                      onClick={() => setScrollSpeed(s => Math.min(10, s + 1))}
+                      className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold bg-surface border border-border text-fg hover:bg-surface-3 cursor-pointer"
+                      title="Aumentar velocidad"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsAutoScrolling(!isAutoScrolling)}
+                  className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs ${
+                    isAutoScrolling
+                      ? 'bg-accent text-accent-fg animate-pulse'
+                      : 'bg-surface border border-border text-fg hover:bg-surface-3'
+                  }`}
+                >
+                  {isAutoScrolling ? <IconPause size={13} /> : <IconPlay size={13} />}
+                  <span>{isAutoScrolling ? 'Pausar Desplazamiento' : 'Iniciar Desplazamiento'}</span>
+                </button>
+              </div>
             </div>
-
-            <div className="w-[1px] h-6 bg-border hidden sm:block" />
-
-            {/* Auto-Scroll */}
+          ) : (
+            /* Botón Colapsado al Costado Derecho (Pill/Flotante Compacto) */
             <button
-              onClick={() => setIsAutoScrolling(!isAutoScrolling)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-                isAutoScrolling
-                  ? 'bg-accent text-accent-fg shadow-xs animate-pulse'
-                  : 'bg-surface-2 text-fg hover:bg-surface-3'
+              onClick={() => setIsFabExpanded(true)}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-surface/95 border shadow-xl backdrop-blur-md cursor-pointer transition-all duration-150 active:scale-95 ${
+                isAutoScrolling || isMetronomeActive
+                  ? 'border-accent text-accent ring-2 ring-accent/20'
+                  : 'border-border text-fg hover:bg-surface-2'
               }`}
+              title="Abrir controles de BPM y Auto-Scroll"
             >
-              {isAutoScrolling ? <IconPause size={14} /> : <IconPlay size={14} />}
-              <span>{isAutoScrolling ? 'Pausar' : 'Auto-Scroll'}</span>
-            </button>
+              {/* LED de Metrónomo */}
+              <div className="flex items-center gap-0.5">
+                {[0, 1, 2, 3].map(b => (
+                  <span
+                    key={b}
+                    className={`w-1.5 h-2.5 rounded-full transition-all duration-75 ${
+                      isMetronomeActive && beatIndex === b
+                        ? (b === 0 ? 'bg-accent scale-125' : 'bg-warm scale-110')
+                        : 'bg-fg-muted/30'
+                    }`}
+                  />
+                ))}
+              </div>
 
-            <div className="flex items-center gap-1 px-2 py-1 bg-surface-2 rounded-xl border border-border">
-              <span className="text-[10px] font-bold text-fg-muted uppercase">Vel</span>
-              <button
-                onClick={() => setScrollSpeed(s => Math.max(1, s - 1))}
-                className="w-5 h-5 flex items-center justify-center rounded text-xs font-bold text-fg hover:bg-surface cursor-pointer"
-                title="Reducir velocidad"
-              >
-                -
-              </button>
-              <span className="text-xs font-mono font-bold text-accent px-1">{scrollSpeed}x</span>
-              <button
-                onClick={() => setScrollSpeed(s => Math.min(10, s + 1))}
-                className="w-5 h-5 flex items-center justify-center rounded text-xs font-bold text-fg hover:bg-surface cursor-pointer"
-                title="Aumentar velocidad"
-              >
-                +
-              </button>
-            </div>
-          </div>
+              <span className="font-mono text-xs font-bold text-fg">{bpm}</span>
+
+              {isAutoScrolling && (
+                <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
+              )}
+            </button>
+          )}
         </div>
 
-        {/* Barra de Navegación de Setlist en Modo Enfoque */}
+        {/* Barra de Navegación de Setlist en Modo Enfoque (Centrada) */}
         {hasSetlist && (
-          <div className="fixed bottom-0 left-0 right-0 z-20 bg-surface/95 backdrop-blur-md border-t border-border px-4 py-2.5 flex items-center justify-between shadow-lg">
-            <button
-              disabled={setlistIndex! <= 0}
-              onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! - 1].id)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
-            >
-              <IconSkipBack size={13} />
-              <span className="hidden sm:inline">Anterior:</span>
-              <span className="truncate max-w-[120px]">{setlistIndex! > 0 ? setlistSongs![setlistIndex! - 1].title : ''}</span>
-            </button>
-            <div className="text-center">
-              <span className="text-xs font-bold text-fg block">
-                Canción {setlistIndex! + 1} de {setlistSongs!.length}
-              </span>
-              <span className="text-[10px] text-fg-muted uppercase tracking-wider block">Setlist de Servicio</span>
+          <div className="fixed bottom-0 left-0 right-0 z-20 bg-surface/95 backdrop-blur-md border-t border-border shadow-lg">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center max-w-xl mx-auto w-full px-3 py-2">
+              <div className="flex justify-start">
+                <button
+                  disabled={setlistIndex! <= 0}
+                  onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! - 1].id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                >
+                  <IconSkipBack size={13} />
+                  <span className="hidden sm:inline">Anterior</span>
+                  <span className="truncate max-w-[90px] hidden md:inline">{setlistIndex! > 0 ? `: ${setlistSongs![setlistIndex! - 1].title}` : ''}</span>
+                </button>
+              </div>
+              <div className="text-center px-2">
+                <span className="text-xs font-bold text-fg block whitespace-nowrap">
+                  {setlistIndex! + 1} / {setlistSongs!.length}
+                </span>
+                <span className="text-[10px] text-fg-muted uppercase tracking-wider block whitespace-nowrap">Setlist</span>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  disabled={setlistIndex! >= setlistSongs!.length - 1}
+                  onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! + 1].id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                >
+                  <span className="hidden sm:inline">Siguiente</span>
+                  <span className="truncate max-w-[90px] hidden md:inline">{setlistIndex! < setlistSongs!.length - 1 ? `: ${setlistSongs![setlistIndex! + 1].title}` : ''}</span>
+                  <IconSkipForward size={13} />
+                </button>
+              </div>
             </div>
-            <button
-              disabled={setlistIndex! >= setlistSongs!.length - 1}
-              onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! + 1].id)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
-            >
-              <span className="hidden sm:inline">Siguiente:</span>
-              <span className="truncate max-w-[120px]">{setlistIndex! < setlistSongs!.length - 1 ? setlistSongs![setlistIndex! + 1].title : ''}</span>
-              <IconSkipForward size={13} />
-            </button>
           </div>
         )}
       </div>
@@ -4775,35 +4928,200 @@ function SongViewScreen({
         </div>
       </div>
 
-      {/* Barra de Navegación de Setlist en Vista Normal */}
-      {hasSetlist && (
-        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-20 bg-surface/95 backdrop-blur-md border-t border-border px-4 py-2.5 flex items-center justify-between shadow-lg">
-          <button
-            disabled={setlistIndex! <= 0}
-            onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! - 1].id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
-          >
-            <IconSkipBack size={13} />
-            <span className="hidden sm:inline">Anterior:</span>
-            <span className="truncate max-w-[120px]">{setlistIndex! > 0 ? setlistSongs![setlistIndex! - 1].title : ''}</span>
-          </button>
-          <div className="text-center">
-            <span className="text-xs font-bold text-fg block">
-              Canción {setlistIndex! + 1} de {setlistSongs!.length}
-            </span>
-            <span className="text-[10px] text-fg-muted uppercase tracking-wider block">Setlist de Servicio</span>
-          </div>
-          <button
-            disabled={setlistIndex! >= setlistSongs!.length - 1}
-            onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! + 1].id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
-          >
-            <span className="hidden sm:inline">Siguiente:</span>
-            <span className="truncate max-w-[120px]">{setlistIndex! < setlistSongs!.length - 1 ? setlistSongs![setlistIndex! + 1].title : ''}</span>
-            <IconSkipForward size={13} />
-          </button>
+        {/* Controles Flotantes Desplegables al Costado Derecho en Vista Normal */}
+        <div className={`fixed right-3 z-30 flex flex-col items-end gap-2 select-none pointer-events-auto transition-all ${
+          hasSetlist ? 'bottom-20 sm:bottom-24' : 'bottom-6 md:bottom-8'
+        }`}>
+          {isAutoScrollPaused && (
+            <div className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-semibold animate-pulse shadow-lg backdrop-blur-md">
+              Pausa táctil temporal
+            </div>
+          )}
+
+          {isFabExpanded ? (
+            <div className="flex flex-col gap-3 p-3.5 rounded-3xl bg-surface/95 border border-border shadow-2xl backdrop-blur-md w-72 transition-all duration-200">
+              <div className="flex items-center justify-between pb-2 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
+                  <span className="text-xs font-bold text-fg uppercase tracking-wider">Controles en Vivo</span>
+                </div>
+                <button
+                  onClick={() => setIsFabExpanded(false)}
+                  className="w-7 h-7 rounded-xl bg-surface-2 border border-border text-fg-muted hover:text-fg flex items-center justify-center cursor-pointer transition-colors"
+                  title="Minimizar panel"
+                >
+                  <IconX size={14} />
+                </button>
+              </div>
+
+              {/* Metrónomo */}
+              <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-surface-2 border border-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-fg-muted uppercase">Metrónomo</span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setBpm(b => Math.max(30, b - 5))}
+                      className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold bg-surface border border-border text-fg hover:bg-surface-3 cursor-pointer"
+                      title="Reducir 5 BPM"
+                    >
+                      -
+                    </button>
+                    <span className="font-mono text-xs font-bold text-fg w-12 text-center">{bpm} BPM</span>
+                    <button
+                      onClick={() => setBpm(b => Math.min(280, b + 5))}
+                      className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold bg-surface border border-border text-fg hover:bg-surface-3 cursor-pointer"
+                      title="Aumentar 5 BPM"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-1">
+                    {[0, 1, 2, 3].map(b => (
+                      <span
+                        key={b}
+                        className={`w-2 h-2 rounded-full transition-all duration-75 ${
+                          isMetronomeActive && beatIndex === b
+                            ? (b === 0 ? 'bg-accent scale-125 shadow-xs' : 'bg-warm scale-110')
+                            : 'bg-fg-muted/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setMetronomeAudio(!metronomeAudio)}
+                      className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
+                        metronomeAudio
+                          ? 'bg-accent/15 border-accent text-accent'
+                          : 'bg-surface border-border text-fg-muted hover:text-fg'
+                      }`}
+                      title={metronomeAudio ? 'Silenciar click' : 'Activar sonido'}
+                    >
+                      <IconVolume size={13} />
+                    </button>
+                    <button
+                      onClick={() => setIsMetronomeActive(!isMetronomeActive)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                        isMetronomeActive
+                          ? 'bg-accent text-accent-fg shadow-xs'
+                          : 'bg-surface border border-border text-fg hover:bg-surface-3'
+                      }`}
+                    >
+                      {isMetronomeActive ? <IconPause size={12} /> : <IconPlay size={12} />}
+                      <span>{isMetronomeActive ? 'Parar' : 'Iniciar'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Auto-Scroll */}
+              <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-surface-2 border border-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-fg-muted uppercase">Auto-Scroll</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-fg-muted">Vel:</span>
+                    <button
+                      onClick={() => setScrollSpeed(s => Math.max(1, s - 1))}
+                      className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold bg-surface border border-border text-fg hover:bg-surface-3 cursor-pointer"
+                      title="Reducir velocidad"
+                    >
+                      -
+                    </button>
+                    <span className="font-mono text-xs font-bold text-accent w-6 text-center">{scrollSpeed}x</span>
+                    <button
+                      onClick={() => setScrollSpeed(s => Math.min(10, s + 1))}
+                      className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold bg-surface border border-border text-fg hover:bg-surface-3 cursor-pointer"
+                      title="Aumentar velocidad"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsAutoScrolling(!isAutoScrolling)}
+                  className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs ${
+                    isAutoScrolling
+                      ? 'bg-accent text-accent-fg animate-pulse'
+                      : 'bg-surface border border-border text-fg hover:bg-surface-3'
+                  }`}
+                >
+                  {isAutoScrolling ? <IconPause size={13} /> : <IconPlay size={13} />}
+                  <span>{isAutoScrolling ? 'Pausar Desplazamiento' : 'Iniciar Desplazamiento'}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsFabExpanded(true)}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-surface/95 border shadow-xl backdrop-blur-md cursor-pointer transition-all duration-150 active:scale-95 ${
+                isAutoScrolling || isMetronomeActive
+                  ? 'border-accent text-accent ring-2 ring-accent/20'
+                  : 'border-border text-fg hover:bg-surface-2'
+              }`}
+              title="Abrir controles de BPM y Auto-Scroll"
+            >
+              <div className="flex items-center gap-0.5">
+                {[0, 1, 2, 3].map(b => (
+                  <span
+                    key={b}
+                    className={`w-1.5 h-2.5 rounded-full transition-all duration-75 ${
+                      isMetronomeActive && beatIndex === b
+                        ? (b === 0 ? 'bg-accent scale-125' : 'bg-warm scale-110')
+                        : 'bg-fg-muted/30'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <span className="font-mono text-xs font-bold text-fg">{bpm}</span>
+
+              {isAutoScrolling && (
+                <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
+              )}
+            </button>
+          )}
         </div>
-      )}
+
+        {/* Barra de Navegación de Setlist en Vista Normal (Centrada) */}
+        {hasSetlist && (
+          <div className="fixed bottom-0 left-0 right-0 z-20 bg-surface/95 backdrop-blur-md border-t border-border shadow-lg">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center max-w-xl mx-auto w-full px-3 py-2">
+              <div className="flex justify-start">
+                <button
+                  disabled={setlistIndex! <= 0}
+                  onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! - 1].id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                >
+                  <IconSkipBack size={13} />
+                  <span className="hidden sm:inline">Anterior</span>
+                  <span className="truncate max-w-[90px] hidden md:inline">{setlistIndex! > 0 ? `: ${setlistSongs![setlistIndex! - 1].title}` : ''}</span>
+                </button>
+              </div>
+              <div className="text-center px-2">
+                <span className="text-xs font-bold text-fg block whitespace-nowrap">
+                  {setlistIndex! + 1} / {setlistSongs!.length}
+                </span>
+                <span className="text-[10px] text-fg-muted uppercase tracking-wider block whitespace-nowrap">Setlist</span>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  disabled={setlistIndex! >= setlistSongs!.length - 1}
+                  onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! + 1].id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                >
+                  <span className="hidden sm:inline">Siguiente</span>
+                  <span className="truncate max-w-[90px] hidden md:inline">{setlistIndex! < setlistSongs!.length - 1 ? `: ${setlistSongs![setlistIndex! + 1].title}` : ''}</span>
+                  <IconSkipForward size={13} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   )
 }
@@ -6585,8 +6903,10 @@ export default function App() {
         )}
       </main>
 
-      {/* Navegación Inferior para Móviles */}
-      <BottomNav screen={screen} setScreen={s => nav(s)} currentUser={currentMusician} />
+      {/* Navegación Inferior para Móviles (se oculta en pantalla de canción con setlist para no tapar la navegación de servicio) */}
+      {!(screen === 'song' && currentSetlistSongs && currentSetlistSongs.length > 0) && (
+        <BottomNav screen={screen} setScreen={s => nav(s)} currentUser={currentMusician} />
+      )}
     </div>
   )
 }

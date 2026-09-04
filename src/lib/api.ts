@@ -229,6 +229,32 @@ function isPureChordLine(line: string): boolean {
   return tokens.length > 0 && tokens.every(token => isSingleChordToken(token))
 }
 
+// Palabras funcionales de 1 a 3 letras en español que pueden existir como palabras independientes
+const STANDALONE_SPANISH_WORDS = new Set([
+  'y', 'a', 'e', 'o', 'u', 'el', 'la', 'tu', 'tú', 'su', 'mi', 'mí', 'de', 'en', 'es', 'un', 'al',
+  'se', 'me', 'te', 'le', 'lo', 'nos', 'los', 'las', 'les', 'del', 'por', 'con', 'sin', 'mas', 'más',
+  'tan', 'muy', 'que', 'qué', 'fue', 'fui', 'dio', 'vio', 'voz', 'paz', 'luz', 'sol', 'pan', 'rey',
+  'fe', 'yo', 'ya', 'si', 'sí', 'no', 'ni', 'dos', 'tal', 'va', 'van', 'hoy', 'ver', 'mar',
+  'fin', 'bien', 'mal'
+])
+
+function sanitizeIntraWordChordSpaces(line: string): string {
+  // Caso 1: [Acorde] pegado a la izquierda pero separado con espacio de la siguiente sílaba (ej: 'ad[F#] orarte' -> 'ad[F#]orarte')
+  let s = line.replace(/([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)(\[[A-G][b#]?[^\]]*\])\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)/g, '$1$2$3')
+  // Caso 2: [Acorde] con espacio a la izquierda pero pegado a la derecha (ej: 'ad [F#]orarte' -> 'ad[F#]orarte')
+  s = s.replace(/([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s+(\[[A-G][b#]?[^\]]*\])([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)/g, '$1$2$3')
+  // Caso 3: [Acorde] con espacios a ambos lados pero la primera parte es una sílaba incompleta (<=3 letras y no es palabra autónoma)
+  // ej: 'Tu le diste la música para ad [F#] orarte' -> 'ad[F#]orarte'
+  s = s.replace(/([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s+(\[[A-G][b#]?[^\]]*\])\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)/g, (match, p1, chord, p2) => {
+    const p1Lower = p1.toLowerCase()
+    if (p1.length <= 3 && !STANDALONE_SPANISH_WORDS.has(p1Lower)) {
+      return p1 + chord + p2
+    }
+    return match
+  })
+  return s
+}
+
 export function parseChordProText(text: string): LyricLine[] {
   if (!text || !text.trim()) {
     return [{ segments: [{ text: 'Letra no ingresada.' }] }]
@@ -241,11 +267,12 @@ export function parseChordProText(text: string): LyricLine[] {
   let lastNonEmpty = ''
 
   for (const l of rawLines) {
-    const trimmed = l.trim()
+    const sanitizedLine = sanitizeIntraWordChordSpaces(l)
+    const trimmed = sanitizedLine.trim()
     if (trimmed && trimmed === lastNonEmpty) {
       continue
     }
-    deduplicatedLines.push(l)
+    deduplicatedLines.push(sanitizedLine)
     if (trimmed) lastNonEmpty = trimmed
   }
 
