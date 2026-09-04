@@ -3669,10 +3669,10 @@ function ChordSheetRenderer({
   hideChords?: boolean
 }) {
   const fontSizes = {
-    sm: { chord: 'text-xs', text: 'text-xs md:text-sm', lineGap: 'gap-0.5 sm:gap-1' },
-    base: { chord: 'text-xs md:text-sm', text: 'text-sm md:text-base', lineGap: 'gap-1 sm:gap-1.5' },
-    lg: { chord: 'text-sm md:text-base', text: 'text-base md:text-lg', lineGap: 'gap-1.5 sm:gap-2' },
-    xl: { chord: 'text-base md:text-lg', text: 'text-lg md:text-xl', lineGap: 'gap-2 sm:gap-2.5' },
+    sm: { chord: 'text-[11px] sm:text-xs', text: 'text-xs sm:text-sm', lineGap: 'gap-0.5 sm:gap-1' },
+    base: { chord: 'text-xs sm:text-sm', text: 'text-[13px] sm:text-base', lineGap: 'gap-1 sm:gap-1.5' },
+    lg: { chord: 'text-sm sm:text-base', text: 'text-sm sm:text-lg', lineGap: 'gap-1.5 sm:gap-2' },
+    xl: { chord: 'text-base sm:text-lg', text: 'text-base sm:text-xl', lineGap: 'gap-2 sm:gap-2.5' },
   }[fontSize]
 
   return (
@@ -3713,8 +3713,83 @@ function ChordSheetRenderer({
         const isPureChords = line.segments.every(s => Boolean(s.chord) && (!s.text || s.text.trim().length === 0))
         const isPureText = line.segments.every(s => !s.chord)
 
-        // En modo Solo Letra, ocultar lineas de acordes puros (intros, interludios)
+        // En modo Solo Letra, ocultar líneas de acordes puros (intros, interludios)
         if (hideChords && isPureChords) return null
+
+        // Tokenización de la línea para agrupación atómica por palabra
+        type WordColumn = { chord?: string; text: string }
+        type LineToken =
+          | { type: 'word'; columns: WordColumn[] }
+          | { type: 'space'; text: string }
+          | { type: 'chord'; chord?: string; text: string }
+
+        let tokens: LineToken[] = []
+
+        if (isPureChords) {
+          tokens = line.segments.map(s => ({
+            type: 'chord',
+            chord: s.chord,
+            text: s.text || '',
+          }))
+        } else {
+          let currentWordColumns: WordColumn[] = []
+
+          for (let si = 0; si < line.segments.length; si++) {
+            const seg = line.segments[si]
+            const chord = seg.chord
+            const text = seg.text || ''
+
+            if (!text) {
+              if (chord) {
+                if (currentWordColumns.length > 0) {
+                  tokens.push({ type: 'word', columns: currentWordColumns })
+                  currentWordColumns = []
+                }
+                tokens.push({ type: 'chord', chord, text: '' })
+              }
+              continue
+            }
+
+            if (/^\s*$/.test(text)) {
+              if (chord) {
+                if (currentWordColumns.length > 0) {
+                  tokens.push({ type: 'word', columns: currentWordColumns })
+                  currentWordColumns = []
+                }
+                tokens.push({ type: 'chord', chord, text })
+              } else {
+                if (currentWordColumns.length > 0) {
+                  tokens.push({ type: 'word', columns: currentWordColumns })
+                  currentWordColumns = []
+                }
+                tokens.push({ type: 'space', text })
+              }
+              continue
+            }
+
+            const parts = text.split(/(\s+)/)
+            for (let pi = 0; pi < parts.length; pi++) {
+              const part = parts[pi]
+              if (!part) continue
+
+              const isSpace = /^\s+$/.test(part)
+              if (isSpace) {
+                if (currentWordColumns.length > 0) {
+                  tokens.push({ type: 'word', columns: currentWordColumns })
+                  currentWordColumns = []
+                }
+                tokens.push({ type: 'space', text: part })
+              } else {
+                const colChord = pi === 0 ? chord : undefined
+                currentWordColumns.push({ chord: colChord, text: part })
+              }
+            }
+          }
+
+          if (currentWordColumns.length > 0) {
+            tokens.push({ type: 'word', columns: currentWordColumns })
+          }
+        }
 
         return (
           <div key={li} className="flex flex-col select-text w-full max-w-full overflow-x-auto">
@@ -3731,39 +3806,48 @@ function ChordSheetRenderer({
                 {line.segments.map(s => s.text).join('')}
               </p>
             ) : (
-              <div className="flex flex-wrap items-end leading-none max-w-full overflow-x-auto my-0.5">
-                {line.segments.map((seg, si) => {
-                  const hasChord = Boolean(seg.chord)
-                  const text = seg.text || ''
-                  const isBlankText = !text.trim()
-
-                  // Margen para garantizar que los acordes nunca se peguen (ej: CAm -> C Am)
-                  const chordMargin = isPureChords
-                    ? 'mr-5 sm:mr-7'
-                    : hasChord
-                    ? (isBlankText ? 'mr-3 sm:mr-4' : 'mr-1 sm:mr-1.5')
-                    : 'mr-0'
-
-                  return (
-                    <span
-                      key={si}
-                      className={`inline-flex flex-col flex-nowrap align-bottom select-text ${chordMargin}`}
-                    >
-                      {hasChord ? (
-                        <strong
-                          className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 tracking-normal whitespace-nowrap select-text ${
-                            isBlankText ? 'min-w-[3.5ch] pr-2' : 'pr-1'
-                          }`}
-                        >
-                          {seg.chord}
-                        </strong>
-                      ) : (
-                        <span className={`${fontSizes.chord} leading-none mb-0.5 opacity-0 select-none pointer-events-none`}>
-                          ·
+              <div className="flex flex-wrap items-end leading-none max-w-full my-0.5">
+                {tokens.map((token, ti) => {
+                  if (token.type === 'word') {
+                    return (
+                      <span key={ti} className="inline-block whitespace-nowrap align-bottom">
+                        <span className="inline-flex items-end">
+                          {token.columns.map((col, ci) => (
+                            <span key={ci} className="inline-flex flex-col flex-nowrap align-bottom">
+                              <span className={`min-h-[1.25rem] flex items-end ${fontSizes.chord} font-mono font-bold leading-none mb-0.5 whitespace-nowrap text-accent select-text ${!col.chord ? 'opacity-0 select-none pointer-events-none' : ''}`}>
+                                {col.chord || '\u00A0'}
+                              </span>
+                              <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
+                                {col.text}
+                              </span>
+                            </span>
+                          ))}
                         </span>
-                      )}
+                      </span>
+                    )
+                  }
+
+                  if (token.type === 'space') {
+                    return (
+                      <span key={ti} className="inline-flex flex-col flex-nowrap align-bottom">
+                        <span className="min-h-[1.25rem] leading-none mb-0.5 opacity-0 select-none pointer-events-none">
+                          {'\u00A0'}
+                        </span>
+                        <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
+                          {token.text}
+                        </span>
+                      </span>
+                    )
+                  }
+
+                  // token.type === 'chord' (acordes aislados en líneas de intro/solos o espacios)
+                  return (
+                    <span key={ti} className="inline-flex flex-col flex-nowrap align-bottom mr-5 sm:mr-7">
+                      <strong className={`min-h-[1.25rem] flex items-end text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 whitespace-nowrap select-text`}>
+                        {token.chord}
+                      </strong>
                       <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
-                        {text || (hasChord ? '\u00A0\u00A0\u00A0' : '')}
+                        {token.text || '\u00A0\u00A0\u00A0'}
                       </span>
                     </span>
                   )
@@ -4078,7 +4162,7 @@ function SongViewScreen({
     return (
       <div
         ref={focusRef}
-        className="fixed inset-0 z-[70] bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8 pb-48 select-text"
+        className="fixed inset-0 z-[70] bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-3 sm:p-6 md:p-8 pb-48 select-text"
       >
         {/* Guía Visual Rítmica Fija Superior (Metrónomo en pantalla completa) */}
         {isMetronomeActive && (
@@ -4784,7 +4868,7 @@ function SongViewScreen({
         )}
 
         {/* Partitura y Letra Estilo CifraClub */}
-        <div className="rounded-3xl p-6 md:p-10 bg-surface border border-border shadow-xs">
+        <div className="rounded-3xl p-3.5 sm:p-6 md:p-10 bg-surface border border-border shadow-xs">
           <ChordSheetRenderer lyrics={transposedLyrics} fontSize={fontSize} hideChords={hideChords} />
         </div>
 
