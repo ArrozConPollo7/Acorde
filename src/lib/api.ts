@@ -64,6 +64,7 @@ export interface LyricLine {
   label?: string
   isTab?: boolean
   isEmpty?: boolean
+  comment?: string
   segments: SongSegment[]
 }
 
@@ -98,6 +99,7 @@ export interface Song {
   musical_type?: string // 'Worship contemporáneo' | 'Balada congregacional' | 'Celebración Rítmica' | 'Himno Tradicional' | 'Coral' | 'Especial'
   technical_complexity?: string // 'Básica' | 'Intermedia' | 'Avanzada'
   resumen_tematico?: string // Resumen temático denso generado una sola vez para búsqueda semántica con IA
+  bpm?: number // BPM numérico para metrónomo (si no existe, default por tempo: rápida=140, media=100, lenta=70)
 }
 
 export interface RosterEntry {
@@ -259,6 +261,13 @@ export function parseChordProText(text: string): LyricLine[] {
       if (result.length > 0 && !result[result.length - 1].isEmpty) {
         result.push({ isEmpty: true, segments: [] })
       }
+      continue
+    }
+
+    // Detectar directivas de anotación ChordPro: {comment: texto} o {c: texto}
+    const commentMatch = trimmed.match(/^\{(?:comment|c)\s*:\s*(.+?)\}$/i)
+    if (commentMatch) {
+      result.push({ comment: commentMatch[1].trim(), segments: [] })
       continue
     }
 
@@ -425,6 +434,8 @@ export function formatLyricsToChordPro(lyrics: LyricLine[]): string {
   if (!lyrics || lyrics.length === 0) return ''
   return lyrics
     .map(line => {
+      if (line.isEmpty) return ''
+      if (line.comment) return `{comment: ${line.comment}}`
       const header = line.label ? `[${line.label}]\n` : ''
       if (line.isTab) {
         return header + line.segments.map(s => s.text).join('')

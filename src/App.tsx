@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, type ReactNode } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback, type ReactNode } from 'react'
 import {
   fetchSongs,
   fetchEvents,
@@ -458,6 +458,54 @@ function IconLogOut({ size = 16 }: { size?: number }) {
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
       <polyline points="16 17 21 12 16 7" />
       <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  )
+}
+
+function IconEye({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+function IconEyeOff({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+    </svg>
+  )
+}
+
+function IconSkipBack({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <polygon points="19 20 9 12 19 4 19 20" />
+      <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  )
+}
+
+function IconSkipForward({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <polygon points="5 4 15 12 5 20 5 4" />
+      <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  )
+}
+
+function IconVolume({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
     </svg>
   )
 }
@@ -3586,9 +3634,11 @@ function LibraryScreen({
 function ChordSheetRenderer({
   lyrics,
   fontSize = 'base',
+  hideChords = false,
 }: {
   lyrics: LyricLine[]
   fontSize?: 'sm' | 'base' | 'lg' | 'xl'
+  hideChords?: boolean
 }) {
   const fontSizes = {
     sm: { chord: 'text-xs', text: 'text-xs md:text-sm', lineGap: 'gap-0.5 sm:gap-1' },
@@ -3604,7 +3654,18 @@ function ChordSheetRenderer({
           return <div key={li} className="h-3 sm:h-4.5 select-none pointer-events-none" aria-hidden="true" />
         }
 
+        if (line.comment) {
+          return (
+            <div key={li} className="my-1.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-warm/10 border border-warm/30 text-warm text-xs font-semibold tracking-wide">
+                {line.comment}
+              </span>
+            </div>
+          )
+        }
+
         if (line.isTab) {
+          if (hideChords) return null
           return (
             <div key={li} className="my-1.5">
               {line.label && (
@@ -3624,6 +3685,9 @@ function ChordSheetRenderer({
         const isPureChords = line.segments.every(s => Boolean(s.chord) && (!s.text || s.text.trim().length === 0))
         const isPureText = line.segments.every(s => !s.chord)
 
+        // En modo Solo Letra, ocultar lineas de acordes puros (intros, interludios)
+        if (hideChords && isPureChords) return null
+
         return (
           <div key={li} className="flex flex-col select-text w-full max-w-full overflow-x-hidden">
             {line.label && (
@@ -3634,7 +3698,7 @@ function ChordSheetRenderer({
               </div>
             )}
 
-            {isPureText ? (
+            {hideChords || isPureText ? (
               <p className={`text-fg ${fontSizes.text} leading-snug whitespace-pre-wrap break-words font-mono my-0.5`}>
                 {line.segments.map(s => s.text).join('')}
               </p>
@@ -3696,6 +3760,9 @@ function SongViewScreen({
   onDelete,
   theme,
   onToggleTheme,
+  setlistSongs,
+  setlistIndex,
+  onNavigateSong,
 }: {
   song: Song
   onBack: () => void
@@ -3703,25 +3770,186 @@ function SongViewScreen({
   onDelete?: (id: string) => Promise<void> | void
   theme: Theme
   onToggleTheme: () => void
+  setlistSongs?: Song[]
+  setlistIndex?: number
+  onNavigateSong?: (songId: string) => void
 }) {
   const [transpose, setTranspose] = useState(0)
+  const [capo, setCapo] = useState(0)
   const [instTab, setInstTab] = useState<typeof INSTRUMENTS_TABS[number]>('guitarra')
   const [isFocusMode, setIsFocusMode] = useState(false)
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base')
+  const [hideChords, setHideChords] = useState(false)
   const [isAutoScrolling, setIsAutoScrolling] = useState(false)
-  const [scrollSpeed, setScrollSpeed] = useState<1 | 2 | 3>(1)
+  const [scrollSpeed, setScrollSpeed] = useState(3) // 1 - 10
+  const [isAutoScrollPaused, setIsAutoScrollPaused] = useState(false)
+  const [isMetronomeActive, setIsMetronomeActive] = useState(false)
+  const [metronomeAudio, setMetronomeAudio] = useState(false)
+  const [beatIndex, setBeatIndex] = useState(0)
+  const defaultBpm = song.bpm || (song.tempo === 'rápida' ? 140 : song.tempo === 'media' ? 100 : 70)
+  const [bpm, setBpm] = useState(defaultBpm)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Auto-scroll logic for reading hands-free (like CifraClub)
+  const focusRef = useRef<HTMLDivElement>(null)
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+  const pauseTimeoutRef = useRef<number | null>(null)
+  const transposeMapRef = useRef<Map<string, number>>(new Map())
+  const capoMapRef = useRef<Map<string, number>>(new Map())
+  const audioCtxRef = useRef<AudioContext | null>(null)
+
+  // Persistencia de transposición y cejilla por canción en sesión
   useEffect(() => {
+    const savedTranspose = transposeMapRef.current.get(song.id)
+    setTranspose(savedTranspose !== undefined ? savedTranspose : 0)
+
+    const savedCapo = capoMapRef.current.get(song.id)
+    setCapo(savedCapo !== undefined ? savedCapo : 0)
+
+    const newDefaultBpm = song.bpm || (song.tempo === 'rápida' ? 140 : song.tempo === 'media' ? 100 : 70)
+    setBpm(newDefaultBpm)
+
+    setIsAutoScrolling(false)
+    setIsAutoScrollPaused(false)
+    setIsMetronomeActive(false)
+    setBeatIndex(0)
+  }, [song.id, song.bpm, song.tempo])
+
+  useEffect(() => {
+    transposeMapRef.current.set(song.id, transpose)
+  }, [song.id, transpose])
+
+  useEffect(() => {
+    capoMapRef.current.set(song.id, capo)
+  }, [song.id, capo])
+
+  // Auto-scroll fluido a 60fps con requestAnimationFrame
+  useEffect(() => {
+    if (!isAutoScrolling || isAutoScrollPaused) return
+    let lastTime = performance.now()
+    let animationFrameId: number
+
+    const scrollStep = (now: number) => {
+      const dt = (now - lastTime) / 1000
+      lastTime = now
+      const pxPerSec = scrollSpeed * 20
+      const scrollAmount = pxPerSec * dt
+
+      const target = isFocusMode && focusRef.current ? focusRef.current : window
+      if (target === window) {
+        window.scrollBy({ top: scrollAmount })
+      } else {
+        ;(target as HTMLDivElement).scrollTop += scrollAmount
+      }
+
+      animationFrameId = requestAnimationFrame(scrollStep)
+    }
+
+    animationFrameId = requestAnimationFrame(scrollStep)
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [isAutoScrolling, isAutoScrollPaused, scrollSpeed, isFocusMode])
+
+  // Pausa automática temporal al interactuar manualmente con el scroll
+  const handleUserScrollInteraction = useCallback(() => {
     if (!isAutoScrolling) return
-    const speedMs = scrollSpeed === 1 ? 50 : scrollSpeed === 2 ? 30 : 15
-    const interval = setInterval(() => {
-      window.scrollBy({ top: 1, behavior: 'smooth' })
-    }, speedMs)
-    return () => clearInterval(interval)
-  }, [isAutoScrolling, scrollSpeed])
+    setIsAutoScrollPaused(true)
+    if (pauseTimeoutRef.current) window.clearTimeout(pauseTimeoutRef.current)
+    pauseTimeoutRef.current = window.setTimeout(() => {
+      setIsAutoScrollPaused(false)
+    }, 3500)
+  }, [isAutoScrolling])
+
+  useEffect(() => {
+    const target = isFocusMode && focusRef.current ? focusRef.current : window
+    const opts: AddEventListenerOptions = { passive: true }
+    target.addEventListener('wheel', handleUserScrollInteraction, opts)
+    target.addEventListener('touchstart', handleUserScrollInteraction, opts)
+    return () => {
+      target.removeEventListener('wheel', handleUserScrollInteraction)
+      target.removeEventListener('touchstart', handleUserScrollInteraction)
+    }
+  }, [isFocusMode, handleUserScrollInteraction])
+
+  // Screen Wake Lock API nativa para evitar que la pantalla se apague
+  useEffect(() => {
+    let isMounted = true
+    async function handleWakeLock() {
+      if (isAutoScrolling && 'wakeLock' in navigator) {
+        try {
+          const lock = await navigator.wakeLock.request('screen')
+          if (isMounted) {
+            wakeLockRef.current = lock
+            lock.addEventListener('release', () => {
+              if (wakeLockRef.current === lock) wakeLockRef.current = null
+            })
+          } else {
+            lock.release().catch(() => {})
+          }
+        } catch {
+          // Wake lock no disponible o batería baja
+        }
+      } else if (!isAutoScrolling && wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {})
+        wakeLockRef.current = null
+      }
+    }
+    handleWakeLock()
+    return () => {
+      isMounted = false
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {})
+        wakeLockRef.current = null
+      }
+    }
+  }, [isAutoScrolling])
+
+  // Click de metrónomo sintetizado vía Web Audio API
+  const playMetronomeClick = useCallback((isDownbeat: boolean) => {
+    try {
+      if (!audioCtxRef.current) {
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+        audioCtxRef.current = new AudioContextClass()
+      }
+      const ctx = audioCtxRef.current
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+
+      osc.frequency.value = isDownbeat ? 880 : 440
+      osc.type = 'sine'
+
+      const now = ctx.currentTime
+      gain.gain.setValueAtTime(0.12, now)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05)
+
+      osc.start(now)
+      osc.stop(now + 0.05)
+    } catch {
+      // Ignorar si el navegador bloquea audio antes de interacción
+    }
+  }, [])
+
+  // Pulso de metrónomo rítmico
+  useEffect(() => {
+    if (!isMetronomeActive) {
+      setBeatIndex(0)
+      return
+    }
+    const intervalMs = Math.round(60000 / bpm)
+    let currentBeat = 0
+    const timer = setInterval(() => {
+      currentBeat = (currentBeat + 1) % 4
+      setBeatIndex(currentBeat)
+      if (metronomeAudio) {
+        playMetronomeClick(currentBeat === 0)
+      }
+    }, intervalMs)
+    return () => clearInterval(timer)
+  }, [isMetronomeActive, bpm, metronomeAudio, playMetronomeClick])
 
   async function handleConfirmDelete() {
     if (!onDelete || isDeleting) return
@@ -3736,7 +3964,7 @@ function SongViewScreen({
     }
   }
 
-  // Actualizar el título del documento para Safari Reader View y marcadores
+  // Título de la pestaña
   useEffect(() => {
     const originalTitle = document.title
     document.title = `${song.title} - ${song.artist} | Acorde IBAMI`
@@ -3745,8 +3973,11 @@ function SongViewScreen({
     }
   }, [song.title, song.artist])
 
+  // Transposición y Cejilla / Capo (Cálculo Inverso)
   const preferFlats = song.key.includes('b') || song.key.startsWith('F')
   const displayKey = transposeChord(song.key, transpose, preferFlats)
+  const effectiveTranspose = transpose - capo
+  const capoKey = capo > 0 ? transposeChord(song.key, effectiveTranspose, preferFlats) : null
 
   const currentLyrics = (song.instrument_lyrics?.[instTab] && song.instrument_lyrics[instTab]!.length > 0)
     ? song.instrument_lyrics[instTab]!
@@ -3756,7 +3987,7 @@ function SongViewScreen({
     ...line,
     segments: line.segments.map(seg => ({
       ...seg,
-      chord: seg.chord ? transposeChord(seg.chord, transpose, preferFlats) : undefined,
+      chord: seg.chord ? transposeChord(seg.chord, capo > 0 ? effectiveTranspose : transpose, preferFlats) : undefined,
     })),
   }))
 
@@ -3766,7 +3997,7 @@ function SongViewScreen({
     generateSongPDF({
       title: song.title,
       artist: song.artist,
-      key: displayKey,
+      key: capo > 0 ? `${displayKey} (Capo ${capo}: ${capoKey})` : displayKey,
       tempo: song.tempo,
       lyrics: transposedLyrics,
     })
@@ -3780,53 +4011,79 @@ function SongViewScreen({
     setFontSize(curr => (curr === 'xl' ? 'lg' : curr === 'lg' ? 'base' : 'sm'))
   }
 
-  // Vista de solo letra y acordes (Modo Lectura / Enfoque)
+  const hasSetlist = Boolean(setlistSongs && setlistSongs.length > 0 && setlistIndex !== undefined && setlistIndex >= 0)
+
+  // ─── VISTA MODO ENFOQUE (FULLSCREEN LECTURA Y ACORDES) ─────────────────────────
   if (isFocusMode) {
     return (
-      <div className="fixed inset-0 z-[70] bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8 pb-44">
-        <div className="max-w-xl mx-auto w-full overflow-x-hidden">
+      <div
+        ref={focusRef}
+        className="fixed inset-0 z-[70] bg-bg text-fg overflow-y-auto w-full max-w-full overflow-x-hidden p-4 md:p-8 pb-48 select-text"
+      >
+        <div className="max-w-2xl mx-auto w-full overflow-x-hidden">
+          {/* Barra Superior Fija de Controles */}
           <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-border sticky top-0 bg-bg/95 backdrop-blur-md z-10">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <button
-                onClick={() => { setIsFocusMode(false); setIsAutoScrolling(false) }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface border border-border text-fg text-xs font-semibold hover:bg-surface-2 cursor-pointer shadow-xs active:scale-95 transition-all"
+                onClick={() => { setIsFocusMode(false); setIsAutoScrolling(false); setIsMetronomeActive(false) }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface border border-border text-fg text-xs font-semibold hover:bg-surface-2 cursor-pointer shadow-xs active:scale-95 transition-all"
               >
                 <IconChevronLeft size={16} />
                 <span>Volver</span>
               </button>
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Controles A- / A+ */}
                 <div className="flex items-center rounded-xl bg-surface border border-border p-0.5">
                   <button
                     onClick={handleZoomOut}
-                    className="px-2.5 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
+                    className="px-2 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
                     title="Reducir fuente"
                   >
                     A-
                   </button>
-                  <span className="text-[10px] text-fg-muted px-1 font-mono uppercase">{fontSize}</span>
+                  <span className="text-[10px] text-fg-muted px-1.5 font-mono uppercase">{fontSize}</span>
                   <button
                     onClick={handleZoomIn}
-                    className="px-2.5 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
+                    className="px-2 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
                     title="Aumentar fuente"
                   >
                     A+
                   </button>
                 </div>
-                <span className="text-xs font-bold text-accent px-3 py-1 rounded-lg bg-surface-2 border border-border">
-                  Tono {displayKey}
+
+                {/* Toggle Solo Letra */}
+                <button
+                  onClick={() => setHideChords(!hideChords)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                    hideChords
+                      ? 'bg-warm/15 border-warm/40 text-warm'
+                      : 'bg-surface border-border text-fg-muted hover:text-fg'
+                  }`}
+                  title={hideChords ? 'Mostrar acordes' : 'Ocultar acordes'}
+                >
+                  {hideChords ? <IconEyeOff size={13} /> : <IconEye size={13} />}
+                  <span>{hideChords ? 'Solo Letra' : 'Con Acordes'}</span>
+                </button>
+
+                {/* Badge de Tonalidad y Capo */}
+                <span className="text-xs font-bold text-accent px-2.5 py-1 rounded-lg bg-surface-2 border border-border">
+                  {displayKey} {capo > 0 && `(Capo ${capo}: ${capoKey})`}
                 </span>
+
                 <ThemeToggle theme={theme} onToggle={onToggleTheme} />
               </div>
             </div>
 
-            {/* Selector de Instrumento y Auto-Scroll en Modo Enfoque */}
+            {/* Barra de Instrumentos, Cejilla, Metrónomo y Auto-Scroll */}
             <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
-              <div className="flex-1 flex gap-1 p-1 rounded-xl bg-surface border border-border items-center">
+              {/* Selector de Instrumento */}
+              <div className="flex gap-1 p-1 rounded-xl bg-surface border border-border items-center">
                 {INSTRUMENTS_TABS.map(inst => (
                   <button
                     key={inst}
                     onClick={() => setInstTab(inst)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                       instTab === inst
                         ? 'bg-accent text-accent-fg shadow-xs'
                         : 'text-fg-muted hover:text-fg'
@@ -3838,31 +4095,63 @@ function SongViewScreen({
                 ))}
               </div>
 
-              {/* Botón de Auto-Scroll estilo CifraClub */}
+              {/* Selector de Cejilla / Capo Rápido */}
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-surface border border-border">
+                <span className="text-[10px] uppercase font-bold text-fg-muted">Capo</span>
+                <select
+                  value={capo}
+                  onChange={e => setCapo(Number(e.target.value))}
+                  aria-label="Seleccionar cejilla o capo"
+                  className="bg-surface-2 border border-border rounded-lg text-xs font-bold text-fg px-1.5 py-1 cursor-pointer"
+                >
+                  <option value={0}>0 (Sin capo)</option>
+                  <option value={1}>Traste 1</option>
+                  <option value={2}>Traste 2</option>
+                  <option value={3}>Traste 3</option>
+                  <option value={4}>Traste 4</option>
+                  <option value={5}>Traste 5</option>
+                  <option value={6}>Traste 6</option>
+                  <option value={7}>Traste 7</option>
+                </select>
+              </div>
+
+              {/* Metrónomo Visual y Sonoro */}
               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface border border-border shrink-0">
                 <button
-                  onClick={() => setIsAutoScrolling(!isAutoScrolling)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
-                    isAutoScrolling
-                      ? 'bg-accent text-accent-fg animate-pulse'
+                  onClick={() => setIsMetronomeActive(!isMetronomeActive)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    isMetronomeActive
+                      ? 'bg-accent text-accent-fg'
                       : 'text-fg-muted hover:text-fg bg-surface-2'
                   }`}
+                  title="Activar metrónomo"
                 >
-                  {isAutoScrolling ? <IconPause size={13} /> : <IconPlay size={13} />}
-                  <span>{isAutoScrolling ? 'Pausar Scroll' : 'Auto-Scroll'}</span>
+                  <span className={`w-2 h-2 rounded-full transition-all ${
+                    isMetronomeActive
+                      ? (beatIndex === 0 ? 'bg-white scale-125 shadow-sm' : 'bg-white/60 scale-100')
+                      : 'bg-fg-muted/40'
+                  }`} />
+                  <span>{bpm} BPM</span>
                 </button>
-                {isAutoScrolling && (
+
+                {isMetronomeActive && (
                   <button
-                    onClick={() => setScrollSpeed(s => (s === 1 ? 2 : s === 2 ? 3 : 1))}
-                    className="px-2 py-1 rounded-lg text-[10px] font-bold text-accent bg-accent/15 border border-accent/30 cursor-pointer"
+                    onClick={() => setMetronomeAudio(!metronomeAudio)}
+                    className={`p-1 rounded-lg text-xs transition-all cursor-pointer ${
+                      metronomeAudio
+                        ? 'text-accent bg-accent/15 border border-accent/30'
+                        : 'text-fg-muted hover:text-fg'
+                    }`}
+                    title={metronomeAudio ? 'Silenciar click' : 'Activar sonido de click'}
                   >
-                    {scrollSpeed}x
+                    <IconVolume size={13} />
                   </button>
                 )}
               </div>
             </div>
           </div>
 
+          {/* Indicación Técnica para el Instrumentista Activo */}
           {activeNotes && (
             <div className="p-3.5 rounded-2xl bg-surface-2 border border-accent/40 text-xs text-fg flex items-start gap-2.5 mb-6 shadow-xs">
               <IconFileText size={15} className="text-accent shrink-0 mt-0.5" />
@@ -3875,34 +4164,100 @@ function SongViewScreen({
             </div>
           )}
 
-          <article
-            className="w-full max-w-full overflow-x-hidden break-words"
-            itemScope
-            itemType="https://schema.org/MusicComposition"
-          >
+          {/* Letra y Acordes Estilo CifraClub */}
+          <article className="w-full max-w-full overflow-x-hidden break-words">
             <header className="mb-6 border-b border-border pb-4">
-              <h1
-                className="font-display text-3xl md:text-4xl text-fg tracking-wide mb-1 leading-tight uppercase"
-                itemProp="name"
-              >
+              <h1 className="font-display text-3xl md:text-4xl text-fg tracking-wide mb-1 leading-tight uppercase">
                 {song.title}
               </h1>
-              <p className="text-fg-muted text-sm font-medium" itemProp="composer">
+              <p className="text-fg-muted text-sm font-medium">
                 {song.artist} {song.tempo ? `· ${song.tempo}` : ''}
               </p>
             </header>
 
-            <main className="pb-32">
-              <ChordSheetRenderer lyrics={transposedLyrics} fontSize={fontSize} />
+            <main className="pb-36">
+              <ChordSheetRenderer lyrics={transposedLyrics} fontSize={fontSize} hideChords={hideChords} />
             </main>
           </article>
         </div>
+
+        {/* Botón Flotante Auto-Scroll (FAB) en Modo Enfoque */}
+        <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
+          {isAutoScrollPaused && (
+            <div className="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold animate-pulse shadow-lg backdrop-blur-md">
+              Pausa táctil temporal
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-surface/95 border border-border shadow-2xl backdrop-blur-md">
+            <button
+              onClick={() => setIsAutoScrolling(!isAutoScrolling)}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                isAutoScrolling
+                  ? 'bg-accent text-accent-fg shadow-xs animate-pulse'
+                  : 'bg-surface-2 text-fg hover:bg-surface-3'
+              }`}
+            >
+              {isAutoScrolling ? <IconPause size={14} /> : <IconPlay size={14} />}
+              <span>{isAutoScrolling ? 'Pausar' : 'Auto-Scroll'}</span>
+            </button>
+
+            <div className="flex items-center gap-1 px-2 py-1 bg-surface-2 rounded-xl border border-border">
+              <span className="text-[10px] font-bold text-fg-muted uppercase">Vel</span>
+              <button
+                onClick={() => setScrollSpeed(s => Math.max(1, s - 1))}
+                className="w-5 h-5 flex items-center justify-center rounded text-xs font-bold text-fg hover:bg-surface cursor-pointer"
+                title="Reducir velocidad"
+              >
+                -
+              </button>
+              <span className="text-xs font-mono font-bold text-accent px-1">{scrollSpeed}x</span>
+              <button
+                onClick={() => setScrollSpeed(s => Math.min(10, s + 1))}
+                className="w-5 h-5 flex items-center justify-center rounded text-xs font-bold text-fg hover:bg-surface cursor-pointer"
+                title="Aumentar velocidad"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Barra de Navegación de Setlist en Modo Enfoque */}
+        {hasSetlist && (
+          <div className="fixed bottom-0 left-0 right-0 z-20 bg-surface/95 backdrop-blur-md border-t border-border px-4 py-2.5 flex items-center justify-between shadow-lg">
+            <button
+              disabled={setlistIndex! <= 0}
+              onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! - 1].id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+            >
+              <IconSkipBack size={13} />
+              <span className="hidden sm:inline">Anterior:</span>
+              <span className="truncate max-w-[120px]">{setlistIndex! > 0 ? setlistSongs![setlistIndex! - 1].title : ''}</span>
+            </button>
+            <div className="text-center">
+              <span className="text-xs font-bold text-fg block">
+                Canción {setlistIndex! + 1} de {setlistSongs!.length}
+              </span>
+              <span className="text-[10px] text-fg-muted uppercase tracking-wider block">Setlist de Servicio</span>
+            </div>
+            <button
+              disabled={setlistIndex! >= setlistSongs!.length - 1}
+              onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! + 1].id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+            >
+              <span className="hidden sm:inline">Siguiente:</span>
+              <span className="truncate max-w-[120px]">{setlistIndex! < setlistSongs!.length - 1 ? setlistSongs![setlistIndex! + 1].title : ''}</span>
+              <IconSkipForward size={13} />
+            </button>
+          </div>
+        )}
       </div>
     )
   }
 
+  // ─── VISTA NORMAL DEL REPERTORIO ──────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-bg text-fg pb-40 md:pb-16">
+    <div className="min-h-screen bg-bg text-fg pb-40 md:pb-24 select-text">
       {/* Modal de Confirmación para Eliminar Canción */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -3946,12 +4301,15 @@ function SongViewScreen({
       )}
 
       <div className="max-w-4xl mx-auto px-4 lg:px-8 pt-6">
-        <div className="flex items-center justify-between mb-6">
+        {/* Barra Superior */}
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <button onClick={onBack} className="flex items-center gap-1.5 text-fg-muted text-sm hover:text-fg transition-colors cursor-pointer">
             <IconChevronLeft size={16} />
-            <span>Volver al Repertorio</span>
+            <span>Volver {hasSetlist ? 'al Servicio' : 'al Repertorio'}</span>
           </button>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Controles de Fuente */}
             <div className="flex items-center rounded-xl bg-surface border border-border p-0.5">
               <button
                 onClick={handleZoomOut}
@@ -3960,7 +4318,7 @@ function SongViewScreen({
               >
                 A-
               </button>
-              <span className="text-[10px] text-fg-muted px-1 font-mono uppercase">{fontSize}</span>
+              <span className="text-[10px] text-fg-muted px-1.5 font-mono uppercase">{fontSize}</span>
               <button
                 onClick={handleZoomIn}
                 className="px-2.5 py-1 text-xs font-bold text-fg-muted hover:text-fg cursor-pointer"
@@ -3969,13 +4327,29 @@ function SongViewScreen({
                 A+
               </button>
             </div>
+
+            {/* Toggle Solo Letra */}
+            <button
+              onClick={() => setHideChords(!hideChords)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                hideChords
+                  ? 'bg-warm/15 border-warm/40 text-warm'
+                  : 'bg-surface border-border text-fg-muted hover:text-fg'
+              }`}
+            >
+              {hideChords ? <IconEyeOff size={14} /> : <IconEye size={14} />}
+              <span className="hidden sm:inline">{hideChords ? 'Solo Letra' : 'Con Acordes'}</span>
+            </button>
+
+            {/* Botón Modo Enfoque */}
             <button
               onClick={() => setIsFocusMode(true)}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent text-accent-fg font-semibold text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
             >
               <IconBook size={14} />
-              <span>Solo Letra y Acordes</span>
+              <span>Modo Enfoque</span>
             </button>
+
             <div className="md:hidden">
               <ThemeToggle theme={theme} onToggle={onToggleTheme} />
             </div>
@@ -3992,13 +4366,20 @@ function SongViewScreen({
               </div>
               <p className="text-fg-muted text-base mt-0.5">{song.artist}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-bold px-4 py-1.5 rounded-xl text-accent-fg bg-accent shadow-xs">Tono {displayKey}</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-bold px-4 py-1.5 rounded-xl text-accent-fg bg-accent shadow-xs">
+                Tono {displayKey}
+              </span>
+              {capo > 0 && (
+                <span className="text-xs font-bold px-3 py-1.5 rounded-xl text-warm bg-warm/15 border border-warm/30">
+                  Capo {capo}: {capoKey}
+                </span>
+              )}
               <span className={`text-xs font-medium px-3 py-1 rounded-full border ${TEMPO_STYLES[song.tempo]}`}>{song.tempo}</span>
             </div>
           </div>
 
-          {/* Ficha Técnica Ministerial (Notion) */}
+          {/* Ficha Técnica Ministerial */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-surface-2 border border-border mb-6">
             <div>
               <p className="text-[10px] text-fg-muted uppercase tracking-wider font-bold">Dominio Iglesia</p>
@@ -4018,43 +4399,126 @@ function SongViewScreen({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center justify-between rounded-2xl p-4 bg-surface-2 border border-border">
-              <span className="text-fg-muted text-xs font-semibold uppercase tracking-wider">Transposición</span>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setTranspose(t => t - 1)}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-fg font-bold bg-surface border border-border hover:bg-surface-3 active:scale-95 transition-all text-base cursor-pointer"
-                >
-                  −
-                </button>
-                <span className="text-fg font-display text-2xl w-10 text-center tracking-wide">
-                  {transpose > 0 ? `+${transpose}` : transpose}
-                </span>
-                <button
-                  onClick={() => setTranspose(t => t + 1)}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-fg font-bold bg-surface border border-border hover:bg-surface-3 active:scale-95 transition-all text-base cursor-pointer"
-                >
-                  +
-                </button>
+          {/* Controles de Transposición, Cejilla, Metrónomo e Instrumento */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* Transposición y Cejilla */}
+            <div className="flex flex-col gap-3 rounded-2xl p-4 bg-surface-2 border border-border">
+              <div className="flex items-center justify-between">
+                <span className="text-fg-muted text-xs font-semibold uppercase tracking-wider">Transposición</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setTranspose(t => t - 1)}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center text-fg font-bold bg-surface border border-border hover:bg-surface-3 active:scale-95 transition-all text-sm cursor-pointer"
+                  >
+                    −
+                  </button>
+                  <span className="text-fg font-display text-xl w-10 text-center tracking-wide">
+                    {transpose > 0 ? `+${transpose}` : transpose}
+                  </span>
+                  <button
+                    onClick={() => setTranspose(t => t + 1)}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center text-fg font-bold bg-surface border border-border hover:bg-surface-3 active:scale-95 transition-all text-sm cursor-pointer"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Selector de Cejilla / Capo */}
+              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                <div>
+                  <span className="text-xs font-semibold text-fg block">Cejilla / Capo</span>
+                  <span className="text-[10px] text-fg-muted">
+                    {capo > 0 ? `Digitación en ${capoKey}` : 'Sin cejilla (tono real)'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map(fret => (
+                    <button
+                      key={fret}
+                      onClick={() => setCapo(fret)}
+                      className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        capo === fret
+                          ? 'bg-accent text-accent-fg shadow-xs scale-105'
+                          : 'bg-surface text-fg-muted hover:text-fg border border-border'
+                      }`}
+                    >
+                      {fret}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-1 p-1 rounded-2xl bg-surface-2 border border-border items-center">
-              {INSTRUMENTS_TABS.map(inst => (
-                <button
-                  key={inst}
-                  onClick={() => setInstTab(inst)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    instTab === inst
-                      ? 'bg-accent text-accent-fg shadow-xs'
-                      : 'text-fg-muted hover:text-fg'
-                  }`}
-                >
-                  {getInstrumentIcon(inst)}
-                  <span className="capitalize">{inst}</span>
-                </button>
-              ))}
+            {/* Metrónomo & Pestañas de Instrumento */}
+            <div className="flex flex-col gap-3 rounded-2xl p-4 bg-surface-2 border border-border justify-between">
+              {/* Metrónomo Visual y Sonoro */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-semibold text-fg block">Metrónomo</span>
+                  <span className="text-[10px] text-fg-muted font-mono">{bpm} BPM · 4/4</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Visual LED Pulse */}
+                  <div className="flex items-center gap-1 px-2 py-1 bg-surface rounded-xl border border-border">
+                    {[0, 1, 2, 3].map(beat => (
+                      <span
+                        key={beat}
+                        className={`w-2.5 h-2.5 rounded-full transition-all duration-75 ${
+                          isMetronomeActive && beatIndex === beat
+                            ? (beat === 0 ? 'bg-accent scale-125' : 'bg-warm scale-110')
+                            : 'bg-border'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Toggle Audio */}
+                  <button
+                    onClick={() => setMetronomeAudio(!metronomeAudio)}
+                    className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                      metronomeAudio
+                        ? 'bg-accent/15 border-accent text-accent'
+                        : 'bg-surface border-border text-fg-muted hover:text-fg'
+                    }`}
+                    title={metronomeAudio ? 'Silenciar click' : 'Activar sonido de click'}
+                  >
+                    <IconVolume size={14} />
+                  </button>
+
+                  {/* Play/Pause Metrónomo */}
+                  <button
+                    onClick={() => setIsMetronomeActive(!isMetronomeActive)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isMetronomeActive
+                        ? 'bg-accent text-accent-fg shadow-xs'
+                        : 'bg-surface border border-border text-fg hover:bg-surface-3'
+                    }`}
+                  >
+                    {isMetronomeActive ? <IconPause size={12} /> : <IconPlay size={12} />}
+                    <span>{isMetronomeActive ? 'Parar' : 'Iniciar'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Selector de Instrumentos */}
+              <div className="flex gap-1 p-1 rounded-xl bg-surface border border-border items-center pt-1">
+                {INSTRUMENTS_TABS.map(inst => (
+                  <button
+                    key={inst}
+                    onClick={() => setInstTab(inst)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      instTab === inst
+                        ? 'bg-accent text-accent-fg shadow-xs'
+                        : 'text-fg-muted hover:text-fg'
+                    }`}
+                  >
+                    {getInstrumentIcon(inst)}
+                    <span className="capitalize">{inst}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -4076,16 +4540,17 @@ function SongViewScreen({
 
         {/* Partitura y Letra Estilo CifraClub */}
         <div className="rounded-3xl p-6 md:p-10 bg-surface border border-border shadow-xs">
-          <ChordSheetRenderer lyrics={transposedLyrics} fontSize={fontSize} />
+          <ChordSheetRenderer lyrics={transposedLyrics} fontSize={fontSize} hideChords={hideChords} />
         </div>
 
+        {/* Botones de Acción */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 mt-6">
           <button
             onClick={() => setIsFocusMode(true)}
             className="py-3.5 px-4 rounded-2xl text-accent-fg bg-accent hover:bg-accent-hover font-semibold text-xs md:text-sm flex items-center justify-center gap-2 active:scale-98 transition-all shadow-xs cursor-pointer"
           >
             <IconBook size={16} />
-            Solo Letra
+            Modo Enfoque
           </button>
           <button
             onClick={onEdit}
@@ -4131,6 +4596,36 @@ function SongViewScreen({
           )}
         </div>
       </div>
+
+      {/* Barra de Navegación de Setlist en Vista Normal */}
+      {hasSetlist && (
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 z-20 bg-surface/95 backdrop-blur-md border-t border-border px-4 py-2.5 flex items-center justify-between shadow-lg">
+          <button
+            disabled={setlistIndex! <= 0}
+            onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! - 1].id)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          >
+            <IconSkipBack size={13} />
+            <span className="hidden sm:inline">Anterior:</span>
+            <span className="truncate max-w-[120px]">{setlistIndex! > 0 ? setlistSongs![setlistIndex! - 1].title : ''}</span>
+          </button>
+          <div className="text-center">
+            <span className="text-xs font-bold text-fg block">
+              Canción {setlistIndex! + 1} de {setlistSongs!.length}
+            </span>
+            <span className="text-[10px] text-fg-muted uppercase tracking-wider block">Setlist de Servicio</span>
+          </div>
+          <button
+            disabled={setlistIndex! >= setlistSongs!.length - 1}
+            onClick={() => onNavigateSong?.(setlistSongs![setlistIndex! + 1].id)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-semibold text-fg hover:bg-surface-3 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          >
+            <span className="hidden sm:inline">Siguiente:</span>
+            <span className="truncate max-w-[120px]">{setlistIndex! < setlistSongs!.length - 1 ? setlistSongs![setlistIndex! + 1].title : ''}</span>
+            <IconSkipForward size={13} />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -5651,6 +6146,18 @@ export default function App() {
     status: (attendance[`${selectedDate}:${r.mid}`] as Status) ?? r.status,
   }))
 
+  const currentSetlistSongs = useMemo(() => {
+    if (prevScreen !== 'day-detail' || !currentEvent?.setlist) return undefined
+    return currentEvent.setlist
+      .map(sid => songs.find(s => s.id === sid))
+      .filter((s): s is Song => Boolean(s))
+  }, [prevScreen, currentEvent, songs])
+
+  const currentSetlistIndex = useMemo(() => {
+    if (!currentSetlistSongs) return -1
+    return currentSetlistSongs.findIndex(s => s.id === selectedSongId)
+  }, [currentSetlistSongs, selectedSongId])
+
   async function handleAttendance(mid: string, status: Status) {
     setAttendance(prev => ({ ...prev, [`${selectedDate}:${mid}`]: status }))
     await updateAttendanceStatus(selectedDate, mid, status)
@@ -5861,6 +6368,9 @@ export default function App() {
             onDelete={handleDeleteSong}
             theme={theme}
             onToggleTheme={toggleTheme}
+            setlistSongs={currentSetlistSongs}
+            setlistIndex={currentSetlistIndex}
+            onNavigateSong={id => setSelectedSongId(id)}
           />
         )}
         {screen === 'admin' && hasRole(currentMusician, 'admin') && (
