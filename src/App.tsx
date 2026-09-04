@@ -3669,10 +3669,10 @@ function ChordSheetRenderer({
   hideChords?: boolean
 }) {
   const fontSizes = {
-    sm: { chord: 'text-[10px] sm:text-xs', text: 'text-[11px] sm:text-sm', lineGap: 'gap-0.5 sm:gap-1' },
-    base: { chord: 'text-[11px] sm:text-sm', text: 'text-xs sm:text-base', lineGap: 'gap-1 sm:gap-1.5' },
-    lg: { chord: 'text-xs sm:text-base', text: 'text-sm sm:text-lg', lineGap: 'gap-1.5 sm:gap-2' },
-    xl: { chord: 'text-sm sm:text-lg', text: 'text-base sm:text-xl', lineGap: 'gap-2 sm:gap-2.5' },
+    sm: { chord: 'text-xs', text: 'text-xs md:text-sm', lineGap: 'gap-0.5 sm:gap-1' },
+    base: { chord: 'text-xs md:text-sm', text: 'text-sm md:text-base', lineGap: 'gap-1 sm:gap-1.5' },
+    lg: { chord: 'text-sm md:text-base', text: 'text-base md:text-lg', lineGap: 'gap-1.5 sm:gap-2' },
+    xl: { chord: 'text-base md:text-lg', text: 'text-lg md:text-xl', lineGap: 'gap-2 sm:gap-2.5' },
   }[fontSize]
 
   return (
@@ -3703,7 +3703,7 @@ function ChordSheetRenderer({
                   </span>
                 </div>
               )}
-              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-3 rounded-2xl bg-surface-2 border border-border leading-tight text-accent whitespace-pre shadow-xs">
+              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-3.5 rounded-2xl bg-surface-2 border border-border leading-tight text-accent whitespace-pre shadow-xs">
                 {line.segments.map(s => s.text).join('')}
               </pre>
             </div>
@@ -3715,57 +3715,6 @@ function ChordSheetRenderer({
 
         // En modo Solo Letra, ocultar lineas de acordes puros (intros, interludios)
         if (hideChords && isPureChords) return null
-
-        // Agrupar sílabas pertenecientes a la misma palabra para que no se corten en flex-wrap
-        let wordClusters: Array<
-          | { type: 'word'; units: Array<{ chord?: string; text: string }> }
-          | { type: 'space'; text: string }
-          | { type: 'chord'; chord?: string; text: string }
-        > = []
-
-        if (isPureChords) {
-          wordClusters = line.segments.map(s => ({
-            type: 'chord',
-            chord: s.chord,
-            text: s.text || '',
-          }))
-        } else {
-          const fineUnits: Array<{ chord?: string; text: string; isSpace: boolean }> = []
-          for (const seg of line.segments) {
-            const chord = seg.chord
-            const text = seg.text || ''
-            if (!text) {
-              fineUnits.push({ chord, text: '', isSpace: false })
-              continue
-            }
-            const parts = text.split(/(\s+)/)
-            for (let i = 0; i < parts.length; i++) {
-              const p = parts[i]
-              if (!p) continue
-              if (/^\s+$/.test(p)) {
-                fineUnits.push({ isSpace: true, text: p })
-              } else {
-                fineUnits.push({ chord: i === 0 ? chord : undefined, text: p, isSpace: false })
-              }
-            }
-          }
-
-          let currentWordUnits: Array<{ chord?: string; text: string }> = []
-          for (const u of fineUnits) {
-            if (u.isSpace) {
-              if (currentWordUnits.length > 0) {
-                wordClusters.push({ type: 'word', units: currentWordUnits })
-                currentWordUnits = []
-              }
-              wordClusters.push({ type: 'space', text: u.text })
-            } else {
-              currentWordUnits.push({ chord: u.chord, text: u.text })
-            }
-          }
-          if (currentWordUnits.length > 0) {
-            wordClusters.push({ type: 'word', units: currentWordUnits })
-          }
-        }
 
         return (
           <div key={li} className="flex flex-col select-text w-full max-w-full overflow-x-auto">
@@ -3783,74 +3732,39 @@ function ChordSheetRenderer({
               </p>
             ) : (
               <div className="flex flex-wrap items-end leading-none max-w-full overflow-x-auto my-0.5">
-                {wordClusters.map((cluster, ci) => {
-                  if (cluster.type === 'chord') {
-                    return (
-                      <span
-                        key={ci}
-                        className="inline-flex flex-col flex-nowrap align-bottom select-text mr-4 sm:mr-6"
-                      >
-                        <strong className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 whitespace-nowrap select-text pr-1`}>
-                          {cluster.chord}
-                        </strong>
-                        <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
-                          {cluster.text || '\u00A0\u00A0\u00A0'}
-                        </span>
-                      </span>
-                    )
-                  }
+                {line.segments.map((seg, si) => {
+                  const hasChord = Boolean(seg.chord)
+                  const text = seg.text || ''
+                  const isBlankText = !text.trim()
 
-                  if (cluster.type === 'space') {
-                    return (
-                      <span
-                        key={ci}
-                        className="inline-flex flex-col flex-nowrap align-bottom select-text"
-                      >
+                  // Margen para garantizar que los acordes nunca se peguen (ej: CAm -> C Am)
+                  const chordMargin = isPureChords
+                    ? 'mr-5 sm:mr-7'
+                    : hasChord
+                    ? (isBlankText ? 'mr-3 sm:mr-4' : 'mr-1 sm:mr-1.5')
+                    : 'mr-0'
+
+                  return (
+                    <span
+                      key={si}
+                      className={`inline-flex flex-col flex-nowrap align-bottom select-text ${chordMargin}`}
+                    >
+                      {hasChord ? (
+                        <strong
+                          className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 tracking-normal whitespace-nowrap select-text ${
+                            isBlankText ? 'min-w-[3.5ch] pr-2' : 'pr-1'
+                          }`}
+                        >
+                          {seg.chord}
+                        </strong>
+                      ) : (
                         <span className={`${fontSizes.chord} leading-none mb-0.5 opacity-0 select-none pointer-events-none`}>
                           ·
                         </span>
-                        <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
-                          {cluster.text}
-                        </span>
+                      )}
+                      <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
+                        {text || (hasChord ? '\u00A0\u00A0\u00A0' : '')}
                       </span>
-                    )
-                  }
-
-                  // cluster.type === 'word': Envoltura atómica de palabra para que las sílabas no se separen
-                  return (
-                    <span
-                      key={ci}
-                      className="inline-flex flex-nowrap items-end whitespace-nowrap select-text"
-                    >
-                      {cluster.units.map((unit, ui) => {
-                        const hasChord = Boolean(unit.chord)
-                        const text = unit.text || ''
-                        const isBlank = !text.trim()
-
-                        return (
-                          <span
-                            key={ui}
-                            className="inline-flex flex-col flex-nowrap align-bottom select-text"
-                          >
-                            {hasChord ? (
-                              <strong
-                                className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 tracking-normal whitespace-nowrap select-text ${
-                                  isBlank ? 'min-w-[3ch] pr-1.5' : 'pr-0.5'
-                                }`}
-                              >
-                                {unit.chord}
-                              </strong>
-                            ) : (
-                              <span className={`${fontSizes.chord} leading-none mb-0.5 opacity-0 select-none pointer-events-none`}>
-                                ·
-                              </span>
-                            )}
-                            <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
-                              {text || (hasChord ? '\u00A0\u00A0\u00A0' : '')}
-                            </span>
-                          </span>
-                        )
-                      })}
                     </span>
                   )
                 })}
