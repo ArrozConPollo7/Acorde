@@ -62,6 +62,8 @@ export interface SongSegment {
 
 export interface LyricLine {
   label?: string
+  isTab?: boolean
+  isEmpty?: boolean
   segments: SongSegment[]
 }
 
@@ -252,12 +254,42 @@ export function parseChordProText(text: string): LyricLine[] {
     const rawLine = deduplicatedLines[i]
     const trimmed = rawLine.trim()
 
-    if (!trimmed) continue
+    // Preservar líneas vacías intencionales como separadores de estrofa (estilo CifraClub)
+    if (!trimmed) {
+      if (result.length > 0 && !result[result.length - 1].isEmpty) {
+        result.push({ isEmpty: true, segments: [] })
+      }
+      continue
+    }
 
-    // Detectar encabezados de sección ([Intro], [Verso 1], [Estribillo], [Solo], [Puente], etc.)
+    // Detectar encabezados de sección estándar ([Intro], [Verso 1], [Estribillo], [Solo], [Puente], etc.)
     if (/^\[([^\]]+)\]$/.test(trimmed) || /^(verso|estrofa|coro|puente|intro|outro|pre-coro|pre-estribillo|estribillo|tag|coda|final|solo|instrumental|parte\s+\d+)/i.test(trimmed)) {
       currentLabel = trimmed.replace(/^\[|\]$/g, '')
       continue
+    }
+
+    // Detectar líneas que empiezan con etiqueta y acordes en la misma línea: [Intro] Eb  F  Gm
+    const tagAndChordsMatch = trimmed.match(/^\[([a-zA-Z0-9áéíóúÁÉÍÓÚ\s_-]+)\]\s+(.*)$/)
+    if (tagAndChordsMatch && isPureChordLine(tagAndChordsMatch[2])) {
+      const sectionTag = tagAndChordsMatch[1]
+      const chordPart = tagAndChordsMatch[2]
+      const chordTokenRegex = /\S+/g
+      const segments: SongSegment[] = []
+      let cMatch: RegExpExecArray | null
+      while ((cMatch = chordTokenRegex.exec(chordPart)) !== null) {
+        const cleanChord = cMatch[0].replace(/^[\[\(]+|[\]\)]+$/g, '')
+        if (CHORD_FULL_VALIDATOR.test(cleanChord)) {
+          segments.push({ chord: cleanChord, text: '' })
+        }
+      }
+      if (segments.length > 0) {
+        result.push({
+          label: sectionTag,
+          segments,
+        })
+        currentLabel = undefined
+        continue
+      }
     }
 
     // Detectar líneas de tablatura (E|---, B|---, etc.)
@@ -333,7 +365,9 @@ export function parseChordProText(text: string): LyricLine[] {
         let cMatch: RegExpExecArray | null
         while ((cMatch = chordTokenRegex.exec(rawLine)) !== null) {
           const cleanChord = cMatch[0].replace(/^[\[\(]+|[\]\)]+$/g, '')
-          segments.push({ chord: cleanChord, text: '   ' })
+          if (CHORD_FULL_VALIDATOR.test(cleanChord)) {
+            segments.push({ chord: cleanChord, text: '' })
+          }
         }
         result.push({
           label: currentLabel,
@@ -352,12 +386,15 @@ export function parseChordProText(text: string): LyricLine[] {
 
     while ((match = bracketRegex.exec(rawLine)) !== null) {
       const textBefore = rawLine.slice(lastIndex, match.index)
-      if (textBefore || segments.length === 0 && match.index > 0) {
+      if (textBefore) {
         if (segments.length > 0 && segments[segments.length - 1].chord && !segments[segments.length - 1].text) {
           segments[segments.length - 1].text = textBefore
-        } else if (textBefore) {
+        } else {
           segments.push({ text: textBefore })
         }
+      } else if (segments.length > 0 && segments[segments.length - 1].chord && !segments[segments.length - 1].text) {
+        // Dos acordes consecutivos sin letra entre ellos: ej: [C][Am]
+        segments[segments.length - 1].text = ' '
       }
       segments.push({ chord: match[1], text: '' })
       lastIndex = bracketRegex.lastIndex

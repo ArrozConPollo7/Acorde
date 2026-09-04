@@ -3591,64 +3591,87 @@ function ChordSheetRenderer({
   fontSize?: 'sm' | 'base' | 'lg' | 'xl'
 }) {
   const fontSizes = {
-    sm: { chord: 'text-[11px] md:text-xs', text: 'text-xs md:text-sm', lineGap: 'gap-3.5' },
-    base: { chord: 'text-xs md:text-sm', text: 'text-sm md:text-base', lineGap: 'gap-5' },
-    lg: { chord: 'text-sm md:text-base', text: 'text-base md:text-lg', lineGap: 'gap-6' },
-    xl: { chord: 'text-base md:text-lg', text: 'text-lg md:text-xl', lineGap: 'gap-7' },
+    sm: { chord: 'text-xs', text: 'text-xs md:text-sm', lineGap: 'gap-0.5 sm:gap-1' },
+    base: { chord: 'text-xs md:text-sm', text: 'text-sm md:text-base', lineGap: 'gap-1 sm:gap-1.5' },
+    lg: { chord: 'text-sm md:text-base', text: 'text-base md:text-lg', lineGap: 'gap-1.5 sm:gap-2' },
+    xl: { chord: 'text-base md:text-lg', text: 'text-lg md:text-xl', lineGap: 'gap-2 sm:gap-2.5' },
   }[fontSize]
 
   return (
     <div className={`flex flex-col ${fontSizes.lineGap} font-mono select-text leading-tight w-full max-w-full overflow-x-hidden`}>
       {lyrics.map((line, li) => {
+        if (line.isEmpty) {
+          return <div key={li} className="h-3 sm:h-4.5 select-none pointer-events-none" aria-hidden="true" />
+        }
+
         if (line.isTab) {
           return (
-            <div key={li} className="my-2">
+            <div key={li} className="my-1.5">
               {line.label && (
-                <div className="mb-2">
-                  <span className="inline-block font-body text-[11px] font-bold text-accent px-2.5 py-0.5 rounded-lg bg-surface-2 border border-border uppercase tracking-wider">
-                    {line.label}
+                <div className="mb-1 mt-2">
+                  <span className="font-mono text-xs sm:text-sm font-bold text-fg-muted tracking-wider">
+                    [{line.label.replace(/^\[|\]$/g, '')}]
                   </span>
                 </div>
               )}
-              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-4 rounded-2xl bg-surface-2 border border-border leading-relaxed text-accent/90 whitespace-pre shadow-xs">
+              <pre className="overflow-x-auto font-mono text-xs md:text-sm p-3.5 rounded-2xl bg-surface-2 border border-border leading-tight text-orange-500/90 dark:text-orange-400/90 whitespace-pre shadow-xs">
                 {line.segments.map(s => s.text).join('')}
               </pre>
             </div>
           )
         }
 
+        const isPureChords = line.segments.every(s => Boolean(s.chord) && (!s.text || s.text.trim().length === 0))
         const isPureText = line.segments.every(s => !s.chord)
 
         return (
           <div key={li} className="flex flex-col select-text w-full max-w-full overflow-x-hidden">
             {line.label && (
-              <div className="mb-2.5 mt-2">
-                <span className="inline-block font-body text-xs font-bold text-accent px-3 py-1 rounded-xl bg-surface-2 border border-border uppercase tracking-widest shadow-xs">
-                  {line.label}
+              <div className="mt-3 mb-1 first:mt-0">
+                <span className="font-mono text-xs sm:text-sm font-bold text-fg-muted tracking-wider">
+                  [{line.label.replace(/^\[|\]$/g, '')}]
                 </span>
               </div>
             )}
 
             {isPureText ? (
-              <p className={`text-fg ${fontSizes.text} leading-relaxed whitespace-pre-wrap break-words font-mono`}>
+              <p className={`text-fg ${fontSizes.text} leading-snug whitespace-pre-wrap break-words font-mono my-0.5`}>
                 {line.segments.map(s => s.text).join('')}
               </p>
             ) : (
-              <div className="flex flex-wrap items-end leading-none max-w-full overflow-x-hidden">
+              <div className="flex flex-wrap items-end leading-none max-w-full overflow-x-hidden my-0.5">
                 {line.segments.map((seg, si) => {
                   const hasChord = Boolean(seg.chord)
                   const text = seg.text || ''
+                  const isBlankText = !text.trim()
+
+                  // Margen para garantizar que los acordes nunca se peguen (ej: CAm -> C Am)
+                  const chordMargin = isPureChords
+                    ? 'mr-5 sm:mr-7'
+                    : hasChord
+                    ? (isBlankText ? 'mr-3 sm:mr-4' : 'mr-1 sm:mr-1.5')
+                    : 'mr-0'
+
                   return (
-                    <span key={si} className="inline-flex flex-col flex-nowrap align-bottom select-text mr-0.5 mb-2">
+                    <span
+                      key={si}
+                      className={`inline-flex flex-col flex-nowrap align-bottom select-text ${chordMargin}`}
+                    >
                       {hasChord ? (
-                        <strong className={`text-accent font-bold ${fontSizes.chord} font-mono leading-none mb-1 min-w-[1.2ch] tracking-tight`}>
+                        <strong
+                          className={`text-orange-500 dark:text-orange-400 font-bold ${fontSizes.chord} font-mono leading-none mb-0.5 tracking-normal whitespace-nowrap select-text ${
+                            isBlankText ? 'min-w-[3.5ch] pr-2' : 'pr-1'
+                          }`}
+                        >
                           {seg.chord}
                         </strong>
                       ) : (
-                        <span className={`${fontSizes.chord} leading-none mb-1 opacity-0 select-none`}>·</span>
+                        <span className={`${fontSizes.chord} leading-none mb-0.5 opacity-0 select-none pointer-events-none`}>
+                          ·
+                        </span>
                       )}
-                      <span className={`text-fg ${fontSizes.text} font-mono leading-none whitespace-pre`}>
-                        {text || (hasChord ? '\u00A0\u00A0' : '')}
+                      <span className={`text-fg ${fontSizes.text} font-mono leading-tight whitespace-pre`}>
+                        {text || (hasChord ? '\u00A0\u00A0\u00A0' : '')}
                       </span>
                     </span>
                   )
